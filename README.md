@@ -20,7 +20,7 @@ pip install networkx
 pip install matplotlib
 ```
 
-After installing all essential packages, you will need to download all `.py` files in this repository. 
+After installing all essential packages, you will need to download all `.py` files in this repository.
 
 ## Usage
 
@@ -44,4 +44,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 ## License
+[![CC BY 4.0][cc-by-shield]][cc-by]
+
 This work is licensed under [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/).
