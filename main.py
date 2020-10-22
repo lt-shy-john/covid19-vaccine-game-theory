@@ -450,6 +450,8 @@ for i in range(len(sys.argv)):
                     # Activate modes with no options needed
                     if mode_flag == 1:
                         pass
+                    elif mode_flag == 4:
+                        mode04()
                     elif mode_flag == 7:
                         pass
                     elif mode_flag == 51:
