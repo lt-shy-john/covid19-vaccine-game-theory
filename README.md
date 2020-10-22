@@ -1,6 +1,6 @@
 # COVID-19 Vaccine Simulation
 
-This is a simulation package written in Python for understanding the upcoming vaccine adoption from the behavioural aspect.
+This is a simulation package written in Python 3 for understanding the upcoming vaccine adoption from the behavioural aspect.
 
 ## Getting Started
 
@@ -19,6 +19,8 @@ pip install networkx
 ```bash
 pip install matplotlib
 ```
+
+After installing all essential packages, you will need to download all `.py` files in this repository. 
 
 ## Usage
 
