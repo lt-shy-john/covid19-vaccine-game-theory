@@ -10,6 +10,7 @@ class Person:
     def __init__(self, personality = 0):
         Person.id += 1  # Name of the person.
         self.id = Person.id
+
         self.opinion = 1 #random.choices([0, 1], weights = [2, 8], k = 1)[0]
         self.meta_opinion = None
 
@@ -19,23 +20,29 @@ class Person:
         1 - Rural
         '''
 
+        # Bounded rationality
+        self.rV_BR = random.randint(0,1000)/1000
+        self.lambda_BR = random.randint(0,1000)/1000
+
         self.occupation = 0
         '''
         0 - Not specified
-        1 - Sex worker
+        1 - Essential workers
         '''
 
         self.wealth = 1000
 
         self.group_no = None
+
+        # Personality
         '''
-        Personality:
         0 - Normal
         1 - Inflexible
         2 - Balancer
         '''
         self.personality = personality
 
+        # Epidemic state
         self.suceptible = 0 #int(round(random.uniform(0, 1), 0))   # 0 means without disease, 1 means infected
         self.exposed    = 0
         self.vaccinated = 0 # Assume all 0 (None of them took vaccine).
@@ -46,8 +53,8 @@ class Person:
         # Travelling overseas
         self.overseas = None
         self.A = None
-        self.rS = None
-        self.rI = None
+        self.rS_overseas = None
+        self.rI_overseas = None
 
         self.compartment_history = []
         self.check_history = []

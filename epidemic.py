@@ -237,6 +237,13 @@ class Epidemic:
 
     def vaccinate(self):
         for i in range(len(self.people)):
+            if 4 in self.mode:
+                print(self.mode[4].P_Alpha[i])
+                seed = random.randint(0,10000)/10000
+                if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
+                    print('*')
+                    self.people[i].vaccinated = 1
+            continue
             if self.people[i].suceptible == 1:
                 continue
             if self.people[i].opinion == 1 and random.uniform(0,1) <= self.alpha_V:

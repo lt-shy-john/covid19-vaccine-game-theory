@@ -1,6 +1,8 @@
 from person import Person
+
 import random
 import networkx as nx
+import numpy as np
 
 class Mode:
     def __init__(self, people, code):
@@ -193,11 +195,29 @@ class Mode02(Mode):
 04: Bounded rationality of vaccine
 '''
 class Mode04(Mode):
-    def __init__(self, people):
+    def __init__(self, people, alpha):
         super().__init__(people,4)
+        self.alpha = alpha
+        self.P_Alpha = []
+
+        # Other parameters are stored within the person
 
     def __call__(self):
+        print('-------------------------')
+        print('You are creating mode 4. ')
+        print('-------------------------\n')
+        print('Assigning parameters to population. ')
+        self.QRE()
         self.raise_flag()
+        print('\nMode 4 equipped. \n')
+
+    def QRE(self):
+        '''
+        Return a list of probability to adaopt vaccine with size of population.
+        '''
+        utility_fn = [self.alpha * person.lambda_BR * person.rV_BR for person in self.people]
+        self.P_Alpha = np.exp(utility_fn)/(sum(np.exp(utility_fn)))
+
 
 '''
 05: Edit partner network
@@ -263,9 +283,9 @@ class Mode05(Mode):
                 return
 
 '''
-06: Risk compensation (%)
+07: Age distribution
 '''
-class Mode06(Mode):
+class Mode07(Mode):
     '''
     Attributes
     ----------
@@ -273,36 +293,9 @@ class Mode06(Mode):
         Frequency of condoms. Highest, median and lowest.
     '''
 
-    def __init__(self, people, contact_nwk):
-        super().__init__(people,6)
-        self.contact_nwk = contact_nwk
-        # Proportion of condom usage groups.
-        self.condom_proportion = [0.34, 0.33, 0.33]
-        # Frequency of replacing condoms.
-        self.condom_rate = [0.85, 0.5, 0.03]
-        # Each agent has their own risk compensation (i.e. replacement of condoms)
-
-
-    def set_condom_rate(self, h, m, l=0):
-        try:
-            self.condom_rate[0] = float(h)
-            self.condom_rate[1] = float(m)
-            self.condom_rate[2] = float(l)
-
-            # Sort the list to descending order
-            self.condom_rate.sort(reverse=True)
-
-            # Check sum if they are normalised
-            if sum(self.condom_rate) < 1:
-                print('Sum of condom rate is less than 1. Please check your inputs.')
-                self.condom_rate[1] = 1 - self.condom_rate[0]
-                self.condom_rate[2] = 0
-            elif sum(self.condom_rate) > 1:
-                print('Sum of condom rate is greater than 1. Please check your inputs.')
-                self.condom_rate = [0.8, 0.15, 0.05]
-
-        except ValueError:
-            print('Wrong data type. Please check your data')
+    def __init__(self, people):
+        super().__init__(people,7)
+        pass
 
     def set_population(self):
         '''

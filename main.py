@@ -214,7 +214,7 @@ def set_mode(mode):
         print('Select the following options:')
         print('01: Living in city/ rural [{}]'.format(mode01.flag))
         print('02: Travel from overseas [{}]'.format(mode02.flag))
-        print('04: Bounded rationality of vaccine []')
+        print('04: Bounded rationality of vaccine [{}]'.format(mode04.flag))
         print('05: Edit contact network')
         print('07: Age distribution []')
         print('08: Gender population []')
@@ -415,15 +415,15 @@ mode_master_list = []
 # All objects should add into mode_master_list
 mode01 = mode.Mode01(population)
 mode02 = mode.Mode02(population)
-mode04 = mode.Mode04(population)
+mode04 = mode.Mode04(population, alpha)
 mode05 = mode.Mode05(population, contact_nwk)
-mode06 = mode.Mode06(population, contact_nwk)
+mode07 = mode.Mode07(population)
 mode21 = mode.Mode21(population, contact_nwk)
 mode31 = mode.Mode31(population)
 mode51 = mode.Mode51(population, contact_nwk)
 mode52 = mode.Mode52(population, contact_nwk)
 
-mode_master_list = [mode01, mode02, mode04, mode05, mode06,
+mode_master_list = [mode01, mode02, mode04, mode05, mode07,
 mode21,
 mode31,
 mode51, mode52]
@@ -450,13 +450,8 @@ for i in range(len(sys.argv)):
                     # Activate modes with no options needed
                     if mode_flag == 1:
                         pass
-                    elif mode_flag == 6:
-                        mode06.set_population()
-                        mode06()
-                        if mode06.flag == 'X':
-                            modes[6] = mode06
-                        else:
-                            modes.pop(6)
+                    elif mode_flag == 7:
+                        pass
                     elif mode_flag == 51:
                         if 52 in modes:
                             print('Mode 52 has been activated. Ignore mode 51. ')
@@ -499,43 +494,11 @@ for i in range(len(sys.argv)):
                                 mode01.set_beta(1,p_r)
                             mode01.assign_regions()
                             mode01.raise_flag()
-                        elif mode_flag == 6:
-                            # Set weight [---w]
-                            if sys.argv[k][:3] == '*r=':
-                                mode06_r_config = sys.argv[k][3:].split(',')
-                                if len(mode06_r_config) == 3:
-                                    mode06.set_condom_rate(int(mode06_r_config[0]), int(mode06_r_config[1]), int(mode06_r_config[2]))
-                                elif len(mode06_r_config) == 2:
-                                    # No optional argument
-                                    mode06.set_condom_rate(int(mode06_r_config[0]), int(mode06_r_config[1]))
-                            if sys.argv[k][:3] == '*p=':
-                                mode06_p_config = sys.argv[k][3:].split(',')
-                                if len(mode06_p_config) == 0 or mode06_p_config == ['']:
-                                    print('No data of condom use proportion, skip this step.')
-                                    break
-
-                                for i in range(len(mode06_p_config)):
-                                    try:
-                                        mode06_p_config[i] = float(mode06_p_config[i])
-                                    except ValueError:
-                                        print('Invalid condom use proportion data.')
-                                        mode06_p_config[i] = 0
-
-                                if sum(mode06_p_config) != 1:
-                                    print('Condom use proportion unable to normalise, changed to default value.')
-                                    mode06_p_config = [3,4,3]
-
-                                mode06()
-                                # Reset the proportion
-                                mode06.set_population(input=mode06_p_config)
-
-                                if mode06.flag == 'X':
-                                    modes[6] = mode06
-                                else:
-                                    mode.pop(6)
+                        elif mode_flag == 7:
+                            pass
 
 
-                        # elif mode_flag == 7:
+                        # elif mode_flag == 999:
                         #     # There are 3 args with last one characters
                         #     seven_config(*[int(data) if data.isnumeric() else data for data in config])
                     continue
