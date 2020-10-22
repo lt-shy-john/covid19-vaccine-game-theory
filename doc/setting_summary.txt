@@ -1,0 +1,46 @@
+ ========================================== 
+
+ Agent Based Modelling: COVID-19 SEIP Model 
+
+ ========================================== 
+
+This simulation was performed on <Time>, <Date>. 
+
+Named <code name>. 
+
+# Summary
+N, n people
+T, t days
+
+## Epidemiology
+Alpha, 0.1
+Beta, 0.1
+Gamma, 0.1
+Delta, 0.1
+Phi, 0.1
+Tau, 0.1
+
+## Population
+### Urban - Rural 
+ , Population, Beta
+City, 0.1, 0.1
+Rural, 0.1, 0.1
+
+## Demographics
+### Bounded rationality
+Method: QRE
+Lambda, 0.1
+
+### Age 
+Distribution type: Normal/ Log-normal/ Discrete
+
+
+### Gender 
+Gender, Beta, Delta
+Male, 0.1, 0.1
+Female, 0.1, 0.1 
+
+## Vaccine
+
+
+# Explanation

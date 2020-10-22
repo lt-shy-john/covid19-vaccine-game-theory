@@ -1,0 +1,50 @@
+=============================
+
+Network topology information
+
+=============================
+
+# Basic data
+
+* Number of agents (N): {}
+* Time (T): {}
+
+# Global statistical information
+
+* Network density: 
+{}
+* Number of edges: 
+{}
+* Diameter: 
+{}
+* Average distance: 
+{}
+* Network heterogeneity: 
+{}
+* Clustering coefficient: 
+{}
+* Closeness: 
+{}
+* Betweeness: 
+{}
+* Scale free coefficient: 
+{}
+
+* Average neighbours: 
+{}
+* Assortativity: 
+{}
+
+* Number of singletons: 
+{}
+
+# Transition rate 
+
+* Probability to debond (l0): {}
+* Probability to bond (l1): {}
+
+# Extract data
+
+When extracting inputs parameters from this document, please the following: 
+
+* Row 9: N
