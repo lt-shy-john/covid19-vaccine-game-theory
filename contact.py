@@ -39,6 +39,13 @@ class ContactNwk:
 
     def update_nwk(self):
         '''
+        Replaced by other update_nwk methods based on their type.
+        '''
+        print('Warning: This code still uses an obselete method: Contact.update_nwk(). ')
+        pass
+
+    def update_random_nwk(self):
+        '''
         At each time, contact clusters changed.
         '''
         for s_node in self.nwk_graph.nodes():
@@ -46,9 +53,8 @@ class ContactNwk:
                 seed = random.randint(0,10000)/10000
                 # Bond
                 if seed < self.l1 and ((s_node.id,t_node.id) not in self.network or (t_node.id,s_node.id) not in self.network):
-                    continue
+                    self.nwk_graph.add_edge(s_node.id,t_node.id)
 
-                seed = random.randint(0,10000)/10000
                 # De-bond
                 if seed < self.l0:
                     if (s_node.id,t_node.id) in self.network:

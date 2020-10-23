@@ -256,6 +256,12 @@ class Epidemic:
         for i in range(len(self.people)):
             if self.people[i].suceptible != 1:
                 continue
+            if 7 in self.mode:
+                self.mode[7].remove_byage(i)
+                continue
+            if 8 in self.mode:
+                self.mode[8].remove_bygender(i)
+                continue
             if random.uniform(0,1) <= self.remove:
                 self.people[i].removed = 1
 
@@ -274,6 +280,10 @@ class Epidemic:
             '''
             if 1 in self.mode:
                 self.mode[1].infect_01(i, seed)
+                continue
+            if 7 in self.mode:
+                self.mode[7].infect_byage(i, seed)
+            if 8 in self.mode:
                 continue
             if (51 in self.mode) or (52 in self.mode) or (53 in self.mode) or (54 in self.mode):
                 self.social_contact()

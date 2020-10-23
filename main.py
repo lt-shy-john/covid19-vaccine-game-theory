@@ -218,7 +218,7 @@ def set_mode(mode):
         print('05: Edit contact network')
         print('07: Age distribution []')
         print('08: Gender population []')
-        print('10: Type of vaccine []')
+        print('10: Type of vaccine [{}]'.format(mode10.flag))
         print('11: Stop transmissability/ reduce severity []')
         print('12: Cost of vaccine []')
         print('13: Accessibility to vaccine []')
@@ -289,12 +289,18 @@ def mode_settings(cmd, mode=None):
                     mode[5] = mode05
                 else:
                     mode.pop(5)
-            elif int(cmd[i]) == 6:
-                mode06()
-                if mode06.flag == 'X':
-                    mode[6] = mode06
+            elif int(cmd[i]) == 7:
+                mode07()
+                if mode07.flag == 'X':
+                    mode[7] = mode07
                 else:
-                    mode.pop(6)
+                    mode.pop(7)
+            elif int(cmd[i]) == 8:
+                mode08()
+                if mode08.flag == 'X':
+                    mode[8] = mode08
+                else:
+                    mode.pop(8)
             elif int(cmd[i]) == 21:
                 mode21()
                 if mode21.flag == 'X':
@@ -417,13 +423,15 @@ mode01 = mode.Mode01(population)
 mode02 = mode.Mode02(population)
 mode04 = mode.Mode04(population, alpha)
 mode05 = mode.Mode05(population, contact_nwk)
-mode07 = mode.Mode07(population)
+mode07 = mode.Mode07(population, beta, delta)
+mode10 = mode.Mode10(population, phi, beta)
 mode21 = mode.Mode21(population, contact_nwk)
 mode31 = mode.Mode31(population)
 mode51 = mode.Mode51(population, contact_nwk)
 mode52 = mode.Mode52(population, contact_nwk)
 
 mode_master_list = [mode01, mode02, mode04, mode05, mode07,
+mode10,
 mode21,
 mode31,
 mode51, mode52]

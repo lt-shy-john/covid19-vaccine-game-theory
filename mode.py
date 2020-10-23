@@ -289,83 +289,330 @@ class Mode07(Mode):
     '''
     Attributes
     ----------
-    condom_rate: iterable of floats
-        Frequency of condoms. Highest, median and lowest.
+    beta: iterable of floats (0 to 1)
+        Transmission rate of different age brackets.
+
+    Note
+    ----
+    Age brackets: 0 - 9, 10 - 19, 20 - 29, 30 - 39, 40 - 49, 50 - 59, 60 - 69, 70 - 79, 80 - 89, 90 - 99.
+
     '''
 
-    def __init__(self, people):
+    def __init__(self, people, beta, delta):
         super().__init__(people,7)
-        pass
+        self.beta_age = [beta for x in range(10)]
+        self.delta_age = [delta for x in range(10)]
 
     def set_population(self):
         '''
-        Set whom uses condom and their habits.
+        Set age of a population.
 
         parameter
         ---------
         input: iterable, optional
             Define frequency and their condom use.
 
-        Notes
-        -----
-        0 represents infrequent use of condom, 1 means user group lies in the median and 2 has the highest frequency.
-
         '''
         for person in self.people:
-            person.condom_group = random.choices(list(range(3)), weights = self.condom_proportion, k=1)[0]
+            person.set_age()
 
-    def infect_condom_use(self, beta, sex_rate):
+    def correct_epi_para(self, p):
         '''
-        Sexual intercourse when condom involved. Overide the normal `Epidemic.infect()` function.
+        Convert epidemic parameters into floats.
+
+        Parameters
+        - p: Epidemic rate, positive decimal less than 1.
+        '''
+        try:
+            p_num = float(p)
+            if p_num < 0 or p_num > 1:
+                p_num = 0
+                print('Please check your inputs and change them in SETTING.')
+            return p_num
+        except ValueError:
+            p_num = 0
+            print('Please check your inputs and change them in SETTING.')
+            return p_num
+
+    def set_correct_epi_para(self, p, P):
+        '''
+        Convert the parameters into integers. If input is blank then do nothing.
+
+        Parameters:
+        p -- string input.
+        P -- original value.
+        pos -- If the parameter is positive number.
+        '''
+        if p == '':
+            return P
+        else:
+            return self.correct_epi_para(p)
+
+    def infect_byage(self, id, seed):
+        '''
+        Remove based on age.
 
         Parameters
         ----------
-        sex_rate: float
-            From epidemic class. Represents population frequency of making sexual intercourse.
+        id: int
+            The person by id. 
+        seed: float
+            Random seed from Simulation.
         '''
 
+        if person.age < 10:
+            beta = self.beta_age[0]
+        elif person.age < 20:
+            beta = self.beta_age[1]
+        elif person.age < 30:
+            beta = self.beta_age[2]
+        elif person.age < 40:
+            beta = self.beta_age[3]
+        elif person.age < 50:
+            beta = self.beta_age[4]
+        elif person.age < 60:
+            beta = self.beta_age[5]
+        elif person.age < 70:
+            beta = self.beta_age[6]
+        elif person.age < 80:
+            beta = self.beta_age[7]
+        elif person.age < 90:
+            beta = self.beta_age[8]
+        elif person.age < 100:
+            beta = self.beta_age[9]
+        else:
+            beta = self.beta_age[-1]
 
-        for pair in self.contact_nwk.network:
-            sex_seed = random.randint(0,1000)/1000
-            if sex_seed > sex_rate:
-                # Not making sex
-                pair[0].condom_history.append(0)
-                pair[1].condom_history.append(0)
-                continue
-            condom_seed = random.randint(0,1000)/1000
-            seed = random.randint(0,1000)/1000
-            condom_rate = max(self.condom_rate[pair[0].condom_group], self.condom_rate[pair[1].condom_group])
-            if condom_seed > condom_rate and seed < beta:
-                if pair[0].suceptible == 0 and pair[0].vaccinated == 0 and (pair[1].suceptible == 1 or pair[1].reinfected == 1 or pair[1].recovered == 1):
-                    pair[0].suceptible = 1
-                if pair[1].suceptible == 0 and pair[1].vaccinated == 0 and (pair[0].suceptible == 1 or pair[0].reinfected == 1 or pair[0].recovered == 1):
-                    pair[1].suceptible = 1
-                # Both party could be infected, so not `elif`.
+        # Infect (or not)
+        if seed < beta:
+            person.suceptible = 1
 
-                # Write their history (no condom)
-                pair[0].condom_history.append(0)
-                pair[1].condom_history.append(0)
-                # Debug check (copy this to other parts if needed)
-                # print('Condom history: {}: {} and {}: {}'.format(pair[0].id, pair[0].condom_history, pair[1].id, pair[1].condom_history))
-            else:
-                # Write their history (wore condom)
-                pair[0].condom_history.append(1)
-                pair[1].condom_history.append(1)
+    def remove_byage(self, id):
+        '''
+        Remove based on age.
 
+        Parameters
+        ----------
+        id: int
+            The person by id.
+        '''
 
-    def raise_flag(self):
-        return super().raise_flag()
+        seed = random.randint(0,1000)/1000
+        if person.age < 10:
+            delta = self.delta_age[0]
+        elif person.age < 20:
+            delta = self.delta_age[1]
+        elif person.age < 30:
+            delta = self.delta_age[2]
+        elif person.age < 40:
+            delta = self.delta_age[3]
+        elif person.age < 50:
+            delta = self.delta_age[4]
+        elif person.age < 60:
+            delta = self.delta_age[5]
+        elif person.age < 70:
+            delta = self.delta_age[6]
+        elif person.age < 80:
+            delta = self.delta_age[7]
+        elif person.age < 90:
+            delta = self.delta_age[8]
+        elif person.age < 100:
+            delta = self.delta_age[9]
+        else:
+            delta = self.delta_age[-1]
 
-    def drop_flag(self):
-        return super().drop_flag()
+        # Infect (or not)
+        if seed < delta:
+            person.removed = 1
+
 
     def __call__(self):
-        try:
-            self.set_population()
-            # self.set_condom_rate()
-        except ValueError:
-            pass
+        print('-------------------------')
+        print('You are creating mode 7. ')
+        print('-------------------------\n')
+        # 0 - 9, 10 - 19, 20 - 29, 30 - 39, 40 - 49, 50 - 59, 60 - 69, 70 - 79, 80 - 89, 90 - 99
+
+        # Infection
+        print('Please set infection parameter for each age brackets below. ')
+        beta0_temp = input('0 - 9 >>> ')
+        self.beta_age[0] = self.set_correct_epi_para(beta0_temp, self.beta_age[0])
+        beta1_temp = input('10 - 19 >>> ')
+        self.beta_age[1] = self.set_correct_epi_para(beta1_temp, self.beta_age[1])
+        beta2_temp = input('20 - 29 >>> ')
+        self.beta_age[2] = self.set_correct_epi_para(beta2_temp, self.beta_age[2])
+        beta3_temp = input('30 - 39 >>> ')
+        self.beta_age[3] = self.set_correct_epi_para(beta3_temp, self.beta_age[3])
+        beta4_temp = input('40 - 49 >>> ')
+        self.beta_age[4] = self.set_correct_epi_para(beta4_temp, self.beta_age[4])
+        beta5_temp = input('50 - 59 >>> ')
+        self.beta_age[5] = self.set_correct_epi_para(beta5_temp, self.beta_age[5])
+        beta6_temp = input('60 - 69 >>> ')
+        self.beta_age[6] = self.set_correct_epi_para(beta6_temp, self.beta_age[6])
+        beta7_temp = input('70 - 79 >>> ')
+        self.beta_age[7] = self.set_correct_epi_para(beta7_temp, self.beta_age[7])
+        beta8_temp = input('80 - 89 >>> ')
+        self.beta_age[8] = self.set_correct_epi_para(beta8_temp, self.beta_age[8])
+        beta9_temp = input('90 - 99 >>> ')
+        self.beta_age[9] = self.set_correct_epi_para(beta9_temp, self.beta_age[9])
+
+        # Removal
+        print('Please set removal parameter for each age brackets below. ')
+        delta0_temp = input('0 - 9 >>> ')
+        self.delta_age[0] = self.set_correct_epi_para(delta0_temp, self.delta_age[0])
+        delta1_temp = input('10 - 19 >>> ')
+        self.delta_age[1] = self.set_correct_epi_para(delta1_temp, self.delta_age[1])
+        delta2_temp = input('20 - 29 >>> ')
+        self.delta_age[2] = self.set_correct_epi_para(delta2_temp, self.delta_age[2])
+        delta3_temp = input('30 - 39 >>> ')
+        self.delta_age[3] = self.set_correct_epi_para(delta3_temp, self.delta_age[3])
+        delta4_temp = input('40 - 49 >>> ')
+        self.delta_age[4] = self.set_correct_epi_para(delta4_temp, self.delta_age[4])
+        delta5_temp = input('50 - 59 >>> ')
+        self.delta_age[5] = self.set_correct_epi_para(delta5_temp, self.delta_age[5])
+        delta6_temp = input('60 - 69 >>> ')
+        self.delta_age[6] = self.set_correct_epi_para(delta6_temp, self.delta_age[6])
+        delta7_temp = input('70 - 79 >>> ')
+        self.delta_age[7] = self.set_correct_epi_para(delta7_temp, self.delta_age[7])
+        delta8_temp = input('80 - 89 >>> ')
+        self.delta_age[8] = self.set_correct_epi_para(delta8_temp, self.delta_age[8])
+        delta9_temp = input('90 - 99 >>> ')
+        self.delta_age[9] = self.set_correct_epi_para(delta9_temp, self.delta_age[9])
+
+        print('You may edit the proportion of each brackets in person.py. ')
+        self.set_population()
         self.raise_flag()
+        print('\nMode 7 equipped. \n')
+
+'''
+08: Gender distribution
+'''
+class Mode08(Mode):
+    '''
+    Attributes
+    ----------
+    beta: iterable of floats (0 to 1)
+        Transmission rate of different age brackets.
+
+    Note
+    ----
+    0 is male, 1 is female.
+
+    '''
+
+    def __init__(self, people, beta, delta):
+        super().__init__(people,8)
+        self.beta_gender = [beta for x in range(2)]
+        self.delta_gender = [delta for x in range(2)]
+
+    def set_population(self):
+        '''
+        Set age of a population.
+
+        parameter
+        ---------
+        input: iterable, optional
+            Define frequency and their condom use.
+
+        '''
+        for person in self.people:
+            person.set_gender()
+
+    def correct_epi_para(self, p):
+        '''
+        Convert epidemic parameters into floats.
+
+        Parameters
+        - p: Epidemic rate, positive decimal less than 1.
+        '''
+        try:
+            p_num = float(p)
+            if p_num < 0 or p_num > 1:
+                p_num = 0
+                print('Please check your inputs and change them in SETTING.')
+            return p_num
+        except ValueError:
+            p_num = 0
+            print('Please check your inputs and change them in SETTING.')
+            return p_num
+
+    def set_correct_epi_para(self, p, P):
+        '''
+        Convert the parameters into integers. If input is blank then do nothing.
+
+        Parameters:
+        p -- string input.
+        P -- original value.
+        pos -- If the parameter is positive number.
+        '''
+        if p == '':
+            return P
+        else:
+            return self.correct_epi_para(p)
+
+    def infect_bygender(self, id, seed):
+        '''
+        Remove based on age.
+
+        Parameters
+        ----------
+        id: int
+            The person by id.
+        seed: float
+            Random seed from Simulation.
+        '''
+
+        if person.gender = 0:
+            beta = self.beta_gender[0]
+        elif person.age = 1:
+            beta = self.beta_gender[1]
+        else:
+            beta = self.beta_gender[-1]
+
+        # Infect (or not)
+        if seed < beta:
+            person.suceptible = 1
+
+    def remove_bygender(self, id):
+        '''
+        Remove based on age.
+
+        Parameters
+        ----------
+        id: int
+            The person by id.
+        '''
+
+        seed = random.randint(0,1000)/1000
+        if person.gender = 0:
+            delta = self.delta_gender[0]
+        elif person.gender = 1:
+            delta = self.delta_gender[1]
+        else:
+            delta = self.delta_gender[-1]
+
+        # Infect (or not)
+        if seed < delta:
+            person.removed = 1
+
+
+    def __call__(self):
+        print('-------------------------')
+        print('You are creating mode 8. ')
+        print('-------------------------\n')
+        print('Please set infection parameter for each age brackets below. ')
+        beta0_temp = input('Male >>> ')
+        self.beta_gender[0] = self.set_correct_epi_para(beta0_temp, self.beta_gender[0])
+        beta1_temp = input('Female >>> ')
+        self.beta_gender[1] = self.set_correct_epi_para(beta1_temp, self.beta_gender[1])
+        print('Please set removal parameter for each age brackets below. ')
+        delta0_temp = input('Male >>> ')
+        self.delta_gender[0] = self.set_correct_epi_para(delta0_temp, self.delta_gender[0])
+        delta1_temp = input('Female >>> ')
+        self.delta_gender[1] = self.set_correct_epi_para(delta1_temp, self.delta_gender[1])
+        print('You may edit the proportion of each brackets in person.py. ')
+        self.set_population()
+        self.raise_flag()
+        print('\nMode 8 equipped. \n')
 
 '''
 10: Type of vaccine (One-off/ Seasonal/ Chemoprophylaxis)
@@ -373,7 +620,8 @@ class Mode07(Mode):
 class Mode10(Mode):
     def __init__(self, people, phi, beta):
         super().__init__(people,10)
-        self.modes = ['One-off', 'Seasonal', 'Chemoprophylaxis']
+        self.types = ['One-off', 'Seasonal', 'Chemoprophylaxis']
+        self.type = None
 
     def __call__(self):
         print('-------------------------')
@@ -385,12 +633,15 @@ class Mode10(Mode):
         print('3. Chemoprophylaxis')
         cmd = input('Please choose one option: ')
         if cmd == '1':
+            self.type = 1
             phi = 1
             return phi
         elif cmd == '2':
-            pass
+            self.type = 2
         elif cmd == '3':
-            pass
+            self.type = 3
+        self.raise_flag()
+        print('\nMode 10 equipped. \n')
 
 '''
 21: Intimacy game
