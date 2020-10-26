@@ -355,7 +355,7 @@ class Mode07(Mode):
         Parameters
         ----------
         id: int
-            The person by id. 
+            The person by id.
         seed: float
             Random seed from Simulation.
         '''
@@ -561,9 +561,9 @@ class Mode08(Mode):
             Random seed from Simulation.
         '''
 
-        if person.gender = 0:
+        if person.gender == 0:
             beta = self.beta_gender[0]
-        elif person.age = 1:
+        elif person.age == 1:
             beta = self.beta_gender[1]
         else:
             beta = self.beta_gender[-1]
@@ -583,9 +583,9 @@ class Mode08(Mode):
         '''
 
         seed = random.randint(0,1000)/1000
-        if person.gender = 0:
+        if person.gender == 0:
             delta = self.delta_gender[0]
-        elif person.gender = 1:
+        elif person.gender == 1:
             delta = self.delta_gender[1]
         else:
             delta = self.delta_gender[-1]
@@ -657,40 +657,6 @@ class Mode21(Mode):
         self.m = 1
         self.mu = 2
 
-    def mate(self, pair):
-
-        if len(pair) > 1:
-            i = random.randint(0,len(pair)-1)  # Who is making the request
-            self.mu = 2
-        else:
-            return None
-        for j in range(len(pair)):
-            if i == j:
-                continue # Skip the person is deciding
-            # [Distrust, Abuse, Honour trust]
-            self.m = 1
-            Ej = [1,1,1]
-            Mj = [-self.rI,self.infection*self.rI,(1-self.infection)*self.r]
-            Kj = [self.m * (1 - self.infection) * self.r, self.m * self.infection * self.rI, self.m * (1-self.infection) * self.r]
-            max_utility = 0
-            option = None
-            for k in range(3):
-                if Ej[k]+Mj[k]+Kj[k] > max_utility:
-                    max_utility = Ej[k]+Mj[k]+Kj[k]
-                    option = k
-            if option == 0:
-                return None
-            # print(pair[j].id, max_utility, option)
-            if option == 2 and (pair[i].suceptible == 1 and pair[i].recovered == 0) or (pair[i].reinfected == 1 and pair[i].recovered == 0):
-                option = 1
-            if option == 1 or option == 2:
-                return option
-
-    def raise_flag(self):
-        return super().raise_flag()
-
-    def drop_flag(self):
-        return super().drop_flag()
 
 '''
 31: Include on demand PrEP.

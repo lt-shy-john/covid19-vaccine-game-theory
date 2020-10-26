@@ -44,6 +44,49 @@ class ContactNwk:
         print('Warning: This code still uses an obselete method: Contact.update_nwk(). ')
         pass
 
+    def update_xulvi_brunet_sokolov(self):
+        '''
+        Update the network. In ContactNwk().
+        '''
+        deg_ls = dict(self.nwk_graph.degree)  # Need this in the loop.
+
+        tmp_edge_ls = [e for e in self.nwk_graph.edges]
+        random.shuffle(tmp_edge_ls)
+        edge_pairs_idx = 0
+        while edge_pairs_idx < len(tmp_edge_ls):
+            if edge_pairs_idx == len(tmp_edge_ls)-1:
+                break
+            pair_nodes = [*tmp_edge_ls[edge_pairs_idx], *tmp_edge_ls[edge_pairs_idx+1]]
+            edge_pairs_idx += 2
+
+            # Sort by degree
+            pair_nodes_dict = dict([(x, deg_ls[x]) for x in pair_nodes])
+            pair_nodes_sorted = sorted(pair_nodes_dict, key=pair_nodes_dict.get, reverse=True)
+
+            if self.assort == True:
+                # Rebond then debond
+                self.nwk_graph.remove_edge(pair_nodes[0], pair_nodes[1])
+                self.nwk_graph.remove_edge(pair_nodes[2], pair_nodes[3])
+                if len(pair_nodes_sorted) == 4:
+                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[1])
+                    self.nwk_graph.add_edge(pair_nodes_sorted[2], pair_nodes_sorted[3])
+                else:
+                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[1])
+                    self.nwk_graph.add_edge(pair_nodes_sorted[1], pair_nodes_sorted[2])
+            else:
+                # Rebond then debond
+                self.nwk_graph.remove_edge(pair_nodes[0], pair_nodes[1])
+                self.nwk_graph.remove_edge(pair_nodes[2], pair_nodes[3])
+                if len(pair_nodes_sorted) == 4:
+                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[3])
+                    self.nwk_graph.add_edge(pair_nodes_sorted[1], pair_nodes_sorted[2])
+                else:
+                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[2])
+
+        # Add edge list to contact_nwk.network
+        self.network = [e for e in self.nwk_graph.edges]
+
+
     def update_random_nwk(self):
         '''
         At each time, contact clusters changed.
@@ -61,3 +104,6 @@ class ContactNwk:
                         self.nwk_graph.remove_edge(s_node.id,t_node.id)
                     elif (t_node.id,s_node.id) in self.network:
                         self.nwk_graph.remove_edge(t_node.id,s_node.id)
+
+        # Add edge list to contact_nwk.network
+        self.contact_nwk.network = [e for e in self.contact_nwk.nwk_graph.edges]

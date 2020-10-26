@@ -393,8 +393,10 @@ class Epidemic:
         self.vaccinate()
         self.infected()
         self.immune()
-        if 51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode:
-            self.contact_nwk.update_nwk()
+        if 51 in self.mode or 53 in self.mode or 54 in self.mode:
+            self.contact_nwk.update_random_nwk()
+        elif 52 in self.mode:
+            self.contact_nwk.update__xulvi_brunet_sokolov()
         self.get_states()
         self.write_history()
         if filename != '':
