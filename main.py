@@ -14,7 +14,7 @@ Main code
 - cmd functions
 - main loop
 '''
-def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, phi_V, phi_T, test_rate):
+def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, phi_V, phi_T, test_rate, immune_time):
     info = input('Information about the parameters? [y/n] ').lower()
     print()
     if info == 'y':
@@ -38,9 +38,9 @@ def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, beta_SS, bet
     if cmd == 'y':
         N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate)
     population = Person.make_population(N)
-    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate
+    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time
 
-def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate):
+def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time):
     print('Adoption parameters \n')
     alpha_V_temp = input('Vaccine: ')
     alpha_V = set_correct_epi_para(alpha_V_temp, alpha_V)
@@ -53,6 +53,9 @@ def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V,
     phi_V = set_correct_epi_para(phi_V_temp, phi_V)
     phi_T_temp = input('Treatment: ')
     phi_T = set_correct_epi_para(phi_T_temp, phi_T)
+    print('\nInfection related')
+    immune_time_temp = input('Immune time (days): ')
+    immune_time = set_correct_epi_para(immune_time_temp, immune_time)
     print('\nTesting parameters \n')
     test_rate_temp = input('COVID-19: ')
     test_rate = set_correct_epi_para(test_rate_temp, test_rate)
@@ -61,7 +64,7 @@ def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V,
     if 51 in modes or 52 in modes or 53 in modes or 54 in modes:
         print('\nYou have created contact network \n')
         print('\nNetwork parameters \n')
-    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate
+    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time
 
 def summary():
     print('N: {}'.format(N))
@@ -76,6 +79,7 @@ def summary():
     if cmd == 'y':
         print('alpha_V = {}'.format(alpha_V))
         print('alpha_T = {}'.format(alpha_T))
+        print('immune time = {}'.format(immune_time))
         print('test rate: {}'.format(test_rate))
     print()
     info = input('Information about the parameters? [y/n] ').lower()
@@ -412,6 +416,7 @@ beta_VI2 = beta_IV
 phi_V = phi
 phi_T = 0.95
 test_rate = 0.5
+immune_time = 60
 
 population = Person.make_population(N)
 contact_nwk = ContactNwk(population)
@@ -537,7 +542,7 @@ for i in range(len(sys.argv)):
 
 if sys.argv[-1] == 'run':
     print('===== Simulation Running =====')
-    current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate)
+    current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time)
     # Load modes
     current_run.load_modes(modes)
     if len(modes) > 0:
@@ -555,11 +560,11 @@ Normal mode
 while True:
     cmd = input('>>> ').lower()
     if cmd == 'setting':
-        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate = setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate)
+        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time = setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time)
         population = Person.make_population(N)
     elif cmd == 'other setting':
         print('Leave blank if not changing the value(s).')
-        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate)
+        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time)
     elif cmd == 'summary':
         summary()
     elif cmd == 'look':
@@ -568,7 +573,7 @@ while True:
         help()
     elif cmd == 'start' or cmd == 'run':
         print('===== Simulation Running =====')
-        current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate)
+        current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time)
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:
