@@ -238,8 +238,8 @@ def set_mode(mode):
         print('42: Moral hazard of treatment []')
         print('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
         print('52: Preferential attachment [{}]'.format(mode52.flag))
-        print('53: Small world topology []')
-        print('54: Lattice network []')
+        print('53: Small world topology [{}]'.format(mode53.flag))
+        print('54: Lattice network [{}]'.format(mode54.flag))
         print('Input number codes to change the options.')
         mode_input = input('> ')
         mode = mode_settings(mode_input, mode)
@@ -335,6 +335,7 @@ def mode_settings(cmd, mode=None):
                     mode[52] = mode52
                 else:
                     mode.pop(52)
+    # Remove modes (Check if the modes itself overwrites basic settings)
     if len(rv_modes) > 0:
         for mode_opt in rv_modes:
             try:
@@ -434,12 +435,14 @@ mode21 = mode.Mode21(population, contact_nwk)
 mode31 = mode.Mode31(population)
 mode51 = mode.Mode51(population, contact_nwk)
 mode52 = mode.Mode52(population, contact_nwk)
+mode53 = mode.Mode53(population, contact_nwk)
+mode54 = mode.Mode54(population, contact_nwk)
 
 mode_master_list = [mode01, mode02, mode04, mode05, mode07,
 mode10,
 mode21,
 mode31,
-mode51, mode52]
+mode51, mode52, mode53, mode54]
 
 
 modes = {}
