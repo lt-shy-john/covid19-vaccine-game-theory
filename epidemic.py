@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 from contact import ContactNwk
 import person
@@ -253,21 +254,41 @@ class Epidemic:
         '''
         A person is removed from population.
         '''
+        delta_pp = np.ones(len(self.people))
+        for i in range(len(self.people)):
+            if any(i in self.mode for i in [7, 8]):
+                # Fetch all parameters:
+                if 7 in self.mode:
+                    delta_pp[i] = np.multiply(self.mode[7].delta_age[int(self.people[i].age//10)], delta_pp[i])
+                if 8 in self.mode:
+                    delta_pp[i] = np.multiply(self.mode[8].delta_gender[self.people[i].gender], delta_pp[i])
+                # print(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
+
+
         for i in range(len(self.people)):
             if self.people[i].suceptible != 1:
                 continue
-            if 7 in self.mode:
-                self.mode[7].remove_byage(i)
-                continue
-            if 8 in self.mode:
-                self.mode[8].remove_bygender(i)
-                continue
-            if random.uniform(0,1) <= self.remove:
+            seed = random.randint(0,1000)/1000
+            if any(i in self.mode for i in [7, 8]):
+                if seed < delta_pp[i]:
+                    self.people[i].removed = 1
+
+            if seed <= self.remove:
                 self.people[i].removed = 1
 
     def infect(self):
+        beta_pp = np.ones(len(self.people))
         for i in range(len(self.people)):
+            if any(i in self.mode for i in [1, 7, 8]):
+                # Fetch all parameters:
+                if 1 in self.mode:
+                    beta_pp[i] = np.multiply(self.mode[1].betas[self.people[i].location], beta_pp[i])
+                if 7 in self.mode:
+                    beta_pp[i] = np.multiply(self.mode[7].beta_age[int(self.people[i].age//10)], beta_pp[i])
+                if 8 in self.mode:
+                    beta_pp[i] = np.multiply(self.mode[8].beta_gender[self.people[i].gender], beta_pp[i])
 
+        for i in range(len(self.people)):
             '''
             Infect (or not)
             '''
@@ -278,12 +299,10 @@ class Epidemic:
             '''
             Customised infection from modes
             '''
-            if 1 in self.mode:
-                self.mode[1].infect_01(i, seed)
-                continue
-            if 7 in self.mode:
-                self.mode[7].infect_byage(i, seed)
-            if 8 in self.mode:
+            if any(i in self.mode for i in [1, 7, 8]):
+                # print(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
+                if seed < beta_pp[i]:
+                    self.people[i].suceptible = 1
                 continue
             if (51 in self.mode) or (52 in self.mode) or (53 in self.mode) or (54 in self.mode):
                 self.social_contact()
@@ -396,7 +415,7 @@ class Epidemic:
         if 51 in self.mode or 53 in self.mode or 54 in self.mode:
             self.contact_nwk.update_random_nwk()
         elif 52 in self.mode:
-            self.contact_nwk.update__xulvi_brunet_sokolov()
+            self.contact_nwk.update_xulvi_brunet_sokolov()
         self.get_states()
         self.write_history()
         if filename != '':

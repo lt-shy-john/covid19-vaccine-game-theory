@@ -430,6 +430,7 @@ mode02 = mode.Mode02(population)
 mode04 = mode.Mode04(population, alpha)
 mode05 = mode.Mode05(population, contact_nwk)
 mode07 = mode.Mode07(population, beta, delta)
+mode08 = mode.Mode08(population, beta, delta)
 mode10 = mode.Mode10(population, phi, beta)
 mode21 = mode.Mode21(population, contact_nwk)
 mode31 = mode.Mode31(population)
@@ -438,7 +439,7 @@ mode52 = mode.Mode52(population, contact_nwk)
 mode53 = mode.Mode53(population, contact_nwk)
 mode54 = mode.Mode54(population, contact_nwk)
 
-mode_master_list = [mode01, mode02, mode04, mode05, mode07,
+mode_master_list = [mode01, mode02, mode04, mode05, mode07, mode08,
 mode10,
 mode21,
 mode31,
@@ -461,15 +462,11 @@ for i in range(len(sys.argv)):
                 # Skip at other options
                 if sys.argv[j][:2] == '--':
                     mode_flag = int(sys.argv[j][2:])
-                    print('Mode: {}'.format(mode_flag))
+                    print('Loading mode: {}'.format(mode_flag))
 
                     # Activate modes with no options needed
-                    if mode_flag == 1:
-                        pass
-                    elif mode_flag == 4:
+                    if mode_flag == 4:
                         mode04()
-                    elif mode_flag == 7:
-                        pass
                     elif mode_flag == 51:
                         if 52 in modes:
                             print('Mode 52 has been activated. Ignore mode 51. ')
@@ -479,15 +476,15 @@ for i in range(len(sys.argv)):
                             modes[51] = mode51
                         else:
                             modes.pop(51)
-                    elif mode_flag == 52:
-                        if 51 in modes:
-                            print('Mode 51 has been activated. Ignore mode 52. ')
-                            break
-                        mode52()
-                        if mode52.flag == 'X':
-                            modes[52] = mode52
-                        else:
-                            mode.pop(52)
+                    # elif mode_flag == 52:
+                    #     if 51 in modes:
+                    #         print('Mode 51 has been activated. Ignore mode 52. ')
+                    #         break
+                    #     mode52()
+                    #     if mode52.flag == 'X':
+                    #         modes[52] = mode52
+                    #     else:
+                    #         mode.pop(52)
 
                     # Loop through config values
                     for k in range(j+1,len(sys.argv)):
@@ -501,19 +498,61 @@ for i in range(len(sys.argv)):
                             # Placeholder
                             if sys.argv[k][:3] == '*b=':
                                 mode01_b_config = sys.argv[k][3:].split(',')
-                                w_c = float(mode01_b_config[0])
-                                w_r = float(mode01_b_config[1])
-                                mode01.set_weight(w_c, w_r)
+                                b_c = float(mode01_b_config[0])
+                                b_r = float(mode01_b_config[1])
+                                mode01.set_beta(0,b_c)
+                                mode01.set_beta(1,b_r)
                             elif sys.argv[k][:3] == '*p=':
                                 mode01_p_config = sys.argv[k][3:].split(',')
-                                p_c = float(mode01_p_config[0])
-                                p_r = float(mode01_p_config[1])
-                                mode01.set_beta(0,p_c)
-                                mode01.set_beta(1,p_r)
+                                w_c = float(mode01_p_config[0])
+                                w_r = float(mode01_p_config[1])
+                                mode01.set_weight(w_c, w_r)
+
                             mode01.assign_regions()
                             mode01.raise_flag()
+                            if mode01.flag == 'X':
+                                modes[1] = mode01
+                            else:
+                                mode.pop(1)
                         elif mode_flag == 7:
-                            pass
+                            if sys.argv[k][:3] == '*b=':
+                                mode07_b_config = sys.argv[k][3:].split(',')
+                                mode07.beta_age = [float(x) for x in mode07_b_config]
+                            elif sys.argv[k][:3] == '*d=':
+                                mode07_d_config = sys.argv[k][3:].split(',')
+                                mode07.delta_age = [float(x) for x in mode07_d_config]
+                            mode07.set_population()
+                            mode07.raise_flag()
+                            if mode07.flag == 'X':
+                                modes[7] = mode07
+                            else:
+                                mode.pop(7)
+                        elif mode_flag == 8:
+                            if sys.argv[k][:3] == '*b=':
+                                mode08_b_config = sys.argv[k][3:].split(',')
+                                mode08.beta_gender = [float(x) for x in mode08_b_config]
+                            elif sys.argv[k][:3] == '*d=':
+                                mode08_d_config = sys.argv[k][3:].split(',')
+                                mode08.delta_gender = [float(x) for x in mode08_d_config]
+                            mode08.set_population()
+                            mode08.raise_flag()
+                            if mode08.flag == 'X':
+                                modes[8] = mode08
+                            else:
+                                mode.pop(8)
+                        elif mode_flag == 52:
+                            if 51 in modes:
+                                print('Mode 51 has been activated. Ignore mode 52. ')
+                                break
+                            if sys.argv[k][:3] == '*m=':
+                                mode52_m_config = int(sys.argv[k][3:])
+                                mode52.set_m(mode52_m_config)
+                            mode52.set_network()
+                            mode52.raise_flag()
+                            if mode52.flag == 'X':
+                                modes[52] = mode52
+                            else:
+                                mode.pop(52)
 
 
                         # elif mode_flag == 999:

@@ -24,6 +24,38 @@ class Mode:
         '''
         self.flag = ' '
 
+    def correct_epi_para(self, p):
+        '''
+        Convert epidemic parameters into floats.
+
+        Parameters
+        - p: Epidemic rate, positive decimal less than 1.
+        '''
+        try:
+            p_num = float(p)
+            if p_num < 0 or p_num > 1:
+                p_num = 0
+                print('Please check your inputs and change them in SETTING.')
+            return p_num
+        except ValueError:
+            p_num = 0
+            print('Please check your inputs and change them in SETTING.')
+            return p_num
+
+    def set_correct_epi_para(self, p, P):
+        '''
+        Convert the parameters into integers. If input is blank then do nothing.
+
+        Parameters:
+        p -- string input.
+        P -- original value.
+        pos -- If the parameter is positive number.
+        '''
+        if p == '':
+            return P
+        else:
+            return self.correct_epi_para(p)
+
 '''
 =======================================================
 
@@ -87,9 +119,9 @@ class Mode01(Mode):
 
         print('\nPlease set proportional parameter below. ')
         prop_city_temp = input('City >>> ')
-        prop_city = self.set_correct_epi_para(prop_city_temp, prop_city)
+        prop_city = super().set_correct_epi_para(prop_city_temp, prop_city)
         prop_rural_temp = input('Rural >>> ')
-        prop_rural = self.set_correct_epi_para(prop_rural_temp, prop_rural)
+        prop_rural = super().set_correct_epi_para(prop_rural_temp, prop_rural)
         prop_city, prop_rural = self.weight[0], self.weight[1]
         print('{}: {}, {}: {}'.format(self.betas[0], self.betas[1], self.weight[0], self.weight[1]))
         print('We are assigning the population to regions.')
@@ -360,32 +392,32 @@ class Mode07(Mode):
             Random seed from Simulation.
         '''
 
-        if person.age < 10:
+        if self.people[id].age < 10:
             beta = self.beta_age[0]
-        elif person.age < 20:
+        elif self.people[id].age < 20:
             beta = self.beta_age[1]
-        elif person.age < 30:
+        elif self.people[id].age < 30:
             beta = self.beta_age[2]
-        elif person.age < 40:
+        elif self.people[id].age < 40:
             beta = self.beta_age[3]
-        elif person.age < 50:
+        elif self.people[id].age < 50:
             beta = self.beta_age[4]
-        elif person.age < 60:
+        elif self.people[id].age < 60:
             beta = self.beta_age[5]
-        elif person.age < 70:
+        elif self.people[id].age < 70:
             beta = self.beta_age[6]
-        elif person.age < 80:
+        elif self.people[id].age < 80:
             beta = self.beta_age[7]
-        elif person.age < 90:
+        elif self.people[id].age < 90:
             beta = self.beta_age[8]
-        elif person.age < 100:
+        elif self.people[id].age < 100:
             beta = self.beta_age[9]
         else:
             beta = self.beta_age[-1]
 
         # Infect (or not)
         if seed < beta:
-            person.suceptible = 1
+            self.people[id].suceptible = 1
 
     def remove_byage(self, id):
         '''
@@ -398,32 +430,32 @@ class Mode07(Mode):
         '''
 
         seed = random.randint(0,1000)/1000
-        if person.age < 10:
+        if self.people[id].age < 10:
             delta = self.delta_age[0]
-        elif person.age < 20:
+        elif self.people[id].age < 20:
             delta = self.delta_age[1]
-        elif person.age < 30:
+        elif self.people[id].age < 30:
             delta = self.delta_age[2]
-        elif person.age < 40:
+        elif self.people[id].age < 40:
             delta = self.delta_age[3]
-        elif person.age < 50:
+        elif self.people[id].age < 50:
             delta = self.delta_age[4]
-        elif person.age < 60:
+        elif self.people[id].age < 60:
             delta = self.delta_age[5]
-        elif person.age < 70:
+        elif self.people[id].age < 70:
             delta = self.delta_age[6]
-        elif person.age < 80:
+        elif self.people[id].age < 80:
             delta = self.delta_age[7]
-        elif person.age < 90:
+        elif self.people[id].age < 90:
             delta = self.delta_age[8]
-        elif person.age < 100:
+        elif self.people[id].age < 100:
             delta = self.delta_age[9]
         else:
             delta = self.delta_age[-1]
 
         # Infect (or not)
         if seed < delta:
-            person.removed = 1
+            self.people[id].removed = 1
 
 
     def __call__(self):
@@ -561,16 +593,16 @@ class Mode08(Mode):
             Random seed from Simulation.
         '''
 
-        if person.gender == 0:
+        if self.people[id].gender == 0:
             beta = self.beta_gender[0]
-        elif person.age == 1:
+        elif self.people[id].age == 1:
             beta = self.beta_gender[1]
         else:
             beta = self.beta_gender[-1]
 
         # Infect (or not)
         if seed < beta:
-            person.suceptible = 1
+            self.people[id].suceptible = 1
 
     def remove_bygender(self, id):
         '''
@@ -583,16 +615,16 @@ class Mode08(Mode):
         '''
 
         seed = random.randint(0,1000)/1000
-        if person.gender == 0:
+        if self.people[id].gender == 0:
             delta = self.delta_gender[0]
-        elif person.gender == 1:
+        elif self.people[id].gender == 1:
             delta = self.delta_gender[1]
         else:
             delta = self.delta_gender[-1]
 
         # Infect (or not)
         if seed < delta:
-            person.removed = 1
+            self.people[id].removed = 1
 
 
     def __call__(self):

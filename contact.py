@@ -12,6 +12,7 @@ class ContactNwk:
         self.network = None  # Graph to show partner topology
         # From now network is defined by modes 50 - 59.
         self.nwk_graph = nx.Graph(self.network)
+        self.assort = True
 
         # Probability to change bonds
         self.l0 = 0.5
