@@ -38,7 +38,7 @@ class Simulation:
 
         # Recovery rate
         self.gamma = gamma
-        self.immune_time = 60
+        self.immune_time = immune_time
 
         # Wear off rate
         self.phi = phi

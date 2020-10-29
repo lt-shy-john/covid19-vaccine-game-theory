@@ -111,10 +111,10 @@ class Mode01(Mode):
         print('-------------------------\n')
         print('Please set infection parameter below. ')
         beta_city_temp = input('City >>> ')
-        beta_city = self.set_correct_epi_para(beta_city_temp, beta_city)
+        beta_city = super().set_correct_epi_para(beta_city_temp, beta_city)
         self.set_beta(0, beta_city)
         beta_rural_temp = input('Rural >>> ')
-        beta_rural = self.set_correct_epi_para(beta_rural_temp, beta_rural)
+        beta_rural = super().set_correct_epi_para(beta_rural_temp, beta_rural)
         self.set_beta(1, beta_rural)
 
         print('\nPlease set proportional parameter below. ')
@@ -238,10 +238,30 @@ class Mode04(Mode):
         print('-------------------------')
         print('You are creating mode 4. ')
         print('-------------------------\n')
+        if self.alpha == 0:
+            print('Warning: Adoption parameter is 0, mode4 will not work under this. Please reset adoption parameter first. ')
+            return
+        print('Please set rationality parameter below. ')
+        lambda_BR = self.people[0].lambda_BR
+        lambda_BR_temp = input('Lambda >>> ')
+        lambda_BR = super().set_correct_epi_para(lambda_BR_temp, lambda_BR)
+        self.set_lambda(lambda_BR)
         print('Assigning parameters to population. ')
         self.QRE()
         self.raise_flag()
         print('\nMode 4 equipped. \n')
+
+    def set_lambda(self, lambda_input):
+        '''
+        Set rationality parameter for each person.
+
+        parameter
+        ---------
+        lambda_input: float
+            A initial value fixed for all people.
+        '''
+        for person in self.people:
+            person.lambda_BR = lambda_input
 
     def QRE(self):
         '''
@@ -467,48 +487,48 @@ class Mode07(Mode):
         # Infection
         print('Please set infection parameter for each age brackets below. ')
         beta0_temp = input('0 - 9 >>> ')
-        self.beta_age[0] = self.set_correct_epi_para(beta0_temp, self.beta_age[0])
+        self.beta_age[0] = super().set_correct_epi_para(beta0_temp, self.beta_age[0])
         beta1_temp = input('10 - 19 >>> ')
-        self.beta_age[1] = self.set_correct_epi_para(beta1_temp, self.beta_age[1])
+        self.beta_age[1] = super().set_correct_epi_para(beta1_temp, self.beta_age[1])
         beta2_temp = input('20 - 29 >>> ')
-        self.beta_age[2] = self.set_correct_epi_para(beta2_temp, self.beta_age[2])
+        self.beta_age[2] = super().set_correct_epi_para(beta2_temp, self.beta_age[2])
         beta3_temp = input('30 - 39 >>> ')
-        self.beta_age[3] = self.set_correct_epi_para(beta3_temp, self.beta_age[3])
+        self.beta_age[3] = super().set_correct_epi_para(beta3_temp, self.beta_age[3])
         beta4_temp = input('40 - 49 >>> ')
-        self.beta_age[4] = self.set_correct_epi_para(beta4_temp, self.beta_age[4])
+        self.beta_age[4] = super().set_correct_epi_para(beta4_temp, self.beta_age[4])
         beta5_temp = input('50 - 59 >>> ')
-        self.beta_age[5] = self.set_correct_epi_para(beta5_temp, self.beta_age[5])
+        self.beta_age[5] = super().set_correct_epi_para(beta5_temp, self.beta_age[5])
         beta6_temp = input('60 - 69 >>> ')
-        self.beta_age[6] = self.set_correct_epi_para(beta6_temp, self.beta_age[6])
+        self.beta_age[6] = super().set_correct_epi_para(beta6_temp, self.beta_age[6])
         beta7_temp = input('70 - 79 >>> ')
-        self.beta_age[7] = self.set_correct_epi_para(beta7_temp, self.beta_age[7])
+        self.beta_age[7] = super().set_correct_epi_para(beta7_temp, self.beta_age[7])
         beta8_temp = input('80 - 89 >>> ')
-        self.beta_age[8] = self.set_correct_epi_para(beta8_temp, self.beta_age[8])
+        self.beta_age[8] = super().set_correct_epi_para(beta8_temp, self.beta_age[8])
         beta9_temp = input('90 - 99 >>> ')
-        self.beta_age[9] = self.set_correct_epi_para(beta9_temp, self.beta_age[9])
+        self.beta_age[9] = super().set_correct_epi_para(beta9_temp, self.beta_age[9])
 
         # Removal
         print('Please set removal parameter for each age brackets below. ')
         delta0_temp = input('0 - 9 >>> ')
-        self.delta_age[0] = self.set_correct_epi_para(delta0_temp, self.delta_age[0])
+        self.delta_age[0] = super().set_correct_epi_para(delta0_temp, self.delta_age[0])
         delta1_temp = input('10 - 19 >>> ')
-        self.delta_age[1] = self.set_correct_epi_para(delta1_temp, self.delta_age[1])
+        self.delta_age[1] = super().set_correct_epi_para(delta1_temp, self.delta_age[1])
         delta2_temp = input('20 - 29 >>> ')
-        self.delta_age[2] = self.set_correct_epi_para(delta2_temp, self.delta_age[2])
+        self.delta_age[2] = super().set_correct_epi_para(delta2_temp, self.delta_age[2])
         delta3_temp = input('30 - 39 >>> ')
-        self.delta_age[3] = self.set_correct_epi_para(delta3_temp, self.delta_age[3])
+        self.delta_age[3] = super().set_correct_epi_para(delta3_temp, self.delta_age[3])
         delta4_temp = input('40 - 49 >>> ')
-        self.delta_age[4] = self.set_correct_epi_para(delta4_temp, self.delta_age[4])
+        self.delta_age[4] = super().set_correct_epi_para(delta4_temp, self.delta_age[4])
         delta5_temp = input('50 - 59 >>> ')
-        self.delta_age[5] = self.set_correct_epi_para(delta5_temp, self.delta_age[5])
+        self.delta_age[5] = super().set_correct_epi_para(delta5_temp, self.delta_age[5])
         delta6_temp = input('60 - 69 >>> ')
-        self.delta_age[6] = self.set_correct_epi_para(delta6_temp, self.delta_age[6])
+        self.delta_age[6] = super().set_correct_epi_para(delta6_temp, self.delta_age[6])
         delta7_temp = input('70 - 79 >>> ')
-        self.delta_age[7] = self.set_correct_epi_para(delta7_temp, self.delta_age[7])
+        self.delta_age[7] = super().set_correct_epi_para(delta7_temp, self.delta_age[7])
         delta8_temp = input('80 - 89 >>> ')
-        self.delta_age[8] = self.set_correct_epi_para(delta8_temp, self.delta_age[8])
+        self.delta_age[8] = super().set_correct_epi_para(delta8_temp, self.delta_age[8])
         delta9_temp = input('90 - 99 >>> ')
-        self.delta_age[9] = self.set_correct_epi_para(delta9_temp, self.delta_age[9])
+        self.delta_age[9] = super().set_correct_epi_para(delta9_temp, self.delta_age[9])
 
         print('You may edit the proportion of each brackets in person.py. ')
         self.set_population()
@@ -666,8 +686,6 @@ class Mode10(Mode):
         cmd = input('Please choose one option: ')
         if cmd == '1':
             self.type = 1
-            phi = 1
-            return phi
         elif cmd == '2':
             self.type = 2
         elif cmd == '3':

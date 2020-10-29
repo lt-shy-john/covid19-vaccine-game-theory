@@ -136,6 +136,7 @@ class Epidemic:
         self.infection_RV = beta_RV
 
 
+
     def get_states(self):
         '''
             Get number of people who are in S, I or V state.
@@ -239,10 +240,10 @@ class Epidemic:
     def vaccinate(self):
         for i in range(len(self.people)):
             if 4 in self.mode:
-                print(self.mode[4].P_Alpha[i])
+                # print(self.mode[4].P_Alpha[i])
                 seed = random.randint(0,10000)/10000
                 if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
-                    print('*')
+                    # print('*')
                     self.people[i].vaccinated = 1
             continue
             if self.people[i].suceptible == 1:
@@ -315,7 +316,7 @@ class Epidemic:
         '''
         Simulate social contacts.
         '''
-        for edge in self.contact_nwk.nwk_graph.edges:
+        for edge in self.contact_nwk.network:
             # This is edge of People objects.
             # Conditions where disease will not spread (SS, VV, RR)
             if edge[0].suceptible == 0 and edge[1].suceptible == 0:
@@ -324,6 +325,9 @@ class Epidemic:
                 continue
             if edge[0].removed == 0 or edge[1].removed == 0:
                 continue
+
+            print(edge[0].id, edge[1].id)
+            print('  ', edge[0].suceptible, edge[1].suceptible)
 
             # Infect (or not)
             seed = random.randint(0,100000)/100000

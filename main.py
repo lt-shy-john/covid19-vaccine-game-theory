@@ -417,7 +417,7 @@ beta_VI2 = beta_IV
 phi_V = phi
 phi_T = 0.95
 test_rate = 0.5
-immune_time = 60
+immune_time = 210 # Default: 60 
 
 population = Person.make_population(N)
 contact_nwk = ContactNwk(population)

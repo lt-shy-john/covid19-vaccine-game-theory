@@ -113,7 +113,7 @@ def WriteSummary(obs, filename):
             contents.append('Delta: {}\n'.format(obs.delta))
         contents.append('Phi: {}\n'.format(obs.phi))
         contents.append('Tau: {}\n'.format(obs.test_rate))
-        contents.append('Immune time, {}\n'.format(obs.immune_time))
+        contents.append('Immune time: {} days \n'.format(obs.immune_time))
         if any(i in obs.modes for i in [7, 8]):
             contents.append('\n# Demographics \n')
             if 7 in obs.modes:
@@ -137,6 +137,16 @@ def WriteSummary(obs, filename):
             contents.append('\n## Transmission parameter \n')
             contents.append('City: {} \n'.format(obs.modes[1].betas[0]))
             contents.append('Rural: {} \n'.format(obs.modes[1].betas[1]))
+        if any(i in obs.modes for i in [4, 21]):
+            contents.append('\n# Game Theoretical Option \n')
+            if 4 in obs.modes:
+                contents.append('\n## Bounded Rationality \n')
+                contents.append('Alpha: {}\n'.format(obs.alpha))
+                contents.append('Rationality parameter: \n')
+                contents.append('Append mode: Fixed \n')
+                contents.append('N: {} people\n'.format(len(obs.N)))
+                contents.append('Value: {} \n'.format(obs.people[0].lambda_BR))
+                contents.append('P(V): {} \n'.format(obs.modes[4].P_Alpha[0]))
         if any(i in obs.modes for i in [1, 7, 8]):
             contents.append('# Notes\n')
             contents.append('* Epidemic parameter controlled by optional modes. Consult the relevant modes for more information. \n')

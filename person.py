@@ -23,7 +23,7 @@ class Person:
 
         # Bounded rationality
         self.rV_BR = random.randint(0,1000)/1000
-        self.lambda_BR = random.randint(0,1000)/1000
+        self.lambda_BR = 0.5
 
         self.occupation = 0
         '''
@@ -59,9 +59,10 @@ class Person:
 
         # Demographics
         self.age = None
-        self.gender = None  # 0 means male, 1 means female 
+        self.gender = None  # 0 means male, 1 means female
 
         self.compartment_history = []
+        self.vaccine_history = []
         self.check_history = []
 
     def make_population(N):
