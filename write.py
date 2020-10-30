@@ -25,7 +25,7 @@ def WriteOpinion(obs, filename):
     '''
         Write everyone's opinion and infected state into a .csv file.
     '''
-    filename = str(filename)+'.csv'
+    filename = str(filename)+'-opinion.csv'
     with open(filename, 'a', newline='', encoding='utf8') as f:
         writer = csv.writer(f)
         for i in range(len(obs.people)):

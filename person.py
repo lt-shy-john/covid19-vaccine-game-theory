@@ -12,9 +12,6 @@ class Person:
         Person.id += 1  # Name of the person.
         self.id = Person.id
 
-        self.opinion = 1 #random.choices([0, 1], weights = [2, 8], k = 1)[0]
-        self.meta_opinion = None
-
         self.location = 0
         '''
         0 - City
@@ -42,6 +39,8 @@ class Person:
         2 - Balancer
         '''
         self.personality = personality
+        self.opinion = 1 #random.choices([0, 1], weights = [2, 8], k = 1)[0]
+        self.meta_opinion = None
 
         # Epidemic state
         self.suceptible = 0 #int(round(random.uniform(0, 1), 0))   # 0 means without disease, 1 means infected

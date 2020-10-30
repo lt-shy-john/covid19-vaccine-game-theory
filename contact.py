@@ -12,11 +12,14 @@ class ContactNwk:
         self.network = None  # Graph to show partner topology
         # From now network is defined by modes 50 - 59.
         self.nwk_graph = nx.Graph(self.network)
-        self.assort = True
+
+        self.speed_mode = True
 
         # Probability to change bonds
         self.l0 = 0.5
         self.l1 = 0.5
+        self.assort = True
+        self.PUpdate = 1 # For Contact.update_xulvi_brunet_sokolov()
 
     def set_dedault_edge_list(self):
         '''
@@ -40,10 +43,14 @@ class ContactNwk:
 
     def update_nwk(self):
         '''
-        Replaced by other update_nwk methods based on their type.
+        Basic functionality of network updates.
         '''
-        print('Warning: This code still uses an obselete method: Contact.update_nwk(). ')
-        pass
+        # Remove people whom removed
+        for edge in self.nwk_graph.edges:
+            if edge[0].removed == 1:
+                self.nwk_graph.remove_edge(edge[0],edge[1])
+            elif edge[1].removed == 1:
+                self.nwk_graph.remove_edge(edge[0],edge[1])
 
     def update_xulvi_brunet_sokolov(self):
         '''
@@ -51,7 +58,11 @@ class ContactNwk:
         '''
         deg_ls = dict(self.nwk_graph.degree)  # Need this in the loop.
 
-        tmp_edge_ls = [e for e in self.nwk_graph.edges]
+        seed = random.randint(0,10000)/10000
+        if seed > self.PUpdate: 
+            return
+
+        tmp_edge_ls = self.network
         random.shuffle(tmp_edge_ls)
         edge_pairs_idx = 0
         while edge_pairs_idx < len(tmp_edge_ls):

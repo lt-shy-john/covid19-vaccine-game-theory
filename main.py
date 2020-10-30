@@ -134,11 +134,11 @@ def usage():
     print('  --12 \t Cost of vaccine.')
     print('  --13 \t Accessibility to vaccine.')
     print('  --14 \t Side effects of vaccine.')
-    print('  --15 \t Medication incorporated.')
     print('  --21 \t Intimacy game.')
     print('  --22 \t Stubbon to take vaccine.')
     print('  --23 \t Stubbon to against vaccine.')
-    print('  --24 \t Contrary to social groups [].')
+    print('  --24 \t Contrary to social groups.')
+    print('  --31 \t Medication incorporated.')
     print('  --41 \t Moral hazard of social distancing.')
     print('  --42 \t Moral hazard of treatment.')
     print('  --51 \t Erdos-Renyi topology.')
@@ -227,12 +227,11 @@ def set_mode(mode):
         print('12: Cost of vaccine []')
         print('13: Accessibility to vaccine []')
         print('14: Side effects of vaccine []')
-        print('15: Medication incorporated []')
         print('21: Imitation game [{}]'.format(mode21.flag))
         print('22: Stubbon to take vaccine []')
         print('23: Stubbon to against vaccine []')
         print('24: Contrary to social groups []')
-        print('31: Include on demand PrEP. [{}]'.format(mode31.flag))
+        print('31: Medication incorporated [{}]'.format(mode31.flag))
         print('32: Population on demand PrEP had planned sex. []')
         print('41: Moral hazard of social distancing []')
         print('42: Moral hazard of treatment []')
@@ -242,12 +241,16 @@ def set_mode(mode):
         print('54: Lattice network [{}]'.format(mode54.flag))
         print('Input number codes to change the options.')
         mode_input = input('> ')
+        print(mode_input)
         mode = mode_settings(mode_input, mode)
         cmd = input('Return to main menu? [y/n] ')
     return mode
 
 def mode_settings(cmd, mode=None):
     cmd = cmd.split(' ')
+    if cmd == ['']:
+        # If empty response, then leave prematurely.
+        return mode
     rv_modes = []
     if '-dp' in cmd:
         removal_idx = cmd.index('-dp')
@@ -417,7 +420,7 @@ beta_VI2 = beta_IV
 phi_V = phi
 phi_T = 0.95
 test_rate = 0.5
-immune_time = 210 # Default: 60 
+immune_time = 60
 
 population = Person.make_population(N)
 contact_nwk = ContactNwk(population)
@@ -457,7 +460,13 @@ Loads the settings prior to the run. Optional keyword 'run' to run the simulatio
 # Check if mode exists
 for i in range(len(sys.argv)):
     try:
-        if sys.argv[i] == '-m':
+        if sys.argv[i] == '-immune_time':
+            immune_time_temp = sys.argv[i+1]
+            immune_time = set_correct_para(immune_time_temp, immune_time, pos=True)
+        elif sys.argv[i] == '-test_rate':
+            test_rate_temp = sys.argv[i+1]
+            test_rate = set_correct_para(test_rate_temp, test_rate, pos=True)
+        elif sys.argv[i] == '-m':
             for j in range(i+1,len(sys.argv)):
                 # Skip at other options
                 if sys.argv[j][:2] == '--':
@@ -632,22 +641,22 @@ while True:
         print('  Agent Based Modelling: COVID-19 SEIP Model  \n\n')
         print('  ==========================================  ')
         time.sleep(3)
-        print('Author: Shing Hin (John) Yeung\n')
+        print('\n\nAuthor: Shing Hin (John) Yeung\n')
         time.sleep(1)
-        print('This software code comes from Masters in Complex Systems a Capstone Project. ')
+        print('This software code comes from Masters in Complex Systems a Capstone Project. \n')
         time.sleep(1)
-        print('It aims for modelling human choice upon vaccine adoption and therefore predict the epidemic. ')
+        print('It aims for modelling human choice upon vaccine adoption and therefore predict the epidemic. \n\n')
         time.sleep(1)
-        print('The author would like to thank you to many people who conrtibuted to this project. ')
+        print('The author would like to thank you to many people who conrtibuted to this project. \n')
         time.sleep(1)
         print('Dr Shailendra Sawleshwarkar')
         print('A/ Prof Iryna Zablotska-Manos')
         print('Dr Samit Bhattacharyya')
         time.sleep(3)
-        print('Primary supervisor')
-        print('Dr Mahendrarajah Piraveenan')
+        print('\n\nPrimary supervisor')
+        print('Dr Mahendrarajah Piraveenan\n')
         time.sleep(3)
-        print('This study dedicates to the humanity that strives in the COVID-19 pandemic. ')
+        print('This study dedicates to the humanity that strives in the COVID-19 pandemic. \n\n\n')
         time.sleep(1)
         print('==== Thank you ====')
     elif cmd == 'quit' or cmd == 'q':

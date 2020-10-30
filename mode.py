@@ -709,7 +709,7 @@ class Mode21(Mode):
 
 
 '''
-31: Include on demand PrEP.
+31: Medication incorporated
 '''
 class Mode31(Mode):
     def __init__(self, people):
@@ -718,79 +718,11 @@ class Mode31(Mode):
         # Proportion of agents that takes on demand PrEP
         self.p = 0
 
-    def raise_flag(self):
-        return super().raise_flag()
-
-    def drop_flag(self):
-        return super().drop_flag()
-
-    def set_p(self, p):
-        if p > 1:
-            self.p = 1
-        elif p < 0:
-            self.p = 0
-        else:
-            self.p = p
-
-    def init_on_demand_PrEP(self, person_id):
-        '''
-        Allow the specific agent start on demand PrEP.
-
-        Parameter:
-        self - Mode31 object.
-        person_id - id of the person instance.
-        '''
-        self.people[person_id].on_demand = 1
-        self.people[person_id].vaccinated = 0
-
-    def mate(self, person_id, start=None):
-        '''
-        If the agent made sex in the time step, a mark is made to the agent to decide if the agent is suceptible if forgot to take on-demand PrEP with in 48 hours.
-
-        Values of mated_marker:
-        None - Does not have sex before/ Last sex more than 2 days ago.
-        1 - Had sex 1 day ago.
-        2 - Had sex 2 days ago.
-
-        Values of Person.on_demand:
-        0 - Not on on-demand PrEP
-        1 - Taking on-demand PrEP
-        '''
-        marker = self.people[person_id].mated_marker  # Make code neater
-        if start != None and marker == None:
-            marker = 0
-            self.people[person_id].on_demand = 1
-        elif marker == 0:
-            marker += 1  # become 1
-        elif marker == 1:
-            marker += 1  # become 2
-        elif marker == 2:
-            marker = None
-        # At the end reassign the values back to the attributes
-        self.people[person_id].mated_marker = marker
-
-    def forget_medication(self,person_id):
-        '''
-        Allow the specific agent start on demand PrEP.
-
-        Parameter:
-        self - Instance of mode 31.
-        person_id - id of the person instance.
-        '''
-        self.people[person_id].on_demand = 0
-        self.people[person_id].vaccinated = 0
-
     def __call__(self):
-        is_on = 0
-        for i in range(len(self.people)):
-            if self.people[i].on_demand != None:
-                self.mate(self.people[i].id-1)  # Increase the marker
-                is_on = 1
-        if is_on == 0:
-            # If everyone is not taking on-demand PrEP, drop the flag
-            self.drop_flag()
-        else:
-            self.raise_flag()
+        print('-------------------------')
+        print('You are creating mode 31. ')
+        print('-------------------------\n')
+        self.raise_flag()
 
 '''
 51: Erdos-Renyi topology
@@ -865,6 +797,17 @@ class Mode52(Mode):
         # Add edge list to contact_nwk.network
         self.contact_nwk.network = [e for e in self.contact_nwk.nwk_graph.edges]
 
+    def set_p(self, p):
+        '''
+        Set probability to update network
+        '''
+        if p > 1:
+            self.contact_nwk.PUpdate = 1
+        elif p < 0:
+            self.contact_nwk.PUpdate = 0
+        else:
+            self.contact_nwk.PUpdate = p
+
     def set_m(self, m):
         if m < 1:
             self.m = 1
@@ -885,6 +828,9 @@ class Mode52(Mode):
             print('Invalid data type for m, set m as 1. ')
             m_temp = 1
         self.set_m(m_temp)
+        pUpd_temp = float(input('m >>> '))
+        pUpd = super().set_correct_epi_para(pUpd_temp, self.contact_nwk.PUpdate)
+        self.set_p()
         self.set_network()
         self.raise_flag()
         print('Preferential attachment graph settings done.')

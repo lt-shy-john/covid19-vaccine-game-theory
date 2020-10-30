@@ -4,117 +4,62 @@ import write
 
 
 class Group:
-
-    def __init__(self):
+    def __init__(self, people, group_size=3):
         self.name = None   # Group name not defined until set_group()
-        self.size = 0
-
-    def get_people(self, people):
         self.people = people
+        self.size = group_size
+        self.roster = {}
 
-    def set_group(self, size):
-        self.size = size
-        # print('There are {} people.'.format(len(self.people)))
-        for i in range(len(self.people)):
-            self.people[i].group_no = i // self.size
-            # print('{}: Group {}'.format(i, self.people[i].group_no))
-        self.get_number_of_groups()
-        # print('There are {} groups.'.format(self.no_of_groups+1))   # len() means +1 of the last index of the list.
+        self.set_population()
+        self.set_roster()
 
-    def update_group(self,size):
+    def set_population(self):
+        '''
+        Initially we assign group numbers according to their id.
+        '''
+        for person in self.people:
+            person.group_no = len(self.people) // self.size
+
+    def set_roster(self):
+        for i in len(self.people) // self.size:
+            self.roster[i] = []
+
+    def update_group(self):
         '''
         Permutate everyone into another group.
         '''
-        self.size = size
-        swap_id = []
-        for i in range(len(self.people)):
-            swap_id.append(self.people[i].group_no)
-        random.shuffle(swap_id)
-        for i in range(len(self.people)):
-            self.people[i].group_no = swap_id[i]
-        # self.get_number_of_groups()
-        # print('There are {} groups.'.format(self.no_of_groups))
+        for group_no, members in self.roster.items():
+            for member in members:
+                self.roster[group_no].remove(member)
+                dest_group = random.randint(0,len(self.people) // self.size)
+                self.roster[dest_group].append(member)
 
+                swap_out = self.roster[dest_group][random.randint(0,len(self.roster[dest_group]))]
+                self.roster[dest_group].remove(swap_out)
+                self.roster[group_no].append(swap_out)
 
-    def get_number_of_groups(self):
-        self.no_of_groups = 0
-        for i in range(len(self.people)):
-            if self.people[i].group_no > self.no_of_groups:
-                self.no_of_groups = self.people[i].group_no
-        return self.no_of_groups
-
-    def get_members(self, group_no):
+    def update(self, filename):
         '''
-        Get a list of people in the group. Remember group numbers starts from 0 to n-1
-
-        o - opinion state.
-        s - infected or not.
+        Update opinion using majority Rule
         '''
-        # print('You are enquiring Group {}: '.format(group_no))
-        counter = 0
-        roster = [[],[],[]]
-        for i in range(len(self.people)):
-            if self.people[i].group_no == group_no:
-                counter += 1
-                roster[0].append(i)
-                roster[1].append(self.people[i].opinion)
-                roster[2].append(self.people[i].suceptible)
-                # print('id: {}, o: {}, s: {}'.format(i, self.people[i].opinion, self.people[i].suceptible))
-        # print('There are {} members in the group. \n'.format(counter))
-        roster.append(counter)   # Get the number people in the group to the roster
-        # print(roster)
-        return roster
-
-    def update(self, groups_of, filename):
         self.inflexible_prework()
-        group_roster = []
-        counter_flag = []   # How many 0 opinions in a group (i.e. group_roster[i][1]).
-        result_flag = []
-        o_state_update = []
-        for i in range(self.no_of_groups+1):    # The length of group_roster is 1 plus than the number of groups.
-            group_roster.append(self.get_members(i))
-
-        '''
-        Majority Rule
-        '''
-        # print(group_roster)
-        for i in range(len(group_roster)):
-            for j in range(1,len(group_roster[i])-2):   # The last element in group_roster is the total number of members.
-                counter = 0 # Count how many 0's.
-                for k in range(len(group_roster[i][j])):
-                    if group_roster[i][j][k] == 0:
-                        counter += 1
-            counter_flag.append(counter)
-        # print('')
-        # print('counter of 0\'s:', counter_flag)
-        # print(' ')
-        for i in range(len(counter_flag)):
-            # print('counter_flag[{}]: {}'.format(i, counter_flag[i]), type(counter_flag[i]))
-            # print('len(group_roster[{}][1])//2: {}'.format(i, len(group_roster[i][1])//2), type(len(group_roster[i][1])//2))
-            # print(counter_flag[i] > (len(group_roster[i][1])//2))
-            if counter_flag[i] > (len(group_roster[i][1])//2):
-                result_flag.append(0)
+        for group_no, members in self.roster.items():
+            total_opinion = 0
+            for member in members:
+                total_opinion += member.opinion
+            if total_opinion > len(members):
+                for member in members:
+                    member.opinion = 1
             else:
-                result_flag.append(1)
-        # print(result_flag)
-
-        # print(' ')
-        for i in range(len(group_roster)):
-            # print('It is meant to be {}'.format(result_flag[i]))
-            # print(group_roster[i][1])
-            for j in range(len(group_roster[i][1])):
-                group_roster[i][1][j] = result_flag[i]
-                o_state_update.append(result_flag[i])
-            # print('After:', group_roster[i][1])
-
-        for i in range(len(self.people)):
-            self.people[i].opinion = o_state_update[i]
-        print('')
-
+                for member in members:
+                    member.opinion = 0
+        # Further update due to group concensus.
         self.inflexible()
         self.balance()
-        self.update_group(groups_of)
-        write.WriteOpinion(self, filename)
+
+        if filename != '':
+            write.WriteOpinion(self, filename)
+        self.update_group()
 
     def inflexible_prework(self):
         '''
