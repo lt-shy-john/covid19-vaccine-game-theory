@@ -697,15 +697,33 @@ class Mode10(Mode):
 20: Intimacy game
 '''
 class Mode20(Mode):
-    def __init__(self, people, contact_nwk):
+    def __init__(self, people, contact_nwk, beta):
         super().__init__(people,20)
         self.contact_nwk = contact_nwk
-        self.r = 0.5
-        self.rI = 0.8
+        self.rV = 1
+        self.rI = -1
+        self.beta = beta
+        self.local_infection_p = np.ones(len(self.people))  # The proportion, not number of cases.
+        self.theta = np.ones(len(self.people))
 
-        # Trust factor of population
-        self.m = 1
-        self.mu = 2
+        # Weights on local and global pereption
+        self.rho = 1
+
+        self.ProbV = np.ones(len(self.people))
+
+    def set_perceived_infection(self, global_infection):
+        # Clear objects
+        self.theta = np.ones(len(self.people))
+        self.local_infection_p = np.ones(len(self.people))
+
+        # Start
+        local_infection = np.zeros(len(self.people))
+        for i in range(len(self.people)):
+            for neighbour in self.contact_nwk.nwk_graph.neighbours(self.people[i]):
+                local_infection[i] += 1
+        print(f'There are {local_infection[i]} people infected around {self.people[i].id}. ')
+        self.local_infection_p = local_infection/len(self.people)
+        self.theta = np.add(self.local_infection_p * self.rho, np.ones(len(self.people)) * global_infection * (1-self.rho))
 
 '''
 21: Local Majority Rule
@@ -713,6 +731,7 @@ class Mode20(Mode):
 class Mode20(Mode):
     def __init__(self, people, contact_nwk):
         super().__init__(people,21)
+        self.contact_nwk = contact_nwk
 
 '''
 22: Stubbon to take vaccine
@@ -720,6 +739,7 @@ class Mode20(Mode):
 class Mode22(Mode):
     def __init__(self, people, contact_nwk):
         super().__init__(people,22)
+        self.contact_nwk = contact_nwk
 
 '''
 23: Stubbon to against vaccine
@@ -727,6 +747,7 @@ class Mode22(Mode):
 class Mode23(Mode):
     def __init__(self, people, contact_nwk):
         super().__init__(people,23)
+        self.contact_nwk = contact_nwk
 
 '''
 24: Contrary to social groups
@@ -734,6 +755,7 @@ class Mode23(Mode):
 class Mode24(Mode):
     def __init__(self, people, contact_nwk):
         super().__init__(people,24)
+        self.contact_nwk = contact_nwk
 
 '''
 31: Medication incorporated
