@@ -42,7 +42,7 @@ class Group:
         '''
         Update opinion using majority Rule
         '''
-        self.inflexible_prework()
+        # self.inflexible_prework()
         for group_no, members in self.roster.items():
             total_opinion = 0
             for member in members:
@@ -54,8 +54,8 @@ class Group:
                 for member in members:
                     member.opinion = 0
         # Further update due to group concensus.
-        self.inflexible()
-        self.balance()
+        # self.inflexible()
+        # self.balance()
 
         if filename != '':
             write.WriteOpinion(self, filename)

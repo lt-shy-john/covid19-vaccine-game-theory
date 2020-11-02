@@ -694,11 +694,11 @@ class Mode10(Mode):
         print('\nMode 10 equipped. \n')
 
 '''
-21: Intimacy game
+20: Intimacy game
 '''
-class Mode21(Mode):
+class Mode20(Mode):
     def __init__(self, people, contact_nwk):
-        super().__init__(people,21)
+        super().__init__(people,20)
         self.contact_nwk = contact_nwk
         self.r = 0.5
         self.rI = 0.8
@@ -707,6 +707,33 @@ class Mode21(Mode):
         self.m = 1
         self.mu = 2
 
+'''
+21: Local Majority Rule
+'''
+class Mode20(Mode):
+    def __init__(self, people, contact_nwk):
+        super().__init__(people,21)
+
+'''
+22: Stubbon to take vaccine
+'''
+class Mode22(Mode):
+    def __init__(self, people, contact_nwk):
+        super().__init__(people,22)
+
+'''
+23: Stubbon to against vaccine
+'''
+class Mode23(Mode):
+    def __init__(self, people, contact_nwk):
+        super().__init__(people,23)
+
+'''
+24: Contrary to social groups
+'''
+class Mode24(Mode):
+    def __init__(self, people, contact_nwk):
+        super().__init__(people,24)
 
 '''
 31: Medication incorporated
@@ -715,8 +742,6 @@ class Mode31(Mode):
     def __init__(self, people):
         super().__init__(people,31)
 
-        # Proportion of agents that takes on demand PrEP
-        self.p = 0
 
     def __call__(self):
         print('-------------------------')
