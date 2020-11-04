@@ -554,6 +554,13 @@ for i in range(len(sys.argv)):
                                 modes[8] = mode08
                             else:
                                 mode.pop(8)
+                        elif mode_flag == 10:
+                            if sys.argv[k][:6] == '*mode=':
+                                modes[10].type = modes[10].check_input(sys.argv[k][6:])
+                            if mode10.flag == 'X':
+                                modes[10] = mode10
+                            else:
+                                mode.pop(10)
                         elif mode_flag == 52:
                             if 51 in modes:
                                 print('Mode 51 has been activated. Ignore mode 52. ')
