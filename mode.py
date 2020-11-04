@@ -680,9 +680,8 @@ class Mode10(Mode):
         print('You are creating mode 10. ')
         print('-------------------------\n')
         print('Please set infection parameter below. ')
-        print('1. One-off')
-        print('2. Seasonal')
-        print('3. Chemoprophylaxis')
+        for i in range(len(self.types)):
+            print(f'{i+1}. {self.types[i]}')
         cmd = input('Please choose one option: ')
         if cmd == '1':
             self.type = 1
@@ -692,6 +691,73 @@ class Mode10(Mode):
             self.type = 3
         self.raise_flag()
         print('\nMode 10 equipped. \n')
+
+    def check_input(self, cmd):
+        '''
+        Check from express mode if user has input an integer the corresponds to an existing mode.
+        '''
+        try:
+            cmd = int(cmd)
+            if cmd > 0 and cmd <= 3:
+                return cmd
+        except ValueError:
+            print('Invalid vaccine type specified. ')
+
+
+'''
+11: Stop transmissability/ reduce severity
+'''
+class Mode11(Mode):
+    def __init__(self, people):
+        super().__init__(people,11)
+        self.types = ['Stop transmissability', 'Reduce severity']
+        self.type = None
+
+        self.beta_V = None
+        self.gamma_V = None
+        self.delta_V = None
+
+    def __call__(self, beta, gamma, delta):
+        print('-------------------------')
+        print('You are creating mode 11. ')
+        print('-------------------------\n')
+        print('Please set infection parameter below. ')
+        for i in range(len(self.types)):
+            print(f'{i+1}. {self.types[i]}')
+        cmd = input('Please choose one option: ')
+        if cmd == '1':
+            self.type = 1
+            new_beta_temp = input('Beta >>> ')
+            self.beta_V = super().set_correct_epi_para(new_beta_temp, self.beta_V)
+        elif cmd == '2':
+            self.type = 2
+            new_gamma_temp = input('Gamma >>> ')
+            self.gamma_V = super().set_correct_epi_para(new_gamma_temp, self.gamma_V)
+            new_delta_temp = input('Delta >>> ')
+            self.delta_V = super().set_correct_epi_para(new_delta_temp, self.delta_V)
+        self.raise_flag()
+        print('\nMode 11 equipped. \n')
+
+    def check_input(self, cmd):
+        '''
+        Check from express mode if user has input an integer the corresponds to an existing mode.
+        '''
+        try:
+            cmd = int(cmd)
+            if cmd > 0 and cmd <= 2:
+                return cmd
+        except ValueError:
+            print('Invalid vaccine type specified. ')
+
+    def check_beta(self, beta):
+        if beta < self.beta_V:
+            print('Warning: Your setting implies vaccine may cause higher tranmissibility. ')
+    def check_gamma(self, gamma):
+        if gamma > self.gamma_V:
+            print('Warning: Your setting implies vaccine may cause lower effectiveness. ')
+    def check_delta(self, delta):
+        if delta > self.delta_V:
+            print('Warning: Your setting implies vaccine may cause higher death rate. ')
 
 '''
 20: Intimacy game
@@ -738,34 +804,98 @@ class Mode20(Mode):
 '''
 21: Local Majority Rule
 '''
-class Mode20(Mode):
-    def __init__(self, people, contact_nwk):
+class Mode21(Mode):
+    def __init__(self, people, info_nwk):
         super().__init__(people,21)
-        self.contact_nwk = contact_nwk
+        self.info_nwk = info_nwk
+
+    def __call__(self):
+        print('-------------------------')
+        print('You are creating mode 21. ')
+        print('-------------------------\n')
+        self.raise_flag()
+        print('\nMode 21 equipped. \n')
 
 '''
 22: Stubbon to take vaccine
 '''
 class Mode22(Mode):
-    def __init__(self, people, contact_nwk):
+    def __init__(self, people, info_nwk):
         super().__init__(people,22)
-        self.contact_nwk = contact_nwk
+        self.info_nwk = info_nwk
+
+    def __call__(self):
+        print('-------------------------')
+        print('You are creating mode 22. ')
+        print('-------------------------\n')
+        self.assign_personality()
+        self.raise_flag()
+        print('\nMode 22 equipped. \n')
+
+    def assign_personality(self, p):
+        '''
+        Assign some people with stubbon to take vaccine personality.
+        '''
+        p = super().set_correct_epi_para(p, 0)
+        for person in self.people:
+            if person.personality == 0:
+                seed = random.randint(0,1000)/1000
+                if seed < p:
+                    person.personality = 1
 
 '''
 23: Stubbon to against vaccine
 '''
 class Mode23(Mode):
-    def __init__(self, people, contact_nwk):
+    def __init__(self, people, info_nwk):
         super().__init__(people,23)
-        self.contact_nwk = contact_nwk
+        self.info_nwk = info_nwk
+
+    def __call__(self):
+        print('-------------------------')
+        print('You are creating mode 23. ')
+        print('-------------------------\n')
+        self.assign_personality()
+        self.raise_flag()
+        print('\nMode 23 equipped. \n')
+
+    def assign_personality(self, p):
+        '''
+        Assign some people with stubbon to against vaccine personality.
+        '''
+        p = super().set_correct_epi_para(p, 0)
+        for person in self.people:
+            if person.personality == 0:
+                seed = random.randint(0,1000)/1000
+                if seed < p:
+                    person.personality = 2
 
 '''
 24: Contrary to social groups
 '''
 class Mode24(Mode):
-    def __init__(self, people, contact_nwk):
+    def __init__(self, people, info_nwk):
         super().__init__(people,24)
-        self.contact_nwk = contact_nwk
+        self.info_nwk = info_nwk
+
+    def __call__(self):
+        print('-------------------------')
+        print('You are creating mode 24. ')
+        print('-------------------------\n')
+        self.assign_personality()
+        self.raise_flag()
+        print('\nMode 24 equipped. \n')
+
+    def assign_personality(self, p):
+        '''
+        Assign people with balancer personality.
+        '''
+        p = super().set_correct_epi_para(p, 0)
+        for person in self.people:
+            if person.personality == 0:
+                seed = random.randint(0,1000)/1000
+                if seed < p:
+                    person.personality = 3
 
 '''
 31: Medication incorporated

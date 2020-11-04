@@ -4,6 +4,7 @@ import time
 
 # Import class files
 from person import Person
+from group import Group
 from simulation import Simulation
 import mode
 from contact import ContactNwk
@@ -14,7 +15,7 @@ Main code
 - cmd functions
 - main loop
 '''
-def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, phi_V, phi_T, test_rate, immune_time):
+def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, phi_V, phi_T, test_rate, immune_time, verbose_mode):
     info = input('Information about the parameters? [y/n] ').lower()
     print()
     if info == 'y':
@@ -36,11 +37,11 @@ def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, beta_SS, bet
     delta = set_correct_epi_para(delta_temp, delta)
     cmd = input('Other parameters? [y/n]')
     if cmd == 'y':
-        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate)
+        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, verbose_mode)
     population = Person.make_population(N)
-    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time
+    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode
 
-def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time):
+def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode):
     print('Adoption parameters \n')
     alpha_V_temp = input('Vaccine: ')
     alpha_V = set_correct_epi_para(alpha_V_temp, alpha_V)
@@ -64,7 +65,12 @@ def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V,
     if 51 in modes or 52 in modes or 53 in modes or 54 in modes:
         print('\nYou have created contact network \n')
         print('\nNetwork parameters \n')
-    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time
+    cmd = input('Verbose mode? [y/n]')
+    if cmd == 'y':
+        verbose_mode = True
+    elif cmd == 'n':
+        verbose_mode = False
+    return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode
 
 def summary():
     print('N: {}'.format(N))
@@ -115,12 +121,12 @@ def help():
     print('MODE - Change mode settings.')
     print('RUN/ START - Start the simulation.')
     print('SETTING - Set simulation settings.')
-    print('OTHER SETTING - Set auxillary simulation parameters.')
+    print('OTHER SETTING - Set auxiliary simulation parameters.')
     print('SUMMARY - Print the simulation parameters.')
     print('QUIT/ Q - Quit the software.')
 
 def usage():
-    print('Usage: python3 main.py (N) (T) (alpha) (beta) (gamma) (phi) (delta) ...\n\
+    print('Usage: python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n\
     [-m  <modes_config>] [-f (filename)] [run]\n')
     print('-immune_time \t Immune time after recovered, in days.')
     print('-test_rate \t COVID-19 testing rate.')
@@ -398,7 +404,7 @@ elif len(sys.argv) > 1:
         delta = correct_epi_para(sys.argv[7])
     except:
         print('Exception encountered. Leaving program...')
-        print('Usage: python3 main.py (N) (T) (alpha) (beta) (gamma) (phi) (delta) ...\n[-m <modes_config>] [-f (filename)] [run]\n')
+        print('Usage: python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n[-m <modes_config>] [-f (filename)] [run]\n')
         quit()
 print()
 
@@ -428,7 +434,9 @@ immune_time = 60
 
 population = Person.make_population(N)
 contact_nwk = ContactNwk(population)
+info_nwk = Group(population)
 filename = ''  # Default file name to export (.csv). Change when use prompt 'export' cmd.
+verbose_mode = False
 
 mode_master_list = []
 # All objects should add into mode_master_list
@@ -439,8 +447,12 @@ mode05 = mode.Mode05(population, contact_nwk)
 mode07 = mode.Mode07(population, beta, delta)
 mode08 = mode.Mode08(population, beta, delta)
 mode10 = mode.Mode10(population, phi, beta)
-mode20 = mode.Mode20(population, contact_nwk)
-mode21 = mode.Mode21(population, contact_nwk)
+mode11 = mode.Mode11(population)
+mode20 = mode.Mode20(population, contact_nwk, beta)
+mode21 = mode.Mode21(population, info_nwk)
+mode22 = mode.Mode22(population, info_nwk)
+mode23 = mode.Mode23(population, info_nwk)
+mode24 = mode.Mode24(population, info_nwk)
 mode31 = mode.Mode31(population)
 mode51 = mode.Mode51(population, contact_nwk)
 mode52 = mode.Mode52(population, contact_nwk)
@@ -448,8 +460,8 @@ mode53 = mode.Mode53(population, contact_nwk)
 mode54 = mode.Mode54(population, contact_nwk)
 
 mode_master_list = [mode01, mode02, mode04, mode05, mode07, mode08,
-mode10,
-mode20, mode21,
+mode10, mode11,
+mode20, mode21, mode22, mode23, mode24, 
 mode31,
 mode51, mode52, mode53, mode54]
 
@@ -471,6 +483,8 @@ for i in range(len(sys.argv)):
         elif sys.argv[i] == '-test_rate':
             test_rate_temp = sys.argv[i+1]
             test_rate = set_correct_para(test_rate_temp, test_rate, pos=True)
+        elif sys.argv[i] == '-verbose' or sys.argv[i] == '--v':
+            verbose_mode = True
         elif sys.argv[i] == '-m':
             for j in range(i+1,len(sys.argv)):
                 # Skip at other options
@@ -561,6 +575,25 @@ for i in range(len(sys.argv)):
                                 modes[10] = mode10
                             else:
                                 mode.pop(10)
+                        elif mode_flag == 11:
+                            if sys.argv[k][:6] == '*mode=':
+                                modes[11].type = modes[11].check_input(sys.argv[k][6:])
+                            elif sys.argv[k][:3] == '*b=':
+                                mode11_b_config = sys.argv[k][3:]
+                                mode08.beta_V = set_correct_para(mode11_b_config, mode08.beta_V)
+                                mode08.check_beta()
+                            elif sys.argv[k][:3] == '*g=':
+                                mode11_g_config = sys.argv[k][3:]
+                                mode08.gamma_V = set_correct_para(mode11_g_config, mode08.gamma_V)
+                                mode08.check_gamma()
+                            elif sys.argv[k][:3] == '*d=':
+                                mode11_d_config = sys.argv[k][3:]
+                                mode08.delta_V = set_correct_para(mode11_d_config, mode08.delta_V)
+                                mode08.check_delta()
+                            if mode11.flag == 'X':
+                                modes[11] = mode11
+                            else:
+                                mode.pop(11)
                         elif mode_flag == 52:
                             if 51 in modes:
                                 print('Mode 51 has been activated. Ignore mode 52. ')
@@ -605,7 +638,7 @@ for i in range(len(sys.argv)):
 
 if sys.argv[-1] == 'run':
     print('===== Simulation Running =====')
-    current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time)
+    current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, verbose_mode)
     # Load modes
     current_run.load_modes(modes)
     if len(modes) > 0:
@@ -623,11 +656,11 @@ Normal mode
 while True:
     cmd = input('>>> ').lower()
     if cmd == 'setting':
-        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time = setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time)
+        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode = setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode)
         population = Person.make_population(N)
     elif cmd == 'other setting':
         print('Leave blank if not changing the value(s).')
-        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time)
+        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode)
     elif cmd == 'summary':
         summary()
     elif cmd == 'look':
@@ -636,7 +669,7 @@ while True:
         help()
     elif cmd == 'start' or cmd == 'run':
         print('===== Simulation Running =====')
-        current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time)
+        current_run = Simulation(population, T, population, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, verbose_mode)
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:

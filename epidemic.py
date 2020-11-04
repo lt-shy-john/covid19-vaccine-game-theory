@@ -7,7 +7,7 @@ import write
 
 class Epidemic:
 
-    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk):
+    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode):
         '''Initial elements
 
         Attributes
@@ -73,6 +73,9 @@ class Epidemic:
             # self.infection_VI2 = 0.01
             # self.infection_condom = 0.01
             # self.check_beta()
+
+            # Auxillary parameter
+            self.verbose_mode = verbose_mode
 
 
             '''Compartment statics
@@ -206,8 +209,9 @@ class Epidemic:
         '''
         # Pick R_0 of people infected initially
         proportion = (self.infection/self.recover)/len(self.people)
-        print('R_0 = {}'.format(self.infection/self.recover))
-        # print('R_0(%) = ', proportion)
+        if self.verbose_mode == True:
+            print('R_0 = {}'.format(self.infection/self.recover))
+            # print('R_0(%) = ', proportion)
         for i in range(len(self.people)):
             if random.uniform(0,1) <= proportion:
                 self.people[i].suceptible = 1
@@ -240,10 +244,12 @@ class Epidemic:
     def vaccinate(self):
         for i in range(len(self.people)):
             if 4 in self.mode:
-                # print(self.mode[4].P_Alpha[i])
+                if self.verbose_mode == True:
+                    print(self.mode[4].P_Alpha[i])
                 seed = random.randint(0,10000)/10000
                 if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
-                    # print('*')
+                    if self.verbose_mode == True:
+                        print('*')
                     self.people[i].vaccinated = 1
             continue
             if 20 in self.mode:
@@ -265,7 +271,11 @@ class Epidemic:
                     delta_pp[i] = np.multiply(self.mode[7].delta_age[int(self.people[i].age//10)], delta_pp[i])
                 if 8 in self.mode:
                     delta_pp[i] = np.multiply(self.mode[8].delta_gender[self.people[i].gender], delta_pp[i])
-                # print(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
+                if 11 in self.mode:
+                    if self.people[i].vaccinated == 1:
+                        delta_pp[i] = np.multiply(self.mode[11].delta_V, delta_pp[i])
+                if self.verbose_mode == True:
+                    print(f'Delta for {self.people[i].id} is {beta_pp[i]}. ')
 
 
         for i in range(len(self.people)):
@@ -282,7 +292,7 @@ class Epidemic:
     def infect(self):
         beta_pp = np.ones(len(self.people))
         for i in range(len(self.people)):
-            if any(i in self.mode for i in [1, 7, 8]):
+            if any(i in self.mode for i in [1, 7, 8, 11]):
                 # Fetch all parameters:
                 if 1 in self.mode:
                     beta_pp[i] = np.multiply(self.mode[1].betas[self.people[i].location], beta_pp[i])
@@ -290,20 +300,31 @@ class Epidemic:
                     beta_pp[i] = np.multiply(self.mode[7].beta_age[int(self.people[i].age//10)], beta_pp[i])
                 if 8 in self.mode:
                     beta_pp[i] = np.multiply(self.mode[8].beta_gender[self.people[i].gender], beta_pp[i])
+                if 11 in self.mode:
+                    if self.people[i].vaccinated == 1:
+                        beta_pp[i] = np.multiply(self.mode[11].beta_V, beta_pp[i])
 
         for i in range(len(self.people)):
             '''
             Infect (or not)
             '''
-            if self.people[i].suceptible == 1 or self.people[i].removed == 1 or self.people[i].vaccinated == 1:
+            if self.people[i].suceptible == 1 or self.people[i].removed == 1 :
+                if self.verbose_mode == True:
+                    print(f'{self.people[i].id} will not be infected. ')
                 continue  # Skip
+
+            if 11 not in self.mode and self.people[i].vaccinated == 1:
+                if self.verbose_mode == True:
+                    print(f'{self.people[i].id} is vaccinated and will not be infected. ')
+                continue
 
             seed = random.randint(0,1000)/1000
             '''
             Customised infection from modes
             '''
             if any(i in self.mode for i in [1, 7, 8]):
-                # print(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
+                if self.verbose_mode == True:
+                    print(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
                 if seed < beta_pp[i]:
                     self.people[i].suceptible = 1
                 continue
@@ -321,15 +342,27 @@ class Epidemic:
         for edge in self.contact_nwk.network:
             # This is edge of People objects.
             # Conditions where disease will not spread (SS, VV, RR)
+            if self.verbose_mode == True:
+                print('{}/ {}'.format(self.contact_nwk.network.index(edge), len(self.contact_nwk.network)))
             if edge[0].suceptible == 0 and edge[1].suceptible == 0:
+                if self.verbose_mode == True:
+                    print(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].vaccinated == 0 and edge[1].vaccinated == 0:
+                if self.verbose_mode == True:
+                    print(f'Both ends are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].removed == 0 or edge[1].removed == 0:
+                if self.verbose_mode == True:
+                    print(f'One of the contacts are removed. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-
-            print(edge[0].id, edge[1].id)
-            print('  ', edge[0].suceptible, edge[1].suceptible)
+            if edge[0].exposed == 1 or edge[1].exposed == 0:
+                if self.verbose_mode == True:
+                    print(f'One of the contacts are quarantined. Skip ({edge[0].id}, {edge[1].id}). ')
+                continue
+            if self.verbose_mode == True:
+                print(edge[0].id, edge[1].id)
+                print('  ', edge[0].suceptible, edge[1].suceptible)
 
             # Infect (or not)
             seed = random.randint(0,100000)/100000
@@ -358,6 +391,10 @@ class Epidemic:
     def recovery(self):
         for i in range(len(self.people)):
             seed = random.randint(0,100000)/100000
+            if 11 in self.mode:
+                if seed < self.mode[11].gamma_V:
+                    self.people[i].suceptible = 0
+                    self.people[i].exposed = 0
             if seed < self.recover:
                 self.people[i].suceptible = 0
                 self.people[i].exposed = 0

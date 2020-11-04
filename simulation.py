@@ -6,7 +6,7 @@ import write
 import random
 
 class Simulation:
-    def __init__(self, N, T, people, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, tau, immune_time, groups_of=3):
+    def __init__(self, N, T, people, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, tau, immune_time, verbose_mode, groups_of=3):
         self.N = N
         self.groups_of = groups_of
         self.people = people   # List of people objects
@@ -50,6 +50,7 @@ class Simulation:
         self.delta = delta
 
         # Auxillary parameters
+        self.verbose_mode = verbose_mode
         self.filename = filename
         self.modes = {}
 

@@ -57,15 +57,19 @@ class ContactNwk:
         Update the network. In ContactNwk().
         '''
         deg_ls = dict(self.nwk_graph.degree)  # Need this in the loop.
+        print('Degree of all nodes loaded. ')
 
         seed = random.randint(0,10000)/10000
-        if seed > self.PUpdate: 
+        if seed > self.PUpdate:
             return
 
+        print('Proceeding updating network... \n')
         tmp_edge_ls = self.network
         random.shuffle(tmp_edge_ls)
+        print('Edge list shuffled, repairing them now. ')
         edge_pairs_idx = 0
         while edge_pairs_idx < len(tmp_edge_ls):
+            print(f'Pairing edges {edge_pairs_idx} and {edge_pairs_idx + 1} out of {len(tmp_edge_ls)}. ')
             if edge_pairs_idx == len(tmp_edge_ls)-1:
                 break
             pair_nodes = [*tmp_edge_ls[edge_pairs_idx], *tmp_edge_ls[edge_pairs_idx+1]]
@@ -75,25 +79,26 @@ class ContactNwk:
             pair_nodes_dict = dict([(x, deg_ls[x]) for x in pair_nodes])
             pair_nodes_sorted = sorted(pair_nodes_dict, key=pair_nodes_dict.get, reverse=True)
 
-            if self.assort == True:
-                # Rebond then debond
-                self.nwk_graph.remove_edge(pair_nodes[0], pair_nodes[1])
-                self.nwk_graph.remove_edge(pair_nodes[2], pair_nodes[3])
-                if len(pair_nodes_sorted) == 4:
-                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[1])
-                    self.nwk_graph.add_edge(pair_nodes_sorted[2], pair_nodes_sorted[3])
+            if self.speed_mode != True:
+                if self.assort == True:
+                    # Rebond then debond
+                    self.nwk_graph.remove_edge(pair_nodes[0], pair_nodes[1])
+                    self.nwk_graph.remove_edge(pair_nodes[2], pair_nodes[3])
+                    if len(pair_nodes_sorted) == 4:
+                        self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[1])
+                        self.nwk_graph.add_edge(pair_nodes_sorted[2], pair_nodes_sorted[3])
+                    else:
+                        self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[1])
+                        self.nwk_graph.add_edge(pair_nodes_sorted[1], pair_nodes_sorted[2])
                 else:
-                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[1])
-                    self.nwk_graph.add_edge(pair_nodes_sorted[1], pair_nodes_sorted[2])
-            else:
-                # Rebond then debond
-                self.nwk_graph.remove_edge(pair_nodes[0], pair_nodes[1])
-                self.nwk_graph.remove_edge(pair_nodes[2], pair_nodes[3])
-                if len(pair_nodes_sorted) == 4:
-                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[3])
-                    self.nwk_graph.add_edge(pair_nodes_sorted[1], pair_nodes_sorted[2])
-                else:
-                    self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[2])
+                    # Rebond then debond
+                    self.nwk_graph.remove_edge(pair_nodes[0], pair_nodes[1])
+                    self.nwk_graph.remove_edge(pair_nodes[2], pair_nodes[3])
+                    if len(pair_nodes_sorted) == 4:
+                        self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[3])
+                        self.nwk_graph.add_edge(pair_nodes_sorted[1], pair_nodes_sorted[2])
+                    else:
+                        self.nwk_graph.add_edge(pair_nodes_sorted[0], pair_nodes_sorted[2])
 
         # Add edge list to contact_nwk.network
         self.network = [e for e in self.nwk_graph.edges]

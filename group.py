@@ -21,7 +21,7 @@ class Group:
             person.group_no = len(self.people) // self.size
 
     def set_roster(self):
-        for i in len(self.people) // self.size:
+        for i in range(len(self.people) // self.size):
             self.roster[i] = []
 
     def update_group(self):

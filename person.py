@@ -12,7 +12,7 @@ class Person:
         Person.id += 1  # Name of the person.
         self.id = Person.id
 
-        self.location = 0
+        self.location = None
         '''
         0 - City
         1 - Rural
@@ -35,8 +35,9 @@ class Person:
         # Personality
         '''
         0 - Normal
-        1 - Inflexible
-        2 - Balancer
+        1 - Inflexible (Pro)
+        2 - Inflexible (Against)
+        3 - Balancer
         '''
         self.personality = personality
         self.opinion = 1 #random.choices([0, 1], weights = [2, 8], k = 1)[0]
