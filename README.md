@@ -25,7 +25,7 @@ After installing all essential packages, you will need to download all `.py` fil
 ## Usage
 
 ```bash
-python3 main.py (N) (T) (alpha) (beta) (gamma) (phi) (delta) ...\n\
+python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n\
   [-m]  <modes_config>] [-f (filename)] [run]
 ```
 
@@ -37,6 +37,44 @@ By adding 'run' at the end, the simulation will run automatically.
 ```bash
 py main.py 10 3 0.8 0.3 0.5 0.1 0.005 run
 ```
+
+If you did not use `run` at the end, you will arrive to the interface. The program will ask your command prompt (capitals does not matter).
+
+* LOOK - View partner network.
+* MODE - Change mode settings.
+* RUN/ START - Start the simulation.
+* SETTING - Set simulation settings.
+* OTHER SETTING - Set auxiliary simulation parameters.
+* SUMMARY - Print the simulation parameters.
+* QUIT/ Q - Quit the software.
+
+### Mode
+This simulation can be customised by setting different modes. You may set them via express mode or under `MODE` comand. This simulation offers the following modes:
+
+* 01 Living in city/rural
+* 02 Travelled back from overseas
+* 04 Bounded rationality of vaccine
+* 05 Edit contact network
+* 07 Age distribution
+* 08 Gender distribution
+* 10 Type of vaccine
+* 11 Stop transmissability/ reduce severity
+* 12 Cost of vaccine
+* 13 Accessibility to vaccine
+* 14 Side effects of vaccine
+* 20 Intimacy game
+* 21 Local majority rule
+* 22 Stubbon to take vaccine
+* 23 Stubbon to against vaccine
+* 24 Contrary to social groups
+* 31 Medication incorporated
+* 41 Moral hazard of social distancing
+* 42 Moral hazard of treatment
+* 51: Erdos-Renyi topology
+* 52: Scale free network
+* 53: Small world topology
+* 54: Lattice network
+_Note: Not all modes have been equipped. You will not see anything if you tried to set up those._
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
