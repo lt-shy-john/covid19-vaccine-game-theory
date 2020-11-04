@@ -246,6 +246,8 @@ class Epidemic:
                     # print('*')
                     self.people[i].vaccinated = 1
             continue
+            if 20 in self.mode:
+                theta = self.mode[20].set_perceived_infection(self.I/len(self.people))
             if self.people[i].suceptible == 1:
                 continue
             if self.people[i].opinion == 1 and random.uniform(0,1) <= self.alpha_V:
@@ -375,8 +377,30 @@ class Epidemic:
                     continue
 
     def wear_off(self):
+        '''
+        Vaccine may wear off.
+        '''
+        if 10 in self.mode:
+            if self.mode[10].type == 1:
+                return # Patients will not have their vaccine wear-off.
+            elif self.mode[10].type == 2:
+                for i in range(len(self.people)):
+                    # See people are unlikely to leave V compartment.
+                    recent = self.people[i].compartment_history[-366//4:]
+                    for j in range(len(recent)-1):
+                        if len(recent) < 2:
+                            continue
+                        if recent[j] == 'S' and recent[j+1] == 'V':
+                            # Maintain V state and iterate to next person
+                            self.people[i].vaccinated = 1
+                            continue
+                    # Else
+                    seed = random.randint(0,100000)/100000
+                    if self.people[i].vaccinated == 1 and seed <= self.resus:
+                        self.people[i].vaccinated = 0
         for i in range(len(self.people)):
-            if self.people[i].vaccinated == 1 and random.uniform(0,1) <= self.resus:
+            seed = random.randint(0,100000)/100000
+            if self.people[i].vaccinated == 1 and seed <= self.resus:
                 self.people[i].vaccinated = 0
 
     def testing(self):

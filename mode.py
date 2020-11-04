@@ -718,12 +718,22 @@ class Mode20(Mode):
 
         # Start
         local_infection = np.zeros(len(self.people))
-        for i in range(len(self.people)):
-            for neighbour in self.contact_nwk.nwk_graph.neighbours(self.people[i]):
-                local_infection[i] += 1
-        print(f'There are {local_infection[i]} people infected around {self.people[i].id}. ')
-        self.local_infection_p = local_infection/len(self.people)
-        self.theta = np.add(self.local_infection_p * self.rho, np.ones(len(self.people)) * global_infection * (1-self.rho))
+        if self.people[0].location != None:
+            for i in range(len(self.people)):
+                if self.people[i].location == 0:
+                    pass
+                else:
+                    pass
+            return
+        if self.contact_nwk.network != None:
+            for i in range(len(self.people)):
+                for neighbour in self.contact_nwk.nwk_graph.neighbours(self.people[i]):
+                    local_infection[i] += 1
+            print(f'There are {local_infection[i]} people infected around {self.people[i].id}. ')
+            self.local_infection_p = local_infection/len(self.people)
+            self.theta = np.add(self.local_infection_p * self.rho, np.ones(len(self.people)) * global_infection * (1-self.rho))
+        else:
+            pass
 
 '''
 21: Local Majority Rule
