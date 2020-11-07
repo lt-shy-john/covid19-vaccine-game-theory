@@ -67,7 +67,7 @@ class Simulation:
 
     def __call__(self, modes=None):
         FILENAME_STATES = ''
-        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.contact_nwk)
+        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.contact_nwk, self.verbose_mode)
         epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
         epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
         epidemic.load_modes(self.modes)
@@ -90,6 +90,14 @@ class Simulation:
             print('Data stored in \'{}.csv\''.format(self.filename))
             write.WriteCompartmentHistory(self, self.filename)
             print('Compartment history exported in \'{}-compartment.csv\''.format(self.filename))
+            write.WriteTestingHistory(self, self.filename)
+            print('COVID-19 testing records exported in \'{}-testing.csv\''.format(self.filename))
+            if any(i in self.mode for i in [22, 23, 24]):
+                write.WriteOpinionPersonality(self, self.filename)
+                print('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
+            elif 21 in self.mode:
+                write.WriteStates(self, self.filename)
+                print('Information network details exported in \'{}-opinion.csv\''.format(self.filename))
             write.WriteSummary(self, self.filename)
             print('Summary exported in \'{}-summary.txt\''.format(self.filename))
         print('')

@@ -203,18 +203,15 @@ class Epidemic:
             self.epidemic = 0
             Epidemic.kill_epidemic(self)
 
-    def start_epidemic(self):
+    def start_epidemic(self, initial_infection=4):
         '''
         Start an epidemic
         '''
-        # Pick R_0 of people infected initially
-        proportion = (self.infection/self.recover)/len(self.people)
-        if self.verbose_mode == True:
-            print('R_0 = {}'.format(self.infection/self.recover))
-            # print('R_0(%) = ', proportion)
-        for i in range(len(self.people)):
-            if random.uniform(0,1) <= proportion:
-                self.people[i].suceptible = 1
+        if len(self.people) < initial_infection:
+            initial_infection = len(self.people)
+        # Pick random number of people (1-5) infected initially
+        for i in range(initial_infection):
+            self.people[i].suceptible = 1
 
     def kill_epidemic(self):
         for i in range(len(self.people)):
@@ -449,9 +446,9 @@ class Epidemic:
             if seed < self.test_rate:
                 if self.people[i].suceptible == 1:
                     self.people[i].exposed = 1
-                self.people[i].check_history.append(1)
+                self.people[i].test_history.append(1)
                 continue
-            self.people[i].check_history.append(0)
+            self.people[i].test_history.append(0)
 
     def __iter__(self):
         return self

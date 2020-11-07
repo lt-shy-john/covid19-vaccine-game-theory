@@ -63,7 +63,7 @@ class Person:
 
         self.compartment_history = []
         self.vaccine_history = []
-        self.check_history = []
+        self.test_history = []
 
     def make_population(N):
         population = []

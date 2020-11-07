@@ -15,7 +15,7 @@ Main code
 - cmd functions
 - main loop
 '''
-def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, phi_V, phi_T, test_rate, immune_time, verbose_mode):
+def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, verbose_mode):
     info = input('Information about the parameters? [y/n] ').lower()
     print()
     if info == 'y':
@@ -318,12 +318,39 @@ def mode_settings(cmd, mode=None):
                     mode[8] = mode08
                 else:
                     mode.pop(8)
+            elif int(cmd[i]) == 20:
+                mode20()
+                if mode20.flag == 'X':
+                    mode[20] = mode20
+                else:
+                    mode.pop(21)
             elif int(cmd[i]) == 21:
                 mode21()
                 if mode21.flag == 'X':
                     mode[21] = mode21
                 else:
                     mode.pop(21)
+            elif int(cmd[i]) == 22:
+                if check_main_mode_opinion(modes,22) == True:
+                    mode22()
+                if mode22.flag == 'X':
+                    mode[22] = mode22
+                else:
+                    mode.pop(22)
+            elif int(cmd[i]) == 23:
+                if check_main_mode_opinion(modes,23) == True:
+                    mode23()
+                if mode23.flag == 'X':
+                    mode[23] = mode23
+                else:
+                    mode.pop(23)
+            elif int(cmd[i]) == 24:
+                if check_main_mode_opinion(modes,24) == True:
+                    mode24()
+                if mode24.flag == 'X':
+                    mode[24] = mode24
+                else:
+                    mode.pop(24)
             elif int(cmd[i]) == 31:
                 mode31()
                 if mode31.flag == 'X':
@@ -359,6 +386,13 @@ def mode_settings(cmd, mode=None):
             except ValueError:
                 continue
     return mode
+
+def check_main_mode_opinion(modes, code):
+    if 21 not in modes:
+        print(f'Warning: Mode 21 is requried for activating mode {code}.')
+        print('Please return to settings to activate this mode first. ')
+        return False
+    return True
 
 def find_mode(code, mode_master_list):
     for mode in mode_master_list:
@@ -461,7 +495,7 @@ mode54 = mode.Mode54(population, contact_nwk)
 
 mode_master_list = [mode01, mode02, mode04, mode05, mode07, mode08,
 mode10, mode11,
-mode20, mode21, mode22, mode23, mode24, 
+mode20, mode21, mode22, mode23, mode24,
 mode31,
 mode51, mode52, mode53, mode54]
 
