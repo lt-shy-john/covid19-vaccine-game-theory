@@ -24,6 +24,37 @@ class Mode:
         '''
         self.flag = ' '
 
+    def correct_para(p, pos=False):
+        '''
+        Convert the parameters into integers.
+
+        Parameters
+        p -- input.
+        - pos: If the parameter is positive number.
+        '''
+        try:
+            p_num = int(p)
+            if pos == True and p_num < 1:
+                p_num = 1
+            return p_num
+        except ValueError:
+            p_num = 1
+            return p_num
+
+    def set_correct_para(p, P, pos=False):
+        '''
+        Convert the parameters into integers. If input is blank then do nothing.
+
+        Parameters:
+        p -- string input.
+        P -- original value.
+        pos -- If the parameter is positive number.
+        '''
+        if p == '':
+            return P
+        else:
+            return correct_para(p, pos=False)
+
     def correct_epi_para(self, p):
         '''
         Convert epidemic parameters into floats.
@@ -140,37 +171,6 @@ class Mode01(Mode):
         '''
         self.betas[idx] = value
 
-    def correct_epi_para(self, p):
-        '''
-        Convert epidemic parameters into floats.
-
-        Parameters
-        - p: Epidemic rate, positive decimal less than 1.
-        '''
-        try:
-            p_num = float(p)
-            if p_num < 0 or p_num > 1:
-                p_num = 0
-                print('Please check your inputs and change them in SETTING.')
-            return p_num
-        except ValueError:
-            p_num = 0
-            print('Please check your inputs and change them in SETTING.')
-            return p_num
-
-    def set_correct_epi_para(self, p, P):
-        '''
-        Convert the parameters into integers. If input is blank then do nothing.
-
-        Parameters:
-        p -- string input.
-        P -- original value.
-        pos -- If the parameter is positive number.
-        '''
-        if p == '':
-            return P
-        else:
-            return self.correct_epi_para(p)
 
     def infect_01(self, idx, p):
         '''
@@ -368,114 +368,6 @@ class Mode07(Mode):
         for person in self.people:
             person.set_age()
 
-    def correct_epi_para(self, p):
-        '''
-        Convert epidemic parameters into floats.
-
-        Parameters
-        - p: Epidemic rate, positive decimal less than 1.
-        '''
-        try:
-            p_num = float(p)
-            if p_num < 0 or p_num > 1:
-                p_num = 0
-                print('Please check your inputs and change them in SETTING.')
-            return p_num
-        except ValueError:
-            p_num = 0
-            print('Please check your inputs and change them in SETTING.')
-            return p_num
-
-    def set_correct_epi_para(self, p, P):
-        '''
-        Convert the parameters into integers. If input is blank then do nothing.
-
-        Parameters:
-        p -- string input.
-        P -- original value.
-        pos -- If the parameter is positive number.
-        '''
-        if p == '':
-            return P
-        else:
-            return self.correct_epi_para(p)
-
-    def infect_byage(self, id, seed):
-        '''
-        Remove based on age.
-
-        Parameters
-        ----------
-        id: int
-            The person by id.
-        seed: float
-            Random seed from Simulation.
-        '''
-
-        if self.people[id].age < 10:
-            beta = self.beta_age[0]
-        elif self.people[id].age < 20:
-            beta = self.beta_age[1]
-        elif self.people[id].age < 30:
-            beta = self.beta_age[2]
-        elif self.people[id].age < 40:
-            beta = self.beta_age[3]
-        elif self.people[id].age < 50:
-            beta = self.beta_age[4]
-        elif self.people[id].age < 60:
-            beta = self.beta_age[5]
-        elif self.people[id].age < 70:
-            beta = self.beta_age[6]
-        elif self.people[id].age < 80:
-            beta = self.beta_age[7]
-        elif self.people[id].age < 90:
-            beta = self.beta_age[8]
-        elif self.people[id].age < 100:
-            beta = self.beta_age[9]
-        else:
-            beta = self.beta_age[-1]
-
-        # Infect (or not)
-        if seed < beta:
-            self.people[id].suceptible = 1
-
-    def remove_byage(self, id):
-        '''
-        Remove based on age.
-
-        Parameters
-        ----------
-        id: int
-            The person by id.
-        '''
-
-        seed = random.randint(0,1000)/1000
-        if self.people[id].age < 10:
-            delta = self.delta_age[0]
-        elif self.people[id].age < 20:
-            delta = self.delta_age[1]
-        elif self.people[id].age < 30:
-            delta = self.delta_age[2]
-        elif self.people[id].age < 40:
-            delta = self.delta_age[3]
-        elif self.people[id].age < 50:
-            delta = self.delta_age[4]
-        elif self.people[id].age < 60:
-            delta = self.delta_age[5]
-        elif self.people[id].age < 70:
-            delta = self.delta_age[6]
-        elif self.people[id].age < 80:
-            delta = self.delta_age[7]
-        elif self.people[id].age < 90:
-            delta = self.delta_age[8]
-        elif self.people[id].age < 100:
-            delta = self.delta_age[9]
-        else:
-            delta = self.delta_age[-1]
-
-        # Infect (or not)
-        if seed < delta:
-            self.people[id].removed = 1
 
 
     def __call__(self):
@@ -569,83 +461,6 @@ class Mode08(Mode):
         for person in self.people:
             person.set_gender()
 
-    def correct_epi_para(self, p):
-        '''
-        Convert epidemic parameters into floats.
-
-        Parameters
-        - p: Epidemic rate, positive decimal less than 1.
-        '''
-        try:
-            p_num = float(p)
-            if p_num < 0 or p_num > 1:
-                p_num = 0
-                print('Please check your inputs and change them in SETTING.')
-            return p_num
-        except ValueError:
-            p_num = 0
-            print('Please check your inputs and change them in SETTING.')
-            return p_num
-
-    def set_correct_epi_para(self, p, P):
-        '''
-        Convert the parameters into integers. If input is blank then do nothing.
-
-        Parameters:
-        p -- string input.
-        P -- original value.
-        pos -- If the parameter is positive number.
-        '''
-        if p == '':
-            return P
-        else:
-            return self.correct_epi_para(p)
-
-    def infect_bygender(self, id, seed):
-        '''
-        Remove based on age.
-
-        Parameters
-        ----------
-        id: int
-            The person by id.
-        seed: float
-            Random seed from Simulation.
-        '''
-
-        if self.people[id].gender == 0:
-            beta = self.beta_gender[0]
-        elif self.people[id].age == 1:
-            beta = self.beta_gender[1]
-        else:
-            beta = self.beta_gender[-1]
-
-        # Infect (or not)
-        if seed < beta:
-            self.people[id].suceptible = 1
-
-    def remove_bygender(self, id):
-        '''
-        Remove based on age.
-
-        Parameters
-        ----------
-        id: int
-            The person by id.
-        '''
-
-        seed = random.randint(0,1000)/1000
-        if self.people[id].gender == 0:
-            delta = self.delta_gender[0]
-        elif self.people[id].gender == 1:
-            delta = self.delta_gender[1]
-        else:
-            delta = self.delta_gender[-1]
-
-        # Infect (or not)
-        if seed < delta:
-            self.people[id].removed = 1
-
 
     def __call__(self):
         print('-------------------------')
@@ -653,14 +468,14 @@ class Mode08(Mode):
         print('-------------------------\n')
         print('Please set infection parameter for each age brackets below. ')
         beta0_temp = input('Male >>> ')
-        self.beta_gender[0] = self.set_correct_epi_para(beta0_temp, self.beta_gender[0])
+        self.beta_gender[0] = super().set_correct_epi_para(beta0_temp, self.beta_gender[0])
         beta1_temp = input('Female >>> ')
-        self.beta_gender[1] = self.set_correct_epi_para(beta1_temp, self.beta_gender[1])
+        self.beta_gender[1] = super().set_correct_epi_para(beta1_temp, self.beta_gender[1])
         print('Please set removal parameter for each age brackets below. ')
         delta0_temp = input('Male >>> ')
-        self.delta_gender[0] = self.set_correct_epi_para(delta0_temp, self.delta_gender[0])
+        self.delta_gender[0] = super().set_correct_epi_para(delta0_temp, self.delta_gender[0])
         delta1_temp = input('Female >>> ')
-        self.delta_gender[1] = self.set_correct_epi_para(delta1_temp, self.delta_gender[1])
+        self.delta_gender[1] = super().set_correct_epi_para(delta1_temp, self.delta_gender[1])
         print('You may edit the proportion of each brackets in person.py. ')
         self.set_population()
         self.raise_flag()
