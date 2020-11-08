@@ -244,7 +244,7 @@ class Mode04(Mode):
         print('Please set rationality parameter below. ')
         lambda_BR = self.people[0].lambda_BR
         lambda_BR_temp = input('Lambda >>> ')
-        lambda_BR = super().set_correct_epi_para(lambda_BR_temp, lambda_BR)
+        lambda_BR = super().set_correct_para(lambda_BR_temp, lambda_BR, pos=True)
         self.set_lambda(lambda_BR)
         print('Assigning parameters to population. ')
         self.QRE()

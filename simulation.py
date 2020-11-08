@@ -92,10 +92,10 @@ class Simulation:
             print('Compartment history exported in \'{}-compartment.csv\''.format(self.filename))
             write.WriteTestingHistory(self, self.filename)
             print('COVID-19 testing records exported in \'{}-testing.csv\''.format(self.filename))
-            if any(i in self.mode for i in [22, 23, 24]):
+            if any(i in self.modes for i in [22, 23, 24]):
                 write.WriteOpinionPersonality(self, self.filename)
                 print('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
-            elif 21 in self.mode:
+            elif 21 in self.modes:
                 write.WriteStates(self, self.filename)
                 print('Information network details exported in \'{}-opinion.csv\''.format(self.filename))
             write.WriteSummary(self, self.filename)

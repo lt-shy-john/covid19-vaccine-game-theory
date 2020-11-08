@@ -527,9 +527,7 @@ for i in range(len(sys.argv)):
                     print('Loading mode: {}'.format(mode_flag))
 
                     # Activate modes with no options needed
-                    if mode_flag == 4:
-                        mode04()
-                    elif mode_flag == 51:
+                    if mode_flag == 51:
                         if 52 in modes:
                             print('Mode 52 has been activated. Ignore mode 51. ')
                             break
@@ -576,6 +574,17 @@ for i in range(len(sys.argv)):
                                 modes[1] = mode01
                             else:
                                 mode.pop(1)
+                        elif mode_flag == 4:
+                            if sys.argv[k][:3] == '*l=':
+                                lambda_BR = population[0].lambda_BR
+                                mode04_l_config = sys.argv[k][3:]
+                                lambda_BR = set_correct_para(mode04_l_config, lambda_BR, pos=True)
+                            mode04.QRE()
+                            mode04.raise_flag()
+                            if mode04.flag == 'X':
+                                modes[4] = mode04
+                            else:
+                                mode.pop(4)
                         elif mode_flag == 7:
                             if sys.argv[k][:3] == '*b=':
                                 mode07_b_config = sys.argv[k][3:].split(',')
