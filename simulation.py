@@ -6,11 +6,12 @@ import write
 import random
 
 class Simulation:
-    def __init__(self, N, T, people, contact_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, tau, immune_time, verbose_mode, groups_of=3):
+    def __init__(self, N, T, people, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, tau, immune_time, verbose_mode, groups_of=3):
         self.N = N
         self.groups_of = groups_of
         self.people = people   # List of people objects
         self.contact_nwk = contact_nwk
+        self.info_nwk = info_nwk
         self.groups = None
         self.T = T
 
@@ -65,21 +66,47 @@ class Simulation:
         '''
         self.modes = modes
 
-    def __call__(self, modes=None):
+    def __call__(self, modes=None, start=True):
         FILENAME_STATES = ''
-        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.contact_nwk, self.verbose_mode)
+        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.contact_nwk, self.verbose_mode, start)
         epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
         epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
         epidemic.load_modes(self.modes)
         print('beta = {}, alpha = {}, gamma = {}, phi = {}, lambda = {}'.format(epidemic.infection, epidemic.vaccinated, epidemic.recover, epidemic.resus, epidemic.test_rate))
-        epidemic.set_epidemic(1)
         print('=========== t = 0 ============\n')
         print('N = {}'.format(len(self.people)))
         print('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
+        epidemic.get_states()
+        if self.filename != '':
+            write.WriteStates(epidemic, epidemic.filename)
         for t in range(self.T):
             print('=========== t = {} ============\n'.format(t+1))
             print('N = {}'.format(len(self.people)))
             print('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
+            # Info network update
+            if 21 in self.modes:
+                if any(i in self.modes for i in [22, 23]):
+                    self.info_nwk.inflexible_prework()
+                if self.verbose_mode == True:
+                    print('Opinion (before)')
+                    for group_no, group in self.info_nwk.roster.items():
+                        print(f'{group_no}:', [x.opinion for x in group])
+                self.info_nwk.update(self.verbose_mode)
+                if any(i in self.modes for i in [22, 23]):
+                    self.info_nwk.inflexible()
+                if 24 in self.modes:
+                    self.info_nwk.balance(self.verbose_mode)
+                if self.verbose_mode == True:
+                    print('Opinion (after)')
+                    for group_no, group in self.info_nwk.roster.items():
+                        print(f'{group_no}:', [x.opinion for x in group])
+                if any(i in self.modes for i in [22, 23, 24]) and self.filename != '':
+                    write.WriteOpinionPersonality(self, self.filename)
+                elif self.filename != '':
+                    write.WriteOpinion(self, self.filename)
+                # Permutate members into groups
+                self.info_nwk.update_group(self.verbose_mode)
+            # Epidemic network update
             epidemic.next(self.filename)
 
         print('\n=========== Result ============\n')
@@ -93,10 +120,8 @@ class Simulation:
             write.WriteTestingHistory(self, self.filename)
             print('COVID-19 testing records exported in \'{}-testing.csv\''.format(self.filename))
             if any(i in self.modes for i in [22, 23, 24]):
-                write.WriteOpinionPersonality(self, self.filename)
                 print('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
             elif 21 in self.modes:
-                write.WriteStates(self, self.filename)
                 print('Information network details exported in \'{}-opinion.csv\''.format(self.filename))
             write.WriteSummary(self, self.filename)
             print('Summary exported in \'{}-summary.txt\''.format(self.filename))

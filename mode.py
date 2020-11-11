@@ -628,6 +628,7 @@ class Mode21(Mode):
         print('-------------------------')
         print('You are creating mode 21. ')
         print('-------------------------\n')
+        # Roster has been set already. 
         self.raise_flag()
         print('\nMode 21 equipped. \n')
 

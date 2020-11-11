@@ -7,7 +7,7 @@ import write
 
 class Epidemic:
 
-    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode):
+    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode, start=True):
         '''Initial elements
 
         Attributes
@@ -119,6 +119,11 @@ class Epidemic:
             self.dI = (1-self.vaccinated)*self.infection*self.S*self.I*self.Pro + self.infection*self.S*self.I*self.Ag - self.recover*self.I
             self.dV = self.vaccinated*self.S*self.Pro - self.resus*self.V
 
+            if start == True:
+                print('*')
+                self.set_epidemic(1)
+
+
         except ValueError:
             print('Check your parameters if they are probabilities.')
 
@@ -209,7 +214,7 @@ class Epidemic:
         '''
         if len(self.people) < initial_infection:
             initial_infection = len(self.people)
-        # Pick random number of people (1-5) infected initially
+        # Pick first 4 people/ random number of people (1-5) infected initially
         for i in range(initial_infection):
             self.people[i].suceptible = 1
 
@@ -251,6 +256,11 @@ class Epidemic:
             continue
             if 20 in self.mode:
                 theta = self.mode[20].set_perceived_infection(self.I/len(self.people))
+            if 21 in self.mode:
+                for person in self.people:
+                    seed = random.randint(0,10000)/10000
+                    if person.opinion == 1 and seed <= self.vaccinated:
+                        person.vaccinated = 1
             if self.people[i].suceptible == 1:
                 continue
             if self.people[i].opinion == 1 and random.uniform(0,1) <= self.alpha_V:
