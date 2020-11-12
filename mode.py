@@ -24,13 +24,15 @@ class Mode:
         '''
         self.flag = ' '
 
-    def correct_para(p, pos=False):
+    def correct_para(self, p, pos=False):
         '''
         Convert the parameters into integers.
 
         Parameters
-        p -- input.
-        - pos: If the parameter is positive number.
+        p: int
+            input.
+        pos: boolean
+            If the parameter is positive number.
         '''
         try:
             p_num = int(p)
@@ -41,7 +43,7 @@ class Mode:
             p_num = 1
             return p_num
 
-    def set_correct_para(p, P, pos=False):
+    def set_correct_para(self, p, P, pos=False):
         '''
         Convert the parameters into integers. If input is blank then do nothing.
 
@@ -623,14 +625,39 @@ class Mode21(Mode):
     def __init__(self, people, info_nwk):
         super().__init__(people,21)
         self.info_nwk = info_nwk
+        self.propro = None
+        self.agpro = None
 
     def __call__(self):
         print('-------------------------')
         print('You are creating mode 21. ')
         print('-------------------------\n')
-        # Roster has been set already. 
+        propro_temp = input('Pro >>> ')
+        self.propro = super().correct_para(propro_temp)
+        agpro_temp = input('Ag >>> ')
+        self.agpro = super().correct_para(agpro_temp)
+        self.set_opinion()
+        print('All population has been assigned with their opinion. ')
+        self.set_personality()
+        print('All population has been assigned with default personality. ')
+        # Roster has been set already.
         self.raise_flag()
         print('\nMode 21 equipped. \n')
+
+    def get_prop(self):
+        return self.propro/(self.propro+self.agpro)
+
+    def set_opinion(self):
+        for person in self.people:
+            seed = random.randint(0,1000)/1000
+            if seed < self.get_prop():
+                person.opinion = 1
+            else:
+                person.opinion = 0
+
+    def set_personality(self):
+        for person in self.people:
+            person.personality = 0
 
 '''
 22: Stubbon to take vaccine
@@ -831,9 +858,9 @@ class Mode52(Mode):
             print('Invalid data type for m, set m as 1. ')
             m_temp = 1
         self.set_m(m_temp)
-        pUpd_temp = float(input('m >>> '))
+        pUpd_temp = float(input('p >>> '))
         pUpd = super().set_correct_epi_para(pUpd_temp, self.contact_nwk.PUpdate)
-        self.set_p()
+        self.set_p(pUpd)
         self.set_network()
         self.raise_flag()
         print('Preferential attachment graph settings done.')

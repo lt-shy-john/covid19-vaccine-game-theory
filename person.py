@@ -8,7 +8,7 @@ import random
 class Person:
     id = 0 # Initial population
 
-    def __init__(self, personality = 0):
+    def __init__(self):
         Person.id += 1  # Name of the person.
         self.id = Person.id
 
@@ -39,8 +39,8 @@ class Person:
         2 - Inflexible (Against)
         3 - Balancer
         '''
-        self.personality = personality
-        self.opinion = 1 #random.choices([0, 1], weights = [2, 8], k = 1)[0]
+        self.personality = None
+        self.opinion = None #random.choices([0, 1], weights = [2, 8], k = 1)[0]
         self.meta_opinion = None
 
         # Epidemic state

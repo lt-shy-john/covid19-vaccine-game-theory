@@ -251,16 +251,18 @@ class Epidemic:
                 seed = random.randint(0,10000)/10000
                 if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
                     if self.verbose_mode == True:
-                        print('*')
+                        print(f'{self.people[i].id} has decided to take vaccine. ')
                     self.people[i].vaccinated = 1
-            continue
+                continue
             if 20 in self.mode:
                 theta = self.mode[20].set_perceived_infection(self.I/len(self.people))
+                continue
             if 21 in self.mode:
                 for person in self.people:
                     seed = random.randint(0,10000)/10000
                     if person.opinion == 1 and seed <= self.vaccinated:
                         person.vaccinated = 1
+                continue
             if self.people[i].suceptible == 1:
                 continue
             if self.people[i].opinion == 1 and random.uniform(0,1) <= self.alpha_V:

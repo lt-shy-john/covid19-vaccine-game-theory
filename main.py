@@ -543,6 +543,12 @@ for i in range(len(sys.argv)):
                         if 52 in modes:
                             print('Mode 52 has been activated. Ignore mode 51. ')
                             break
+                        elif 53 in modes:
+                            print('Mode 53 has been activated. Ignore mode 52. ')
+                            break
+                        elif 54 in modes:
+                            print('Mode 54 has been activated. Ignore mode 52. ')
+                            break
                         mode51()
                         if mode51.flag == 'X':
                             modes[51] = mode51
@@ -653,6 +659,12 @@ for i in range(len(sys.argv)):
                         elif mode_flag == 52:
                             if 51 in modes:
                                 print('Mode 51 has been activated. Ignore mode 52. ')
+                                break
+                            elif 53 in modes:
+                                print('Mode 53 has been activated. Ignore mode 52. ')
+                                break
+                            elif 54 in modes:
+                                print('Mode 54 has been activated. Ignore mode 52. ')
                                 break
                             if sys.argv[k][:3] == '*m=':
                                 mode52_m_config = int(sys.argv[k][3:])
