@@ -470,11 +470,11 @@ test_rate = 0.5
 immune_time = 60
 group_size = 3
 
+verbose_mode = False  # Need to put here for initiating other objects (nwk and person if needed).
 population = Person.make_population(N)
-contact_nwk = ContactNwk(population)
+contact_nwk = ContactNwk(population, verbose_mode)
 info_nwk = Group(population, group_size)
 filename = ''  # Default file name to export (.csv). Change when use prompt 'export' cmd.
-verbose_mode = False
 
 mode_master_list = []
 # All objects should add into mode_master_list
@@ -520,7 +520,7 @@ for i in range(len(sys.argv)):
             immune_time = set_correct_para(immune_time_temp, immune_time, pos=True)
         elif sys.argv[i] == '-test_rate':
             test_rate_temp = sys.argv[i+1]
-            test_rate = set_correct_para(test_rate_temp, test_rate, pos=True)
+            test_rate = set_correct_epi_para(test_rate_temp, test_rate)
         elif sys.argv[i] == '-verbose' or sys.argv[i] == '--v':
             verbose_mode = True
         elif sys.argv[i] == '-m':

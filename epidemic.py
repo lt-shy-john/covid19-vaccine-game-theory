@@ -299,6 +299,17 @@ class Epidemic:
                 self.people[i].removed = 1
 
     def infect(self):
+        '''
+        Mechanism of infection.
+        '''
+
+        # Network contact controlled by Epidemic.social_contact()
+        if (51 in self.mode) or (52 in self.mode) or (53 in self.mode) or (54 in self.mode):
+            if self.verbose_mode == True:
+                print('Social contact applies to infection. ')
+            self.social_contact()
+            return
+        # Creating customised infection parameter for each person.
         beta_pp = np.ones(len(self.people))
         for i in range(len(self.people)):
             if any(i in self.mode for i in [1, 7, 8, 11]):
@@ -329,16 +340,13 @@ class Epidemic:
 
             seed = random.randint(0,1000)/1000
             '''
-            Customised infection from modes
+            Customised infection from modes (excl. network contact)
             '''
             if any(i in self.mode for i in [1, 7, 8]):
                 if self.verbose_mode == True:
                     print(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
                 if seed < beta_pp[i]:
                     self.people[i].suceptible = 1
-                continue
-            if (51 in self.mode) or (52 in self.mode) or (53 in self.mode) or (54 in self.mode):
-                self.social_contact()
                 continue
             # Normal infection event
             if seed < self.infection:
@@ -357,15 +365,16 @@ class Epidemic:
                 if self.verbose_mode == True:
                     print(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            if edge[0].vaccinated == 0 and edge[1].vaccinated == 0:
+            # The following will not apply if mode 11 has been activated.
+            if (edge[0].vaccinated == 1 and edge[1].vaccinated == 1) and 11 not in self.mode:
                 if self.verbose_mode == True:
                     print(f'Both ends are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            if edge[0].removed == 0 or edge[1].removed == 0:
+            if edge[0].removed == 1 or edge[1].removed == 1:
                 if self.verbose_mode == True:
                     print(f'One of the contacts are removed. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            if edge[0].exposed == 1 or edge[1].exposed == 0:
+            if edge[0].exposed == 1 or edge[1].exposed == 1:
                 if self.verbose_mode == True:
                     print(f'One of the contacts are quarantined. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
@@ -378,6 +387,8 @@ class Epidemic:
             if seed < self.infection:
                 edge[0].suceptible = 1
                 edge[1].suceptible = 1
+                if self.verbose_mode == True:
+                    print(f'{edge[0].id}-{edge[1].id} pair is infected.')
 
     def infection_clock(self, i):
         if self.people[i].infection_clock > 14:

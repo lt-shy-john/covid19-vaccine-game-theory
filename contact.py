@@ -6,7 +6,7 @@ import person
 
 class ContactNwk:
 
-    def __init__(self, people):
+    def __init__(self, people, verbose_mode):
         self.people = people
         self.group_no = None
         self.network = None  # Graph to show partner topology
@@ -14,6 +14,7 @@ class ContactNwk:
         self.nwk_graph = nx.Graph(self.network)
 
         self.speed_mode = True
+        self.verbose_mode = verbose_mode
 
         # Probability to change bonds
         self.l0 = 0.5
@@ -57,19 +58,23 @@ class ContactNwk:
         Update the network. In ContactNwk().
         '''
         deg_ls = dict(self.nwk_graph.degree)  # Need this in the loop.
-        print('Degree of all nodes loaded. ')
+        if self.verbose_mode == True:
+            print('Degree of all nodes loaded. ')
 
         seed = random.randint(0,10000)/10000
         if seed > self.PUpdate:
             return
 
-        print('Proceeding updating network... \n')
+        if self.verbose_mode == True:
+            print('Proceeding to updating network... \n')
         tmp_edge_ls = self.network
         random.shuffle(tmp_edge_ls)
-        print('Edge list shuffled, repairing them now. ')
+        if self.verbose_mode == True:
+            print('Edge list shuffled, repairing them now. ')
         edge_pairs_idx = 0
         while edge_pairs_idx < len(tmp_edge_ls):
-            print(f'Pairing edges {edge_pairs_idx} and {edge_pairs_idx + 1} out of {len(tmp_edge_ls)}. ')
+            if self.verbose_mode == True:
+                print(f'Pairing edges {edge_pairs_idx} and {edge_pairs_idx + 1} out of {len(tmp_edge_ls)}. ')
             if edge_pairs_idx == len(tmp_edge_ls)-1:
                 break
             pair_nodes = [*tmp_edge_ls[edge_pairs_idx], *tmp_edge_ls[edge_pairs_idx+1]]
