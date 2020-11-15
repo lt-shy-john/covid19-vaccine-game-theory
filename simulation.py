@@ -78,7 +78,7 @@ class Simulation:
         print('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
         epidemic.get_states()
         if self.filename != '':
-            write.WriteStates(epidemic, epidemic.filename)
+            write.WriteStates(epidemic, self.filename)
         for t in range(self.T):
             print('=========== t = {} ============\n'.format(t+1))
             print('N = {}'.format(len(self.people)))

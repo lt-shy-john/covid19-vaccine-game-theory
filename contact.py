@@ -20,7 +20,7 @@ class ContactNwk:
         self.l0 = 0.5
         self.l1 = 0.5
         self.assort = True
-        self.PUpdate = 1 # For Contact.update_xulvi_brunet_sokolov()
+        self.PUpdate = 0.5 # For Contact.update_xulvi_brunet_sokolov()
 
     def set_dedault_edge_list(self):
         '''

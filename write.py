@@ -117,6 +117,7 @@ def WriteSummary(obs, filename):
         contents.append('Phi: {}\n'.format(obs.phi))
         contents.append('Tau: {}\n'.format(obs.test_rate))
         contents.append('Immune time: {} days \n'.format(obs.immune_time))
+        contents.append('Test rate: {} \n'.format(obs.test_rate))
         if any(i in obs.modes for i in [7, 8]):
             contents.append('\n# Demographics \n')
             if 7 in obs.modes:
@@ -150,6 +151,22 @@ def WriteSummary(obs, filename):
                 contents.append('N: {} people\n'.format(len(obs.N)))
                 contents.append('Value: {} \n'.format(obs.people[0].lambda_BR))
                 contents.append('P(V): {} \n'.format(obs.modes[4].P_Alpha[0]))
+        if any(i in obs.modes for i in [51, 52, 53, 54]):
+            contents.append('\n# Network Topology \n')
+            if 51 in obs.modes:
+                nwk_type = "Erdos-Renyi"
+            elif 52 in obs.modes:
+                nwk_type = "Barabasi-Albert"
+            elif 53 in obs.modes:
+                nwk_type = "Watts-Strogatz"
+            elif 54 in obs.modes:
+                nwk_type = "Lattice"
+            contents.append('Type: {}\n\n'.format(nwk_type))
+            contents.append('\n## Basic Network Quantities \n')
+            contents.append('Nodes: {}\n'.format(obs.contact_nwk.nwk_graph.number_of_nodes()))
+            contents.append('Edges: {}\n'.format(obs.contact_nwk.nwk_graph.number_of_edges()))
+            contents.append('Avg degree: {}\n'.format(2 * obs.contact_nwk.nwk_graph.number_of_edges()/obs.contact_nwk.nwk_graph.number_of_nodes()))
+            contents.append('Assortativity: {}\n'.format(nx.degree_assortativity_coefficient(obs.contact_nwk.nwk_graph)))
         if any(i in obs.modes for i in [1, 7, 8]):
             contents.append('# Notes\n')
             contents.append('* Epidemic parameter controlled by optional modes. Consult the relevant modes for more information. \n')

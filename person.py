@@ -19,7 +19,8 @@ class Person:
         '''
 
         # Bounded rationality
-        self.rV_BR = random.randint(0,1000)/1000
+        self.rV_BR = 1
+        self.rI_BR = -1
         self.lambda_BR = 0.5
 
         self.occupation = 0
