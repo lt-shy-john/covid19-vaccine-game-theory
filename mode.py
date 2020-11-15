@@ -270,7 +270,8 @@ class Mode04(Mode):
         Return a list of probability to adaopt vaccine with size of population.
         '''
         utility_fn = [self.alpha * person.lambda_BR * person.rV_BR for person in self.people]
-        self.P_Alpha = np.exp(utility_fn)/(sum(np.exp(utility_fn)))
+        disutility_fn = [self.alpha * person.lambda_BR * person.rI_BR for person in self.people]
+        self.P_Alpha = np.exp(utility_fn)/(sum(np.exp(utility_fn), np.exp(disutility_fn)))
 
 
 '''
