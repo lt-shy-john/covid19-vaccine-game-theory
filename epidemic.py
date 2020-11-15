@@ -365,10 +365,18 @@ class Epidemic:
                 if self.verbose_mode == True:
                     print(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            # The following will not apply if mode 11 has been activated.
+            # The following will not apply if mode 11 has been activated, skips this condition.
             if (edge[0].vaccinated == 1 and edge[1].vaccinated == 1) and 11 not in self.mode:
                 if self.verbose_mode == True:
                     print(f'Both ends are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
+                continue
+            elif edge[0].vaccinated == 1 and 11 not in self.mode:
+                if self.verbose_mode == True:
+                    print(f'{edge[0].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
+                continue
+            elif edge[1].vaccinated == 1 and 11 not in self.mode:
+                if self.verbose_mode == True:
+                    print(f'{edge[1].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].removed == 1 or edge[1].removed == 1:
                 if self.verbose_mode == True:
