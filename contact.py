@@ -39,7 +39,7 @@ class ContactNwk:
             if type(node) == person.Person:
                 labels[node] = node.id
         nx.draw(self.nwk_graph, pos=pos,with_labels=False)
-        nx.draw_networkx_labels(self.nwk_graph,pos=pos,labels=labels,font_size=16)
+        nx.draw_networkx_labels(self.nwk_graph,pos=pos,labels=labels,font_size=12)
         plt.show()
 
     def update_nwk(self):
