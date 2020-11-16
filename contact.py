@@ -47,11 +47,15 @@ class ContactNwk:
         Basic functionality of network updates.
         '''
         # Remove people whom removed
-        for edge in self.nwk_graph.edges:
-            if edge[0].removed == 1:
-                self.nwk_graph.remove_edge(edge[0],edge[1])
-            elif edge[1].removed == 1:
-                self.nwk_graph.remove_edge(edge[0],edge[1])
+        to_be_removed = []
+        for node in self.nwk_graph.nodes:
+            if node.removed == 1:
+                to_be_removed.append(node)
+        for node in to_be_removed:
+            self.nwk_graph.remove_node(node)
+
+        # Add edge list to contact_nwk.network
+        self.network = [e for e in self.nwk_graph.edges]
 
     def update_xulvi_brunet_sokolov(self):
         '''
