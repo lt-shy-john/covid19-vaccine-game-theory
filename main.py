@@ -130,7 +130,7 @@ def help():
 
 def usage():
     print('Usage: python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n\
-    [-m  <modes_config>] [-f (filename)] [run]\n')
+    [-m  <modes_config>] [-f (filename)] [-verbose | --v] [run]\n')
     print('-immune_time \t Immune time after recovered, in days.')
     print('-test_rate \t COVID-19 testing rate.')
     print('-m \t\t Mode')
@@ -235,7 +235,7 @@ def set_mode(mode):
         print('07: Age distribution [{}]'.format(mode07.flag))
         print('08: Gender population [{}]'.format(mode08.flag))
         print('10: Type of vaccine [{}]'.format(mode10.flag))
-        print('11: Stop transmissability/ reduce severity []')
+        print('11: Stop transmissability/ reduce severity [{}]'.format(mode11.flag))
         print('12: Cost of vaccine []')
         print('13: Accessibility to vaccine []')
         print('14: Side effects of vaccine []')
@@ -245,7 +245,6 @@ def set_mode(mode):
         print('23: Stubbon to against vaccine[{}]'.format(mode23.flag))
         print('24: Contrary to social groups[{}]'.format(mode24.flag))
         print('31: Medication incorporated [{}]'.format(mode31.flag))
-        print('32: Population on demand PrEP had planned sex. []')
         print('41: Moral hazard of social distancing []')
         print('42: Moral hazard of treatment []')
         print('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
@@ -321,6 +320,18 @@ def mode_settings(cmd, mode=None):
                     mode[8] = mode08
                 else:
                     mode.pop(8)
+            elif int(cmd[i]) == 10:
+                mode10()
+                if mode10.flag == 'X':
+                    mode[10] = mode10
+                else:
+                    mode.pop(10)
+            elif int(cmd[i]) == 11:
+                mode11()
+                if mode11.flag == 'X':
+                    mode[11] = mode11
+                else:
+                    mode.pop(10)
             elif int(cmd[i]) == 20:
                 mode20()
                 if mode20.flag == 'X':
@@ -669,6 +680,9 @@ for i in range(len(sys.argv)):
                             if sys.argv[k][:3] == '*m=':
                                 mode52_m_config = int(sys.argv[k][3:])
                                 mode52.set_m(mode52_m_config)
+                            elif sys.argv[k][:3] == '*p=':
+                                mode52_p_config = int(sys.argv[k][3:])
+                                mode52.set_p(mode52_p_config)
                             mode52.set_network()
                             mode52.raise_flag()
                             if mode52.flag == 'X':
