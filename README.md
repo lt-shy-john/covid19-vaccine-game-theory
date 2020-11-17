@@ -26,7 +26,7 @@ After installing all essential packages, you will need to download all `.py` fil
 
 ```bash
 python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n\
-  [-m]  <modes_config>] [-f (filename)] [run]
+  [-m]  <modes_config>] [-f (filename)] [-verbose | --v] [run]
 ```
 
 Example usage:
@@ -74,6 +74,7 @@ This simulation can be customised by setting different modes. You may set them v
 * 52: Scale free network
 * 53: Small world topology
 * 54: Lattice network
+
 _Note: Not all modes have been equipped. You will not see anything if you tried to set up those._
 
 ## Contributing
