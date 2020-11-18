@@ -42,6 +42,7 @@ class Group:
                 self.roster[dest_group].append(member)
                 if verbose_mode == True:
                     print(f'This group has currently now have members: {[p.id for p in self.roster[dest_group]]}. ')
+                member.group_no = dest_group
 
                 swap_out = self.roster[dest_group][random.randint(0,len(self.roster[dest_group])-1)]
                 if verbose_mode == True:
@@ -50,6 +51,7 @@ class Group:
                 self.roster[group_no].append(swap_out)
                 if verbose_mode == True:
                     print(f'Group {dest_group} now have {[p.id for p in self.roster[dest_group]]}. \n\n')
+                swap_out.group_no = dest_group
 
     def update(self, verbose_mode=False):
         '''
