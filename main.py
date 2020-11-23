@@ -627,7 +627,7 @@ for i in range(len(sys.argv)):
                             if mode07.flag == 'X':
                                 modes[7] = mode07
                             else:
-                                mode.pop(7)
+                                modes.pop(7)
                         elif mode_flag == 8:
                             if sys.argv[k][:3] == '*b=':
                                 mode08_b_config = sys.argv[k][3:].split(',')
@@ -640,33 +640,77 @@ for i in range(len(sys.argv)):
                             if mode08.flag == 'X':
                                 modes[8] = mode08
                             else:
-                                mode.pop(8)
+                                modes.pop(8)
                         elif mode_flag == 10:
                             if sys.argv[k][:6] == '*mode=':
                                 modes[10].type = modes[10].check_input(sys.argv[k][6:])
                             if mode10.flag == 'X':
                                 modes[10] = mode10
                             else:
-                                mode.pop(10)
+                                modes.pop(10)
                         elif mode_flag == 11:
                             if sys.argv[k][:6] == '*mode=':
                                 modes[11].type = modes[11].check_input(sys.argv[k][6:])
                             elif sys.argv[k][:3] == '*b=':
                                 mode11_b_config = sys.argv[k][3:]
-                                mode08.beta_V = set_correct_para(mode11_b_config, mode08.beta_V)
-                                mode08.check_beta()
+                                mode11.beta_V = set_correct_para(mode11_b_config, mode11.beta_V)
+                                mode11.check_beta()
                             elif sys.argv[k][:3] == '*g=':
                                 mode11_g_config = sys.argv[k][3:]
-                                mode08.gamma_V = set_correct_para(mode11_g_config, mode08.gamma_V)
-                                mode08.check_gamma()
+                                mode11.gamma_V = set_correct_para(mode11_g_config, mode11.gamma_V)
+                                mode11.check_gamma()
                             elif sys.argv[k][:3] == '*d=':
                                 mode11_d_config = sys.argv[k][3:]
-                                mode08.delta_V = set_correct_para(mode11_d_config, mode08.delta_V)
-                                mode08.check_delta()
+                                mode11.delta_V = set_correct_para(mode11_d_config, mode11.delta_V)
+                                mode11.check_delta()
                             if mode11.flag == 'X':
                                 modes[11] = mode11
                             else:
-                                mode.pop(11)
+                                modes.pop(11)
+                        elif mode_flag == 21:
+                            if sys.argv[k][:3] == '*+=':
+                                mode21_pro_config = sys.argv[k][3:]
+                                mode21.set_pro(mode21_pro_config)
+                            elif sys.argv[k][:3] == '*-=':
+                                mode21_ag_config = sys.argv[k][3:]
+                                mode21.set_ag(mode21_ag_config)
+                            if mode21.propro != None and mode21.agpro != None:
+                                mode21.set_opinion()
+                                mode21.set_personality()
+                                mode21.raise_flag()
+                            if mode21.flag == 'X':
+                                modes[21] = mode21
+                            else:
+                                modes.pop(21)
+                        elif mode_flag == 22:
+                            if sys.argv[k][:3] == '*p=':
+                                mode22_pro_config = sys.argv[k][3:]
+                                mode22.assign_personality(mode22_pro_config)
+                                mode22.raise_flag()
+                            if mode22.flag == 'X':
+                                modes[22] = mode22
+                            else:
+                                modes.pop(22)
+                        elif mode_flag == 23:
+                            if sys.argv[k][:3] == '*p=':
+                                mode23_pro_config = sys.argv[k][3:]
+                                mode23.assign_personality(mode23_pro_config)
+                                mode23.raise_flag()
+
+                            if mode23.flag == 'X':
+                                modes[23] = mode23
+                            else:
+                                modes.pop(23)
+                        elif mode_flag == 24:
+                            if sys.argv[k][:3] == '*p=':
+                                mode24_pro_config = sys.argv[k][3:]
+                                mode24.assign_personality(mode24_pro_config)
+                                mode24.raise_flag()
+
+                            if mode24.flag == 'X':
+                                modes[24] = mode24
+                            else:
+                                modes.pop(24)
                         elif mode_flag == 52:
                             if 51 in modes:
                                 print('Mode 51 has been activated. Ignore mode 52. ')
