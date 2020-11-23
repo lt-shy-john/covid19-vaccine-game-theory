@@ -258,15 +258,15 @@ class Epidemic:
                 theta = self.mode[20].set_perceived_infection(self.I/len(self.people))
                 continue
             if 21 in self.mode:
-                for person in self.people:
-                    seed = random.randint(0,10000)/10000
-                    if person.opinion == 1 and seed <= self.vaccinated:
-                        person.vaccinated = 1
+                person = self.people[i]
+                seed = random.randint(0,10000)/10000
+                if person.opinion == 1 and seed < self.alpha_V:
+                    if self.verbose_mode == True:
+                        print(f'***, {seed} <= {self.alpha_V}')
+                    person.vaccinated = 1
                 continue
             if self.people[i].suceptible == 1:
                 continue
-            if self.people[i].opinion == 1 and random.uniform(0,1) <= self.alpha_V:
-                self.people[i].vaccinated = 1
 
     def removed(self):
         '''
@@ -505,12 +505,13 @@ class Epidemic:
         self.vaccinate()
         self.infected()
         self.immune()
-        if 51 in self.mode or 53 in self.mode or 54 in self.mode:
-            self.contact_nwk.update_random_nwk()
+        if 51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode:
+            if self.contact_nwk.update_rule == 'random':
+                self.contact_nwk.update_random_nwk()
+            elif self.contact_nwk.update_rule == 'XBS':
+                self.contact_nwk.update_xulvi_brunet_sokolov()
             self.contact_nwk.update_nwk()
-        elif 52 in self.mode:
-            self.contact_nwk.update_xulvi_brunet_sokolov()
-            self.contact_nwk.update_nwk()
+
         self.get_states()
         self.write_history()
         if filename != '':

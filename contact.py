@@ -15,6 +15,7 @@ class ContactNwk:
 
         self.speed_mode = True
         self.verbose_mode = verbose_mode
+        self.update_rule = None
 
         # Probability to change bonds
         self.l0 = 0.5
@@ -22,7 +23,7 @@ class ContactNwk:
         self.assort = True
         self.PUpdate = 0.5 # For Contact.update_xulvi_brunet_sokolov()
 
-    def set_dedault_edge_list(self):
+    def set_default_edge_list(self):
         '''
         Generate edge list and set Contact.network. By default edge list is in disjoint pairs.
         '''

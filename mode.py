@@ -808,6 +808,39 @@ class Mode51(Mode):
         else:
             self.p = p
 
+    def set_pupdate(self, p):
+        '''
+        Set probability to update network
+        '''
+        if p > 1:
+            self.contact_nwk.PUpdate = 1
+        elif p < 0:
+            self.contact_nwk.PUpdate = 0
+        else:
+            self.contact_nwk.PUpdate = p
+
+    def set_l0(self, l0):
+        '''
+        Set probability to debond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l0 = 1
+        elif l0 < 0:
+            self.contact_nwk.l0 = 0
+        else:
+            self.contact_nwk.l0 = l0
+
+    def set_l1(self, l1):
+        '''
+        Set probability to rebond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l1 = 1
+        elif l0 < 0:
+            self.contact_nwk.l1 = 0
+        else:
+            self.contact_nwk.l1 = l1
+
     def __call__(self):
         print('-------------------------')
         print('You are creating mode 51. ')
@@ -819,6 +852,20 @@ class Mode51(Mode):
             print('Invalid data type for p, set p as 1. ')
             p_temp = 1
         self.set_p(p_temp)
+        cmd = input('Longitudinal social network? [y/n] ')
+        if cmd == 'y':
+            print('Default rule: independent update. ')
+            cmd_update_rule = input('Change? [y/n] ')
+            if cmd_update_rule == 'y':
+                self.contact_nwk.update_rule = 'XBS'
+                pUpd_temp = float(input('p >>> '))
+                pUpd = super().set_correct_epi_para(pUpd_temp, self.contact_nwk.PUpdate)
+                self.set_pupdate(pUpd)
+            else:
+                self.contact_nwk.update_rule = 'random'
+                l0_temp = float(input('l0 >>> '))
+                l0 = super().set_correct_epi_para(l0, self.contact_nwk.l0)
+                self.set_p(l0)
         self.set_network()
         self.raise_flag()
         print('E-R graph settings done.')
@@ -847,7 +894,7 @@ class Mode52(Mode):
         # Add edge list to contact_nwk.network
         self.contact_nwk.network = [e for e in self.contact_nwk.nwk_graph.edges]
 
-    def set_p(self, p):
+    def set_pupdate(self, p):
         '''
         Set probability to update network
         '''
@@ -857,6 +904,28 @@ class Mode52(Mode):
             self.contact_nwk.PUpdate = 0
         else:
             self.contact_nwk.PUpdate = p
+
+    def set_l0(self, l0):
+        '''
+        Set probability to debond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l0 = 1
+        elif l0 < 0:
+            self.contact_nwk.l0 = 0
+        else:
+            self.contact_nwk.l0 = l0
+
+    def set_l1(self, l1):
+        '''
+        Set probability to rebond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l1 = 1
+        elif l0 < 0:
+            self.contact_nwk.l1 = 0
+        else:
+            self.contact_nwk.l1 = l1
 
     def set_m(self, m):
         if m < 1:
@@ -878,9 +947,24 @@ class Mode52(Mode):
             print('Invalid data type for m, set m as 1. ')
             m_temp = 1
         self.set_m(m_temp)
-        pUpd_temp = float(input('p >>> '))
-        pUpd = super().set_correct_epi_para(pUpd_temp, self.contact_nwk.PUpdate)
-        self.set_p(pUpd)
+
+        cmd = input('Longitudinal social network? [y/n] ')
+        if cmd == 'y':
+            print('Default rule: Xulvi-Brunet Sokolov. ')
+            cmd_update_rule = input('Change? [y/n] ')
+            if cmd_update_rule == 'y':
+                self.contact_nwk.update_rule = 'random'
+                l0_temp = float(input('l0 >>> '))
+                l0Upd = super().set_correct_epi_para(l0_temp, self.contact_nwk.l0)
+                self.set_l0(l0Upd)
+                l1_temp = float(input('l1 >>> '))
+                l1Upd = super().set_correct_epi_para(l1_temp, self.contact_nwk.l1)
+                self.set_l1(l1Upd)
+            else:
+                self.contact_nwk.update_rule = 'XBS'
+                pUpd_temp = float(input('p >>> '))
+                pUpd = super().set_correct_epi_para(pUpd_temp, self.contact_nwk.PUpdate)
+                self.set_pupdate(pUpd)
         self.set_network()
         self.raise_flag()
         print('Preferential attachment graph settings done.')
@@ -923,6 +1007,39 @@ class Mode53(Mode):
         else:
             self.p = p
 
+    def set_pupdate(self, p):
+        '''
+        Set probability to update network
+        '''
+        if p > 1:
+            self.contact_nwk.PUpdate = 1
+        elif p < 0:
+            self.contact_nwk.PUpdate = 0
+        else:
+            self.contact_nwk.PUpdate = p
+
+    def set_l0(self, l0):
+        '''
+        Set probability to debond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l0 = 1
+        elif l0 < 0:
+            self.contact_nwk.l0 = 0
+        else:
+            self.contact_nwk.l0 = l0
+
+    def set_l1(self, l1):
+        '''
+        Set probability to rebond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l1 = 1
+        elif l0 < 0:
+            self.contact_nwk.l1 = 0
+        else:
+            self.contact_nwk.l1 = l1
+
     def __call__(self):
         '''
         Setting mode 53 into model. If other network modes have set, they are dropped by `main.py`.
@@ -943,6 +1060,26 @@ class Mode53(Mode):
             print('Invalid data type for p, set m as 1. ')
             p_temp = 1
         self.set_p(p_temp)
+        '''
+        Set update rule
+        '''
+        cmd = input('Longitudinal social network? [y/n] ')
+        if cmd == 'y':
+            print('Default rule: independent update. ')
+            cmd_update_rule = input('Change? [y/n] ')
+            if cmd_update_rule == 'y':
+                self.contact_nwk.update_rule = 'XBS'
+                pUpd_temp = float(input('p >>> '))
+                pUpd = super().set_correct_epi_para(pUpd_temp, self.contact_nwk.PUpdate)
+                self.set_pupdate(pUpd)
+            else:
+                self.contact_nwk.update_rule = 'random'
+                l0_temp = float(input('l0 >>> '))
+                l0Upd = super().set_correct_epi_para(l0_temp, self.contact_nwk.l0)
+                self.set_l0(l0Upd)
+                l1_temp = float(input('l1 >>> '))
+                l1Upd = super().set_correct_epi_para(l1_temp, self.contact_nwk.l1)
+                self.set_l1(l1Upd)
         self.set_network()
         self.raise_flag()
         print('Watts-Strogatz graph settings done.')
@@ -978,6 +1115,39 @@ class Mode54(Mode):
             self.m = m
         self.n = len(self.people)//self.m
 
+    def set_pupdate(self, p):
+        '''
+        Set probability to update network
+        '''
+        if p > 1:
+            self.contact_nwk.PUpdate = 1
+        elif p < 0:
+            self.contact_nwk.PUpdate = 0
+        else:
+            self.contact_nwk.PUpdate = p
+
+    def set_l0(self, l0):
+        '''
+        Set probability to debond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l0 = 1
+        elif l0 < 0:
+            self.contact_nwk.l0 = 0
+        else:
+            self.contact_nwk.l0 = l0
+
+    def set_l1(self, l1):
+        '''
+        Set probability to rebond
+        '''
+        if l0 > 1:
+            self.contact_nwk.l1 = 1
+        elif l0 < 0:
+            self.contact_nwk.l1 = 0
+        else:
+            self.contact_nwk.l1 = l1
+
     def __call__(self):
         '''
         Setting mode 52 into model. If other network modes have set, they are dropped by `main.py`.
@@ -992,6 +1162,26 @@ class Mode54(Mode):
             print('Invalid data type for m, set m as 1. ')
             m_temp = 1
         self.set_dim(m_temp)
+        '''
+        Set update rule
+        '''
+        cmd = input('Longitudinal social network? [y/n] ')
+        if cmd == 'y':
+            print('Default rule: independent update. ')
+            cmd_update_rule = input('Change? [y/n] ')
+            if cmd_update_rule == 'y':
+                self.contact_nwk.update_rule = 'XBS'
+                pUpd_temp = float(input('p >>> '))
+                pUpd = super().set_correct_epi_para(pUpd_temp, self.contact_nwk.PUpdate)
+                self.set_pupdate(pUpd)
+            else:
+                self.contact_nwk.update_rule = 'random'
+                l0_temp = float(input('l0 >>> '))
+                l0Upd = super().set_correct_epi_para(l0_temp, self.contact_nwk.l0)
+                self.set_l0(l0Upd)
+                l1_temp = float(input('l1 >>> '))
+                l1Upd = super().set_correct_epi_para(l1_temp, self.contact_nwk.l1)
+                self.set_l1(l1Upd)
         self.set_network()
         self.raise_flag()
         print('Preferential attachment graph settings done.')

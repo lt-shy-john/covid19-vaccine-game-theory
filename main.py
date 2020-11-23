@@ -721,12 +721,19 @@ for i in range(len(sys.argv)):
                             elif 54 in modes:
                                 print('Mode 54 has been activated. Ignore mode 52. ')
                                 break
+
                             if sys.argv[k][:3] == '*m=':
                                 mode52_m_config = int(sys.argv[k][3:])
                                 mode52.set_m(mode52_m_config)
                             elif sys.argv[k][:3] == '*p=':
-                                mode52_p_config = int(sys.argv[k][3:])
-                                mode52.set_p(mode52_p_config)
+                                contact_nwk.update_rule = 'XBS'
+                                mode52_p_config = float(sys.argv[k][3:])
+                                mode52.set_pupdate(mode52_p_config)
+                            elif sys.argv[k][:3] == '*l=':
+                                contact_nwk.update_rule = 'random'
+                                mode52_l_config = [int(x) for x in sys.argv[k][3:].split(',')]
+                                mode52.set_l0(mode52_l_config[0])
+                                mode52.set_l1(mode52_l_config[1])
                             mode52.set_network()
                             mode52.raise_flag()
                             if mode52.flag == 'X':
