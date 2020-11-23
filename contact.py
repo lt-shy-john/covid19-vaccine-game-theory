@@ -13,7 +13,7 @@ class ContactNwk:
         # From now network is defined by modes 50 - 59.
         self.nwk_graph = nx.Graph(self.network)
 
-        self.speed_mode = True
+        self.speed_mode = False
         self.verbose_mode = verbose_mode
         self.update_rule = None
 

@@ -729,6 +729,13 @@ for i in range(len(sys.argv)):
                                 contact_nwk.update_rule = 'XBS'
                                 mode52_p_config = float(sys.argv[k][3:])
                                 mode52.set_pupdate(mode52_p_config)
+                            elif sys.argv[k][:3] == '*a=':
+                                contact_nwk.update_rule = 'XBS'
+                                mode52_assort = int(sys.argv[k][3:])
+                                if mode52_assort == 1:
+                                    contact_nwk.assort = True
+                                else:
+                                    contact_nwk.assort = False
                             elif sys.argv[k][:3] == '*l=':
                                 contact_nwk.update_rule = 'random'
                                 mode52_l_config = [int(x) for x in sys.argv[k][3:].split(',')]
