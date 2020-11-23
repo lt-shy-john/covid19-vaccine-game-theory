@@ -85,6 +85,8 @@ class Group:
                 self.people[i].meta_opinion = 1
             elif self.people[i].personality == 2:
                 self.people[i].meta_opinion = 0
+                if verbose_mode == True:
+                    print(f'{self.people[i].id}: {self.people[i].meta_opinion}')
 
     def inflexible(self):
         '''
@@ -95,12 +97,14 @@ class Group:
                 self.people[i].opinion = 1
             elif self.people[i].meta_opinion == 0:
                 self.people[i].opinion = 0
+                if verbose_mode == True:
+                    print(f'   *{self.people[i].id}: {self.people[i].opinion}')
             self.people[i].meta_opinion = None  # They will forget their deep believe until next round.
 
 
     def balance(self, verbose_mode=False):
         for i in range(len(self.people)):
-            if self.people[i].personality == 2:
+            if self.people[i].personality == 3:
                 if verbose_mode == True:
                     print('Before: {} - o:{}'.format(self.people[i].id, self.people[i].opinion))
                 self.people[i].swap_opinion()
