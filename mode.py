@@ -633,6 +633,7 @@ class Mode21(Mode):
         print('-------------------------')
         print('You are creating mode 21. ')
         print('-------------------------\n')
+        print('Please set proportion of initial opinion below. ')
         propro_temp = input('Pro >>> ')
         self.propro = super().correct_para(propro_temp)
         agpro_temp = input('Ag >>> ')
@@ -647,6 +648,12 @@ class Mode21(Mode):
 
     def get_prop(self):
         return self.propro/(self.propro+self.agpro)
+
+    def set_pro(self, propro_temp):
+        self.propro = super().correct_para(propro_temp)
+
+    def set_ag(self, ag_temp):
+        self.agpro = super().correct_para(ag_temp)
 
     def set_opinion(self):
         for person in self.people:
@@ -667,12 +674,15 @@ class Mode22(Mode):
     def __init__(self, people, info_nwk):
         super().__init__(people,22)
         self.info_nwk = info_nwk
+        self.InflexProProportion = None
 
     def __call__(self):
         print('-------------------------')
         print('You are creating mode 22. ')
         print('-------------------------\n')
-        self.assign_personality()
+        print('Please set proportion of stubbon of pro-vaccine below. ')
+        propro_temp = input('Pro >>> ')
+        self.assign_personality(propro_temp)
         self.raise_flag()
         print('\nMode 22 equipped. \n')
 
@@ -686,6 +696,7 @@ class Mode22(Mode):
                 seed = random.randint(0,1000)/1000
                 if seed < p:
                     person.personality = 1
+                    person.opinion = 1
 
 '''
 23: Stubbon to against vaccine
@@ -694,12 +705,15 @@ class Mode23(Mode):
     def __init__(self, people, info_nwk):
         super().__init__(people,23)
         self.info_nwk = info_nwk
+        self.InflexAgProportion = None
 
     def __call__(self):
         print('-------------------------')
         print('You are creating mode 23. ')
         print('-------------------------\n')
-        self.assign_personality()
+        print('Please set proportion of stubbon of anti-vaccine below. ')
+        agpro_temp = input('Pro >>> ')
+        self.assign_personality(agpro_temp)
         self.raise_flag()
         print('\nMode 23 equipped. \n')
 
@@ -713,6 +727,7 @@ class Mode23(Mode):
                 seed = random.randint(0,1000)/1000
                 if seed < p:
                     person.personality = 2
+                    person.opinion = 0
 
 '''
 24: Contrary to social groups
@@ -721,11 +736,15 @@ class Mode24(Mode):
     def __init__(self, people, info_nwk):
         super().__init__(people,24)
         self.info_nwk = info_nwk
+        self.BalancerProportion = None
 
     def __call__(self):
         print('-------------------------')
         print('You are creating mode 24. ')
         print('-------------------------\n')
+        print('Please set proportion of contrarian below. ')
+        balpro_temp = input('Pro >>> ')
+        self.assign_personality(balpro_temp)
         self.assign_personality()
         self.raise_flag()
         print('\nMode 24 equipped. \n')
