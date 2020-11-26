@@ -271,7 +271,11 @@ class Mode04(Mode):
         '''
         utility_fn = [self.alpha * person.lambda_BR * person.rV_BR for person in self.people]
         disutility_fn = [self.alpha * person.lambda_BR * person.rI_BR for person in self.people]
-        self.P_Alpha = np.exp(utility_fn)/(sum(np.exp(utility_fn), np.exp(disutility_fn)))
+        self.P_Alpha = np.divide(np.exp(utility_fn),(np.add(np.exp(utility_fn), np.exp(disutility_fn))), out=np.ones_like(utility_fn), where=(utility_fn!=np.inf))
+        # print('QRE: ')
+        # print('U =',utility_fn)
+        # print('-U =',disutility_fn)
+        # print('p =',self.P_Alpha)
 
 
 '''
