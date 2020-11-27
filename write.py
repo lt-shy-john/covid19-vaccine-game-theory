@@ -59,6 +59,80 @@ def WriteNetwork(graph_obj, filename):
     export_graph = nx.relabel_nodes(export_graph, mapping)
     nx.write_graphml(export_graph, filename+'.graphml')
 
+def WriteNetworkAvgDegree(graph_obj, filename):
+    '''
+    Argument
+    --------
+    graph_obj: Graph
+        The graph to be calculated.
+    filename: str
+        Output filename.
+    '''
+    filename = filename+'-nwk-deg.csv'
+    with open(filename, 'a', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow([2 * graph_obj.number_of_edges()/graph_obj.number_of_nodes()])
+
+def WriteNetworkAvgDegree_I(graph_obj, filename):
+    '''
+    Argument
+    --------
+    graph_obj: Graph
+        The graph to be calculated.
+    filename: str
+        Output filename.
+    '''
+    filename = filename+'-nwk-deg_I.csv'
+    deg_I = {}
+    for node in graph_obj.nodes():
+        if node.suceptible == 1:
+            deg_I[node] = graph_obj.degree[node]
+    content = [v for v in deg_I.values()]
+    try: content.append(sum(content)/len(content))
+    except ZeroDivisionError: content.append(0)
+    with open(filename, 'a', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow(content)
+
+def WriteNetworkAvgDegree_S(graph_obj, filename):
+    '''
+    Argument
+    --------
+    graph_obj: Graph
+        The graph to be calculated.
+    filename: str
+        Output filename.
+
+    Note
+    ----
+    This include the average degree of people whom vaccinated.
+    '''
+    filename = filename+'-nwk-deg_S.csv'
+    deg_S = {}
+    for node in graph_obj.nodes():
+        if node.suceptible == 0 and node.removed == 0:
+            deg_S[node] = graph_obj.degree[node]
+    content = [v for v in deg_S.values()]
+    try: content.append(sum(content)/len(content))
+    except ZeroDivisionError: content.append(0)
+    with open(filename, 'a', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow(content)
+
+def WriteNetworkAssortativity(graph_obj, filename):
+    '''
+    Argument
+    --------
+    graph_obj: Graph
+        The graph to be calculated.
+    filename: str
+        Output filename.
+    '''
+    filename = filename+'-nwk-assort.csv'
+    with open(filename, 'a', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow([nx.degree_assortativity_coefficient(graph_obj)])
+
 def WriteNetworkData(obs):
     '''
     Save basic network information.
@@ -167,7 +241,20 @@ def WriteSummary(obs, filename):
             contents.append('Edges: {}\n'.format(obs.contact_nwk.nwk_graph.number_of_edges()))
             contents.append('Avg degree: {}\n'.format(2 * obs.contact_nwk.nwk_graph.number_of_edges()/obs.contact_nwk.nwk_graph.number_of_nodes()))
             contents.append('Assortativity: {}\n'.format(nx.degree_assortativity_coefficient(obs.contact_nwk.nwk_graph)))
+            if obs.contact_nwk.update_rule != None:
+                contents.append('\n## Longitudinal network \n')
+                if obs.contact_nwk.update_rule != 'random':
+                     contents.append('Type: Independent\n')
+                     contents.append('Probability to bond (l0): {}\n'.format(obs.contact_nwk.l0))
+                     contents.append('Probability to debond (l1): {}\n'.format(obs.contact_nwk.l1))
+                elif obs.contact_nwk.update_rule != 'XBS':
+                    contents.append('Type: XBS\n')
+                    contents.append('Rewire probability: {}\n'.format(obs.contact_nwk.PUpdate))
+                    contents.append('Rewire type: {}\n'.format(obs.contact_nwk.assort))
+                contents.append('Average degree per time step stored in "{}-nwk-deg.csv"\n'.format(obs.filename))
+                contents.append('Assortativity information per time step stored in "{}-nwk-assort.csv"\n'.format(obs.filename))
         if any(i in obs.modes for i in [1, 7, 8]):
+            contents.append('\n## Longitudinal Network \n')
             contents.append('# Notes\n')
             contents.append('* Epidemic parameter controlled by optional modes. Consult the relevant modes for more information. \n')
         f.writelines(contents)
