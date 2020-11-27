@@ -123,8 +123,11 @@ class Simulation:
                 print('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
             elif 21 in self.modes:
                 print('Information network details exported in \'{}-opinion.csv\''.format(self.filename))
+            if any(i in self.modes for i in [51, 52, 53, 54]) and self.contact_nwk.update_rule != None:
+                print('Average degree history exported in \'{}-nwk-deg.csv\', \'{}-nwk-deg_I.csv\' and \'{}-nwk-deg_S.csv\''.format(self.filename,self.filename,self.filename))
+                print('Assortativity history exported in \'{}-assort-deg.csv\''.format(self.filename))
             write.WriteSummary(self, self.filename)
             print('Summary exported in \'{}-summary.txt\''.format(self.filename))
-        print('')
+            print()
 
         # Return any data
