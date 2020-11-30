@@ -734,7 +734,7 @@ for i in range(len(sys.argv)):
                                 mode52_assort = int(sys.argv[k][3:])
                                 if mode52_assort == 1:
                                     contact_nwk.assort = True
-                                else:
+                                elif mode52_assort == 0:
                                     contact_nwk.assort = False
                             elif sys.argv[k][:3] == '*l=':
                                 contact_nwk.update_rule = 'random'
