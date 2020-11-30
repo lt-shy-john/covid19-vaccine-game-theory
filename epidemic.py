@@ -120,8 +120,14 @@ class Epidemic:
             self.dV = self.vaccinated*self.S*self.Pro - self.resus*self.V
 
             if start == True:
-                print('*')
                 self.set_epidemic(1)
+                # Write longitudinal social network data
+                if (51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode) and self.contact_nwk.update_rule != None:
+                    if filename != '':
+                        write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
+                        write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
+                        write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
+                        write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
 
 
         except ValueError:
@@ -295,7 +301,7 @@ class Epidemic:
                 if seed < delta_pp[i]:
                     self.people[i].removed = 1
 
-            if seed <= self.remove:
+            if seed < self.remove:
                 self.people[i].removed = 1
 
     def infect(self):
@@ -431,6 +437,8 @@ class Epidemic:
         '''
         Assume there is a period of immunity since recovery.
         '''
+        if self.immune_time == 0:
+            return
         for i in range(len(self.people)):
             recent = self.people[i].compartment_history[-self.immune_time:]
             for j in range(len(recent)-1):
@@ -508,8 +516,18 @@ class Epidemic:
         if 51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode:
             if self.contact_nwk.update_rule == 'random':
                 self.contact_nwk.update_random_nwk()
+                if filename != '':
+                    write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
+                    write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
+                    write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
+                    write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
             elif self.contact_nwk.update_rule == 'XBS':
                 self.contact_nwk.update_xulvi_brunet_sokolov()
+                if filename != '':
+                    write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
+                    write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
+                    write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
+                    write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
             self.contact_nwk.update_nwk()
 
         self.get_states()
