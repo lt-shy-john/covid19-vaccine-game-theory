@@ -55,7 +55,7 @@ class Mode:
         if p == '':
             return P
         else:
-            return correct_para(p, pos=False)
+            return self.correct_para(p, pos=False)
 
     def correct_epi_para(self, p):
         '''
@@ -235,9 +235,16 @@ class Mode02(Mode):
             beta_new_dest = super().set_correct_epi_para(beta_new_dest_temp, 0.5)
             self.create_destination(new_dest_name, beta_new_dest)
             print(f'{new_dest_name} created. ')
+        print('\nPlease set reward for healthy below. ')
+        r_S_temp = input('rS >>> ')
+        self.rS = super().set_correct_para(r_S_temp, self.rS)
+        print('\nPlease set reward for infection below. ')
+        r_I_temp = input('rI >>> ')
+        self.rI = super().set_correct_para(r_I_temp, self.rI)
         self.create_setting()
         print('Setting applied to population. ')
         self.raise_flag()
+        print('\nMode 2 equipped. \n')
 
     def create_setting(self):
         '''
