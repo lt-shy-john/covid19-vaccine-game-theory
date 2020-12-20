@@ -61,6 +61,7 @@ class Person:
         self.gender = None  # 0 means male, 1 means female
 
         self.compartment_history = []
+        self.travel_history = []
         self.vaccine_history = []
         self.test_history = []
 
