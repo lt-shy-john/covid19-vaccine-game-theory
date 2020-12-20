@@ -188,11 +188,34 @@ class Mode01(Mode):
 02: Travel from overseas
 '''
 class Mode02(Mode):
+    '''
+    Travel from overseas
+
+    Attributes
+    ----------
+    overseas : dict
+        The list of overseas destination, and their transmission rate as values.
+    rS : float
+        Reward of not going overseas.
+    rI : float
+        Reward of going overseas.
+    overseasIsolation: dict
+        The list of overseas destination, and whether they have social isolation policies upon arrival as values (boolean).
+    localIsolation: bool
+        If local area has social isolation policies upon arrival.
+    isolationPeriod: int
+        Social isolation period when arriving a new place. 
+    '''
     def __init__(self, people):
         super().__init__(people,2)
         self.overseas = {'Some Places': 0}
         self.rS = 1
         self.rI = 1
+
+        # Isolation parameters.
+        self.overseasIsolation = {'Some Places': True}
+        self.localIsolation = True
+        self.isolationPeriod = 14
 
     def __call__(self):
         print('-------------------------')
@@ -205,13 +228,26 @@ class Mode02(Mode):
         '''
         Assign values to population
         '''
-        pass
+        for people in self.people:
+            people.A = 1  # Aware the destination has pandemic.
 
     def make_decision(self):
         '''
         Make decision based on circumstances in each time step.
         '''
-        pass
+        for people in self.people:
+            # The peron needs to decide to go overseas by now.
+            if people.overseas != None:
+                pass
+
+            # The person considers the place to visit.
+            destination = random.choice(list(self.overseas))
+            U_I = self.get_Mode02E0(self.people.index(person))
+            U_S = self.get_Mode02E1(self.people.index(person))
+
+            # Make decision
+            if U_I > U_S:
+                people.overseas = {destination: self.overseas[destination]}
 
     def get_Mode02E1(self, i):
         '''
@@ -223,7 +259,13 @@ class Mode02(Mode):
         '''
         Utility function for someone (i-th person) decides not to travel
         '''
-        return -self.rS
+        return self.rS
+
+    def returnOverseas(self):
+        '''
+        Come back from overseas. Option for 14 days isolation.
+        '''
+        pass
 
 '''
 04: Bounded rationality of vaccine
