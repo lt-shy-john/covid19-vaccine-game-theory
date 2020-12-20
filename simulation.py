@@ -122,6 +122,9 @@ class Simulation:
             print('Compartment history exported in \'{}-compartment.csv\''.format(self.filename))
             write.WriteTestingHistory(self, self.filename)
             print('COVID-19 testing records exported in \'{}-testing.csv\''.format(self.filename))
+            if 2 in self.modes:
+                write.writeTravelHistory(self, self.filename)
+                print('Travel history exported in \'{}-travel.csv\''.format(self.filename))
             if any(i in self.modes for i in [22, 23, 24]):
                 print('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
             elif 21 in self.modes:

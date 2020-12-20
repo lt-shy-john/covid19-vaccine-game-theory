@@ -2,6 +2,16 @@ import csv
 import networkx as nx
 import datetime
 
+def writeTravelHistory(obs, filename):
+    '''
+        Write everyone's travel history into a .csv file.
+    '''
+    filename = str(filename)+'-travel.csv'
+    with open(filename, 'a', newline='', encoding='utf8') as f:
+        writer = csv.writer(f)
+        for i in range(len(obs.people)):
+            writer.writerow(travel_history)
+
 def WriteStates(obs, filename):
     '''
         Write everyone's infected state into a .csv file.
