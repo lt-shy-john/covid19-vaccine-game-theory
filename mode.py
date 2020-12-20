@@ -222,6 +222,21 @@ class Mode02(Mode):
         print('You are creating mode 2. ')
         print('-------------------------\n')
         print('Please set the parameters below. ')
+        print('\nPlease set proportional parameter below. ')
+
+        print('\nPlease set new destination below. ')
+        print('(If none, please press enter)')
+        new_dest_name = None
+        while new_dest_name != '':
+            new_dest_name = input('>>> ')
+            if new_dest_name == '':
+                continue
+            beta_new_dest_temp = input('β >>> ')
+            beta_new_dest = super().set_correct_epi_para(beta_new_dest_temp, 0.5)
+            self.create_destination(new_dest_name, beta_new_dest)
+            print(f'{new_dest_name} created. ')
+        self.create_setting()
+        print('Setting applied to population. ')
         self.raise_flag()
 
     def create_setting(self):
@@ -231,6 +246,14 @@ class Mode02(Mode):
         for people in self.people:
             people.A = 1  # Aware the destination has pandemic.
 
+    def create_destination (self, new_dest_name, beta):
+        '''
+        When calling instance, an option to create more destinations.
+        '''
+        if new_dest_name == '':
+            return
+        self.overseasIsolation[new_dest_name] = beta
+
     def make_decision(self):
         '''
         Make decision based on circumstances in each time step.
@@ -238,7 +261,7 @@ class Mode02(Mode):
         for people in self.people:
             # The peron needs to decide to go overseas by now.
             if people.overseas != None:
-                pass
+                continue
 
             # The person considers the place to visit.
             destination = random.choice(list(self.overseas))
@@ -266,6 +289,16 @@ class Mode02(Mode):
         Come back from overseas. Option for 14 days isolation.
         '''
         pass
+
+    def writeTravelHistory(self):
+        '''
+        At each iteration, record where the person went.
+        '''
+        for person in self.people:
+            if person.overseas == None:
+                person.travel_history.append(0)
+            else:
+                person.travel_history.append(person.overseas)
 
 '''
 04: Bounded rationality of vaccine

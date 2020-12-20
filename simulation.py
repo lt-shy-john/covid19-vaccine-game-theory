@@ -109,6 +109,9 @@ class Simulation:
             # Epidemic network update
             epidemic.next(self.filename)
 
+            if 2 in self.modes:
+                self.modes[2].writeTravelHistory()
+
         print('\n=========== Result ============\n')
         print('There are {} people infected.'.format(epidemic.I))
         print('There are {} people vaccinated.'.format(epidemic.V))
