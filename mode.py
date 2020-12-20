@@ -204,7 +204,7 @@ class Mode02(Mode):
     localIsolation: bool
         If local area has social isolation policies upon arrival.
     isolationPeriod: int
-        Social isolation period when arriving a new place. 
+        Social isolation period when arriving a new place.
     '''
     def __init__(self, people):
         super().__init__(people,2)
@@ -259,7 +259,7 @@ class Mode02(Mode):
         '''
         Utility function for someone (i-th person) decides not to travel
         '''
-        return self.rS
+        return -self.rS
 
     def returnOverseas(self):
         '''
