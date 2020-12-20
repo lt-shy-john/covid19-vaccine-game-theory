@@ -290,7 +290,6 @@ def mode_settings(cmd, mode=None):
                 else:
                     mode.pop(1)
             elif int(cmd[i]) == 2:
-                mode02.set_proportion()
                 mode02()
                 if mode02.flag == 'X':
                     mode[2] = mode02
