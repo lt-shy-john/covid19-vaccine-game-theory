@@ -55,8 +55,6 @@ class Person:
         # Travelling overseas
         self.overseas = None
         self.A = None
-        self.rS_overseas = None
-        self.rI_overseas = None
 
         # Demographics
         self.age = None
