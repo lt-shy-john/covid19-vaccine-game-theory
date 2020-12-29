@@ -104,7 +104,7 @@ This simulation can be customised by setting different modes. You may set them v
 
 You should see the following:
 
-![Mode interface](/fig/InterfaceMode01.PNG)
+![Mode interface](/fig/InterfaceMode01.png)
 
 The interface will ask you to input the modes you wish to change them.
 * Input the ones you wish to add, separate them by space.
