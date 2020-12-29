@@ -31,6 +31,17 @@ Once you have opened `main.py`, you will see the interface like this.
 
 ![Initial interface](/fig/Interface01.PNG)
 
+### First use
+4. At this point, the command prompt will ask you to input the parameters.
+  * Number of people (N)
+  * Simulation time (T)
+  * Adoption rate (alpha)
+  * Infection rate (beta)
+  * Recovery rate (gamma)
+  * Rate to resuscept (phi)
+  * Removal rate (delta)
+5. After that you are in the main portal of the software. Input the command (see below) to continue.
+
 ## Usage
 
 ```bash
@@ -49,7 +60,7 @@ py main.py 10 3 0.8 0.3 0.5 0.1 0.005 run
 
 If you did not use `run` at the end, you will arrive to the interface. The program will ask your command prompt (capitals does not matter).
 
-* LOOK - View partner network.
+* LOOK - View contact network.
 * MODE - Change mode settings.
 * RUN/ START - Start the simulation.
 * SETTING - Set simulation settings.
