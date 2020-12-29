@@ -83,6 +83,10 @@ class Simulation:
             print('=========== t = {} ============\n'.format(t+1))
             print('N = {}'.format(len(self.people)))
             print('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
+            # Overseas travel
+            if 2 in self.modes:
+                if self.verbose_mode:
+                    print('!!! Overseas travel alert !!!')
             # Info network update
             if 21 in self.modes:
                 if any(i in self.modes for i in [22, 23]):

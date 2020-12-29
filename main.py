@@ -35,9 +35,9 @@ def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T
     phi = set_correct_epi_para(phi_temp, phi)
     delta_temp = input('delta >>> ')
     delta = set_correct_epi_para(delta_temp, delta)
-    cmd = input('Other parameters? [y/n]')
+    cmd = input('Other parameters? [y/n] ')
     if cmd == 'y':
-        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, group_size, verbose_mode)
+        N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode)
     population = Person.make_population(N)
     return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode
 
@@ -160,6 +160,41 @@ def usage():
     print('-f \t\t Export file name.')
     print('-h \t\t Usage.')
     print('run \t\t Run simulation, last argument.')
+
+def correct_bool_para(b):
+    '''
+    Convert the parameters into boolean.
+
+    Parameters
+    ----------
+    b: bool
+        Input.
+    '''
+    try:
+        if b == 'True':
+            b_bool = True
+        elif b == 'False':
+            b_bool = False
+        else:
+            raise ValueError ('Invalid boolean input. Please check your inputs. Default: True')
+        return b_bool
+    except ValueError:
+        b_bool = True
+        return b_bool
+
+def set_correct_bool_para(b, B):
+    '''
+    Convert the parameters into integers. If input is blank then do nothing.
+
+    Parameters:
+    p -- string input.
+    P -- original value.
+    pos -- If the parameter is positive number.
+    '''
+    if b == '':
+        return B
+    else:
+        return correct_bool_para(b, pos=False)
 
 def correct_para(p, pos=False):
     '''
@@ -374,6 +409,12 @@ def mode_settings(cmd, mode=None):
                 if (mode52.flag == 'X'):
                     print('Mode 52 has been activated. Mode 51 unable to start.')
                     break
+                elif (mode53.flag == 'X'):
+                    print('Mode 53 has been activated. Mode 51 unable to start.')
+                    break
+                elif (mode54.flag == 'X'):
+                    print('Mode 54 has been activated. Mode 51 unable to start.')
+                    break
                 mode51()
                 if mode51.flag == 'X':
                     mode[51] = mode51
@@ -382,6 +423,12 @@ def mode_settings(cmd, mode=None):
             elif int(cmd[i]) == 52:
                 if (mode51.flag == 'X'):
                     print('Mode 51 has been activated. Mode 52 unable to start.')
+                    break
+                elif (mode53.flag == 'X'):
+                    print('Mode 53 has been activated. Mode 51 unable to start.')
+                    break
+                elif (mode54.flag == 'X'):
+                    print('Mode 54 has been activated. Mode 51 unable to start.')
                     break
                 mode52()
                 if mode52.flag == 'X':
@@ -602,6 +649,28 @@ for i in range(len(sys.argv)):
                                 modes[1] = mode01
                             else:
                                 mode.pop(1)
+                        elif mode_flag == 2:
+                            if sys.argv[k][:4] == '*rI=':
+                                r_I_temp = mode02.rI
+                                r_I_config = sys.argv[k][4:]
+                                mode02.rI = set_correct_para(r_I_config, r_I_temp)
+                            elif sys.argv[k][:4] == '*rS=':
+                                r_S_temp = mode02.rI
+                                r_S_config = sys.argv[k][4:]
+                                mode02.rS = set_correct_para(r_S_config, r_S_temp)
+                            elif sys.argv[k][:4] == '*lI=':
+                                localIsolation_temp = True
+                                localIsolation_config = sys.argv[k][4:]
+                                mode02.localIsolation = set_correct_bool_para(localIsolation_config, localIsolation_temp)
+                            elif sys.argv[k][:4] == '*i=':
+                                mode02_isolation_period_config = sys.argv[k][3:]
+                                mode02.isolationPeriod = set_correct_para(mode02_isolation_period_config, mode02.isolationPeriod, pos=True)
+                            mode02.create_setting()
+                            mode02.raise_flag()
+                            if mode02.flag == 'X':
+                                modes[2] = mode02
+                            else:
+                                mode.pop(2)
                         elif mode_flag == 4:
                             if sys.argv[k][:3] == '*l=':
                                 lambda_BR = population[0].lambda_BR
