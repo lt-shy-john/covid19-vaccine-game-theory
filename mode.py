@@ -265,10 +265,13 @@ class Mode02(Mode):
         '''
         Make decision based on circumstances in each time step.
         '''
-        for people in self.people:
-            # The peron needs to decide to go overseas by now.
-            if people.overseas != None:
+        for person in self.people:
+            # If person is symptomatic, they cannot leave.
+            if person.suceptible == 1:
                 continue
+            # The person needs to decide to go overseas by now.
+            if person.overseas != None:
+                continue  # The person is in overseas
 
             # The person considers the place to visit.
             destination = random.choice(list(self.overseas))
@@ -277,7 +280,7 @@ class Mode02(Mode):
 
             # Make decision
             if U_I > U_S:
-                people.overseas = {destination: self.overseas[destination]}
+                person.overseas = {destination: self.overseas[destination]}
 
     def get_Mode02E1(self, i):
         '''
@@ -291,11 +294,14 @@ class Mode02(Mode):
         '''
         return -self.rS
 
+
     def returnOverseas(self):
         '''
         Come back from overseas. Option for 14 days isolation.
         '''
-        pass
+        for person in self.people:
+            if person.overseas+':hospitalised' in person.travel_history[-1]: 
+                continue
 
     def writeTravelHistory(self):
         '''
@@ -304,8 +310,17 @@ class Mode02(Mode):
         for person in self.people:
             if person.overseas == None:
                 person.travel_history.append(0)
-            else:
+                continue
+            if ':isolate' in history[len(history)-period]:
+                # Isolate overseas
                 person.travel_history.append(person.overseas)
+                continue
+            else:
+                # Travel freely
+                person.travel_history.append(person.overseas+':isolate')
+                continue
+            if person.suceptible == 1 and person.overseas != None:
+                person.travel_history.append(person.overseas+':hospitalised')
 
 '''
 04: Bounded rationality of vaccine

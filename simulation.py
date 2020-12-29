@@ -87,6 +87,7 @@ class Simulation:
             if 2 in self.modes:
                 if self.verbose_mode:
                     print('!!! Overseas travel alert !!!')
+                self.modes[2].make_decision()
             # Info network update
             if 21 in self.modes:
                 if any(i in self.modes for i in [22, 23]):
