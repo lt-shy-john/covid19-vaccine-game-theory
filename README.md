@@ -29,7 +29,7 @@ After installing all essential packages, you will need to download all `.py` fil
 
 Once you have opened `main.py`, you will see the interface like this.
 
-![Initial interface](/fig/Interface01.png)
+![Initial interface](/fig/Interface01.PNG)
 
 ## Usage
 
