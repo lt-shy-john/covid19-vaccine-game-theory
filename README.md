@@ -1,6 +1,8 @@
 # COVID-19 Vaccine Simulation
 
-This is a simulation package written in Python 3 for understanding the upcoming vaccine adoption from the behavioural aspect.
+This is a simulation package written in Python 3 for understanding the upcoming vaccine adoption from the behavioural aspect. This is a agent-based modelling and incorporates game theoretical measures, longitudinal social network and local majority rules.
+
+The work is published under a capstone project under Master of Complex System provided by Centre of Complex Systems, University of Sydney. This work is still work in progress with additional functions adding here soon. :satisfied:
 
 ## Getting Started
 
@@ -9,7 +11,7 @@ You may need the following Python libraries
 * `networkx`
 * `matplotlib`
 
-These libraries are common external ones. In case you need to use
+These libraries are the common external libraries. In case you need to install them, use
 ```bash
 pip install numpy
 ```
@@ -19,8 +21,6 @@ pip install networkx
 ```bash
 pip install matplotlib
 ```
-
-After installing all essential packages, you will need to download all `.py` files in this repository.
 
 ### Install
 1. Install all required package as previous.
@@ -35,14 +35,21 @@ Once you have opened `main.py`, you will see the interface like this.
 4. At this point, the command prompt will ask you to input the parameters.
   * Number of people (N)
   * Simulation time (T)
-  * Adoption rate (alpha)
-  * Infection rate (beta)
-  * Recovery rate (gamma)
-  * Rate to resuscept (phi)
-  * Removal rate (delta)
-5. After that you are in the main portal of the software. Input the command (see below) to continue.
+  * Adoption rate (α)
+  * Infection rate (β)
+  * Recovery rate (γ)
+  * Rate to resuscept (φ)
+  * Removal rate (δ)
+5. After that you are in the main portal of the software. Input the command (case insensitive) to continue.
+  * `LOOK` - View contact network.
+  * `MODE` - Change mode settings.
+  * `RUN`/ `START` - Start the simulation.
+  * `SETTING` - Set simulation settings.
+  * `OTHER SETTING` - Set auxiliary simulation parameters.
+  * `SUMMARY` - Print the simulation parameters.
+  * `QUIT`/ `Q` - Quit the software.
 
-## Usage
+## Advanced Usage
 
 ```bash
 python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n\
@@ -60,16 +67,16 @@ py main.py 10 3 0.8 0.3 0.5 0.1 0.005 run
 
 If you did not use `run` at the end, you will arrive to the interface. The program will ask your command prompt (capitals does not matter).
 
-* LOOK - View contact network.
-* MODE - Change mode settings.
-* RUN/ START - Start the simulation.
-* SETTING - Set simulation settings.
-* OTHER SETTING - Set auxiliary simulation parameters.
-* SUMMARY - Print the simulation parameters.
-* QUIT/ Q - Quit the software.
+* `LOOK` - View contact network.
+* `MODE` - Change mode settings.
+* `RUN`/ `START` - Start the simulation.
+* `SETTING` - Set simulation settings.
+* `OTHER SETTING` - Set auxiliary simulation parameters.
+* `SUMMARY` - Print the simulation parameters.
+* `QUIT`/ `Q` - Quit the software.
 
-### Mode
-This simulation can be customised by setting different modes. You may set them via express mode or under `MODE` comand. This simulation offers the following modes:
+## Mode
+This simulation can be customised by setting different modes. You may set them via express mode or under `MODE` command. This simulation offers the following modes:
 
 * 01 Living in city/rural
 * 02 Travelled back from overseas
@@ -95,10 +102,21 @@ This simulation can be customised by setting different modes. You may set them v
 * 53: Small world topology
 * 54: Lattice network
 
+You should see the following:
+
+![Mode interface](/fig/Interface01.PNG)
+
+The interface will ask you to input the modes you wish to change them.
+* Input the ones you wish to add, separate them by space.
+* If you want to remove a mode, use the command `-dp` and input the modes you wish to remove after this (separate modes by spaces).
+
 _Note: Not all modes have been equipped. You will not see anything if you tried to set up those._
+_Note: The removal function does not remove the relevant attributes, it may not behave as expected._
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome! :rocket::rocket:
+
+For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
