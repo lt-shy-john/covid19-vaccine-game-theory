@@ -22,6 +22,15 @@ pip install matplotlib
 
 After installing all essential packages, you will need to download all `.py` files in this repository.
 
+### Install
+1. Install all required package as previous.
+2. Fork this repository.
+3. To start simulation, you will open the `main.py` file in the repository (See usage below). I recommend to open the command line first and open in there.
+
+Once you have opened `main.py`, you will see the interface like this.
+
+![Initial interface](/fig/Interface01.png)
+
 ## Usage
 
 ```bash
