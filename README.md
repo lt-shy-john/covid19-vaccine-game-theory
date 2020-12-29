@@ -110,6 +110,8 @@ The interface will ask you to input the modes you wish to change them.
 * Input the ones you wish to add, separate them by space.
 * If you want to remove a mode, use the command `-dp` and input the modes you wish to remove after this (separate modes by spaces).
 
+After that you will enter setting the configuration of the modes, and they will ask you if you want to return to the main portal or the mode menu. When a mode is activated, you will see a `X` mark next to the mode selection. 
+
 _Note: Not all modes have been equipped. You will not see anything if you tried to set up those._
 _Note: The removal function does not remove the relevant attributes, it may not behave as expected._
 
