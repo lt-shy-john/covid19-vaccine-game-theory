@@ -356,11 +356,18 @@ class Epidemic:
                 continue
             if self.people.overseas != None and 2 in self.mode:
                 if self.verbose_mode == True:
-                    print(f'{self.people.id} is in ovserseas. ')
+                    print(f'{self.people.id} is in ovserseas. ', end='')
+                if self.mode[2].is_isolated_overseas():
+                    if self.verbose_mode == True:
+                        print('(Isolated)*')
+                    continue
                 if seed < self.people.overseas[list(self.people[i].overseas.keys())[0]]:
+                    if self.verbose_mode == True:
+                        print('(Infected)')
                     self.people[i].suceptible = 1
+                else: print()
                 continue
-                
+
             '''
             Normal infection event
             '''
