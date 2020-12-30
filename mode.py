@@ -212,10 +212,13 @@ class Mode02(Mode):
         self.rS = 1
         self.rI = 1
 
-        # Isolation parameters.
+        # Isolation parameters
         self.overseasIsolation = {'Some Places': True}
         self.localIsolation = True
         self.isolationPeriod = 14
+
+        # Return parameters
+        self.return_prob = {'Some Places': 0.14}
 
     def __call__(self):
         print('-------------------------')
@@ -267,11 +270,11 @@ class Mode02(Mode):
         '''
         for person in self.people:
             # If person is symptomatic, they cannot leave.
-            if person.suceptible == 1:
+            if person.suceptible == 1 and person.exposed == 1:
                 continue
             # The person needs to decide to go overseas by now.
             if person.overseas != None:
-                continue  # The person is in overseas
+                continue  # The person is in overseas already
 
             # The person considers the place to visit.
             destination = random.choice(list(self.overseas))
@@ -294,14 +297,26 @@ class Mode02(Mode):
         '''
         return -self.rS
 
+    def is_isolated_overseas(self, i):
+        '''
+        Isolation while overseas, unable to contact with disease.
+        '''
+        if self.overseasIsolation[list(self.people[i].overseas.keys())[0]]:
+            return True
+        return False
+
 
     def returnOverseas(self):
         '''
         Come back from overseas. Option for 14 days isolation.
         '''
         for person in self.people:
-            if person.overseas+':hospitalised' in person.travel_history[-1]: 
+            if person.overseas+':hospitalised' in person.travel_history[-1]:
                 continue
+
+            seed  =  random.randint(0,1000)/1000
+            if seed < self.return_prob[list(person.overseas.keys())[0]]:
+                person.overseas = None
 
     def writeTravelHistory(self):
         '''
@@ -311,15 +326,20 @@ class Mode02(Mode):
             if person.overseas == None:
                 person.travel_history.append(0)
                 continue
-            if ':isolate' in history[len(history)-period]:
-                # Isolate overseas
+            recent_travel_history = []
+            for i in reversed(range(len(person.travel_history))):
+                if type(person.travel_history) != str:
+                    break
+                recent_travel_history.append(person.travel_history[i])
+            if len(recent_travel_history) >= self.isolationPeriod:
                 person.travel_history.append(person.overseas)
-                continue
+                    continue
             else:
-                # Travel freely
                 person.travel_history.append(person.overseas+':isolate')
-                continue
-            if person.suceptible == 1 and person.overseas != None:
+                    continue
+            recent_travel_history = []
+
+            if person.suceptible == 1 and person.exposed == 1 and person.overseas != None:
                 person.travel_history.append(person.overseas+':hospitalised')
 
 '''
