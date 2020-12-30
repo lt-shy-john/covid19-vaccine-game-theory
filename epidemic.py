@@ -354,7 +354,16 @@ class Epidemic:
                 if seed < beta_pp[i]:
                     self.people[i].suceptible = 1
                 continue
-            # Normal infection event
+            if self.people.overseas != None and 2 in self.mode:
+                if self.verbose_mode == True:
+                    print(f'{self.people.id} is in ovserseas. ')
+                if seed < self.people.overseas[list(self.people[i].overseas.keys())[0]]:
+                    self.people[i].suceptible = 1
+                continue
+                
+            '''
+            Normal infection event
+            '''
             if seed < self.infection:
                 self.people[i].suceptible = 1
 
