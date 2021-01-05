@@ -334,9 +334,13 @@ class Epidemic:
             '''
             Infect (or not)
             '''
-            if self.people[i].suceptible == 1 or self.people[i].removed == 1 :
+            if self.people[i].suceptible == 1:
                 if self.verbose_mode == True:
-                    print(f'{self.people[i].id} will not be infected. ')
+                    print(f'{self.people[i].id} has already been infected and will not be infected. ')
+                continue  # Skip
+            if self.people[i].removed == 1 :
+                if self.verbose_mode == True:
+                    print(f'{self.people[i].id} is removed and will not be infected. ')
                 continue  # Skip
 
             if 11 not in self.mode and self.people[i].vaccinated == 1:
@@ -354,14 +358,14 @@ class Epidemic:
                 if seed < beta_pp[i]:
                     self.people[i].suceptible = 1
                 continue
-            if self.people.overseas != None and 2 in self.mode:
+            if self.people[i].overseas != None and 2 in self.mode:
                 if self.verbose_mode == True:
-                    print(f'{self.people.id} is in ovserseas. ', end='')
-                if self.mode[2].is_isolated_overseas():
+                    print(f'{self.people[i].id} is in overseas. ', end='')
+                if self.mode[2].is_isolated_overseas(i):
                     if self.verbose_mode == True:
-                        print('(Isolated)*')
+                        print('(Isolated)')
                     continue
-                if seed < self.people.overseas[list(self.people[i].overseas.keys())[0]]:
+                if seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]:
                     if self.verbose_mode == True:
                         print('(Infected)')
                     self.people[i].suceptible = 1
@@ -372,6 +376,8 @@ class Epidemic:
             Normal infection event
             '''
             if seed < self.infection:
+                if self.verbose_mode == True:
+                    print(f'{self.people[i].id} is infected. ')
                 self.people[i].suceptible = 1
 
     def social_contact(self):
