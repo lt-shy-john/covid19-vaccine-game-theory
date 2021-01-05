@@ -52,7 +52,7 @@ Once you have opened `main.py`, you will see the interface like this.
 ## Advanced Usage
 
 ```bash
-python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n\
+python3 main.py [(N) (T) (α) (β) (γ) (φ) (δ)] ...\n\
   [-m]  <modes_config>] [-f (filename)] [-verbose | --v] [run]
 ```
 
