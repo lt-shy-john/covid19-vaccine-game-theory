@@ -4,6 +4,21 @@ This is a simulation package written in Python 3 for understanding the upcoming 
 
 The work is published under a capstone project under Master of Complex System provided by Centre of Complex Systems, University of Sydney. This work is still work in progress with additional functions adding here soon. :satisfied:
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [COVID-19 Vaccine Simulation](#covid-19-vaccine-simulation)
+  - [Getting Started](#getting-started)
+    - [Install](#install)
+    - [First use](#first-use)
+  - [Advanced Usage](#advanced-usage)
+  - [Mode](#mode)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Getting Started
 
 You may need the following Python libraries
