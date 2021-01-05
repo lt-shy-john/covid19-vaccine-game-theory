@@ -129,7 +129,7 @@ def help():
     print('QUIT/ Q - Quit the software.')
 
 def usage():
-    print('Usage: python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n\
+    print('Usage: python3 main.py [(N) (T) (α) (β) (γ) (φ) (δ)] ...\n\
     [-m  <modes_config>] [-f (filename)] [-verbose | --v] [run]\n')
     print('-immune_time \t Immune time after recovered, in days.')
     print('-test_rate \t COVID-19 testing rate.')
@@ -194,7 +194,7 @@ def set_correct_bool_para(b, B):
     if b == '':
         return B
     else:
-        return correct_bool_para(b, pos=False)
+        return correct_bool_para(b)
 
 def correct_para(p, pos=False):
     '''
@@ -498,7 +498,7 @@ elif len(sys.argv) > 1:
         delta = correct_epi_para(sys.argv[7])
     except:
         print('Exception encountered. Leaving program...')
-        print('Usage: python3 main.py [(N) (T) (alpha) (beta) (gamma) (phi) (delta)] ...\n[-m <modes_config>] [-f (filename)] [run]\n')
+        print('Usage: python3 main.py [(N) (T) (α) (β) (γ) (φ) (δ)] ...\n[-m <modes_config>] [-f (filename)] [run]\n')
         quit()
 print()
 
@@ -536,7 +536,7 @@ filename = ''  # Default file name to export (.csv). Change when use prompt 'exp
 mode_master_list = []
 # All objects should add into mode_master_list
 mode01 = mode.Mode01(population)
-mode02 = mode.Mode02(population)
+mode02 = mode.Mode02(population, beta)
 mode04 = mode.Mode04(population, alpha)
 mode05 = mode.Mode05(population, contact_nwk)
 mode07 = mode.Mode07(population, beta, delta)
