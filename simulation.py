@@ -87,7 +87,9 @@ class Simulation:
             if 2 in self.modes:
                 if self.verbose_mode:
                     print('!!! Overseas travel alert !!!')
-                self.modes[2].make_decision()
+                self.modes[2].returnOverseas(self.verbose_mode)
+                self.modes[2].make_decision(self.verbose_mode)
+
             # Info network update
             if 21 in self.modes:
                 if any(i in self.modes for i in [22, 23]):
@@ -115,7 +117,7 @@ class Simulation:
             epidemic.next(self.filename)
 
             if 2 in self.modes:
-                self.modes[2].writeTravelHistory()
+                self.modes[2].writeTravelHistory(self.verbose_mode)
 
         print('\n=========== Result ============\n')
         print('There are {} people infected.'.format(epidemic.I))
