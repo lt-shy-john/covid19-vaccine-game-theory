@@ -321,6 +321,8 @@ class Mode02(Mode):
         '''
         if not self.localIsolation:
             return False
+        if len(self.people[i].travel_history) < 1:
+            return False
 
         if type(self.people[i].travel_history[-1]) == str:
             if verbose:
