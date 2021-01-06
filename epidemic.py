@@ -371,6 +371,10 @@ class Epidemic:
                     self.people[i].suceptible = 1
                 else: print()
                 continue
+            elif self.people[i].overseas == None and 2 in self.mode:
+                # Check if person is isolated back home. 
+                if is_isolated_local(i, self.verbose_mode):
+                    continue
 
             '''
             Normal infection event
