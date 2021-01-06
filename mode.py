@@ -315,6 +315,31 @@ class Mode02(Mode):
             return True
         return False
 
+    def is_isolated_local(self, i, verbose=False):
+        '''
+        Isolation while back from overseas, unable to contact with disease.
+        '''
+        if not self.localIsolation:
+            return False
+
+        if type(self.people[i].travel_history[-1]) == str:
+            if verbose:
+                print('\tDebug: The person is in overseas. ')
+            return False
+        days_back_in_local = 0
+        for i in reversed(range(len(self.people[i].travel_history))):
+            if type(self.people[i].travel_history[i]) == str:
+                break
+            # if verbose:
+            #     print('\tDebug:', self.people[i].travel_history[i])
+            days_back_in_local += 1
+
+        if days_back_in_local > self.isolationPeriod:
+            if verbose:
+                print('\tPerson is quarantined. {} > {}'.format(days_back_in_local, self.isolationPeriod))
+            return True
+        else: return False
+
 
     def returnOverseas(self, verbose=False):
         '''
