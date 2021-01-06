@@ -209,7 +209,7 @@ class Mode02(Mode):
     def __init__(self, people, main_beta):
         super().__init__(people,2)
         self.overseas = {'Some Places': 0}
-        self.travel_prob = 0.2
+        self.travel_prob = 0.1
         self.rS = 1
         self.rI = 1
         self.beta = main_beta
@@ -280,6 +280,7 @@ class Mode02(Mode):
             if person.overseas != None:
                 continue  # The person is in overseas already
             seed  =  random.randint(0,1000)/1000
+            print(f'\t{seed} : {self.travel_prob} => {person.id} {seed < self.travel_prob}')
             if seed >= self.travel_prob:
                 continue
 
@@ -328,9 +329,14 @@ class Mode02(Mode):
             if verbose:
                 print('\tDebug: The person is in overseas. ')
             return False
+
         days_back_in_local = 0
-        for i in reversed(range(len(self.people[i].travel_history))):
-            if type(self.people[i].travel_history[i]) == str:
+        for t in reversed(range(len(self.people[i].travel_history))):
+            if t == 0:
+                if verbose:
+                    print('\tThe person has never travelled. ')
+                return False
+            elif type(self.people[i].travel_history[t]) == str:
                 break
             # if verbose:
             #     print('\tDebug:', self.people[i].travel_history[i])
