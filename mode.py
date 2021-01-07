@@ -280,7 +280,8 @@ class Mode02(Mode):
             if person.overseas != None:
                 continue  # The person is in overseas already
             seed  =  random.randint(0,1000)/1000
-            print(f'\t{seed} : {self.travel_prob} => {person.id} {seed < self.travel_prob}')
+            if verbose:
+                print(f'\t{seed} : {self.travel_prob} => {person.id} {seed < self.travel_prob}')
             if seed >= self.travel_prob:
                 continue
 
@@ -386,14 +387,16 @@ class Mode02(Mode):
         ----
         Use this function if the person is known to be in overseas.
         '''
-        print(f'\t== Debugging: Recent travel history of {person.id} ==')
+        if verbose:
+            print(f'\t== Debugging: Recent travel history of {person.id} ==')
         recent_travel_history = []
         recent_destination = list(person.overseas.keys())[0]
         for i in reversed(range(len(person.travel_history))):
             if len(recent_travel_history) > 0 and recent_destination not in str(recent_travel_history[-1]):
                 break
             recent_travel_history.append(person.travel_history[i])
-        print(f'\t   {recent_travel_history}')
+        if verbose:
+            print(f'\t   {recent_travel_history}')
         return recent_travel_history
 
     def writeTravelHistory(self, verbose=False):
