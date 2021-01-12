@@ -310,11 +310,16 @@ class Epidemic:
         '''
 
         # Network contact controlled by Epidemic.social_contact()
-        if (51 in self.mode) or (52 in self.mode) or (53 in self.mode) or (54 in self.mode):
+        if any(i in self.mode for i in [51, 52, 53, 53]):
             if self.verbose_mode == True:
                 print('Social contact applies to infection. ')
             self.social_contact()
+
+            for i in range(len(self.people)):
+                if self.people[i].overseas != None and 2 in self.mode:
+                    self.overseas_infect(i)
             return
+
         # Creating customised infection parameter for each person.
         beta_pp = np.ones(len(self.people))
         for i in range(len(self.people)):
@@ -359,21 +364,11 @@ class Epidemic:
                     self.people[i].suceptible = 1
                 continue
             if self.people[i].overseas != None and 2 in self.mode:
-                if self.verbose_mode == True:
-                    print(f'{self.people[i].id} is in overseas. ', end='')
-                if self.mode[2].is_isolated_overseas(i):
-                    if self.verbose_mode == True:
-                        print('(Isolated)')
-                    continue
-                if seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]:
-                    if self.verbose_mode == True:
-                        print('(Infected)')
-                    self.people[i].suceptible = 1
-                else: print()
+                self.overseas_infect(i)
                 continue
             elif self.people[i].overseas == None and 2 in self.mode:
-                # Check if person is isolated back home. 
-                if is_isolated_local(i, self.verbose_mode):
+                # Check if person is isolated back home.
+                if self.mode[2].is_isolated_local(i, self.verbose_mode):
                     continue
 
             '''
@@ -429,6 +424,33 @@ class Epidemic:
                 edge[1].suceptible = 1
                 if self.verbose_mode == True:
                     print(f'{edge[0].id}-{edge[1].id} pair is infected.')
+
+    def overseas_infect(self, i):
+        '''
+        People infect from overseas.
+        '''
+
+        if self.verbose_mode == True:
+            print(f'\t{self.people[i].id} is in overseas. ', end='')
+
+        if self.mode[2].is_isolated_overseas(i):
+            if self.verbose_mode == True:
+                print('(Isolated)')
+            return
+        if self.verbose_mode == True:
+            print('... ', end='')
+        seed = random.randint(0,1000)/1000
+        if self.verbose_mode == True:
+            print(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}', end='')
+
+        if self.people[i].suceptible == 1:
+            if self.verbose_mode == True:
+                print('(Infected*)')
+        elif seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]:
+            if self.verbose_mode == True:
+                print('(Infected)')
+            self.people[i].suceptible = 1
+        else: print()
 
     def infection_clock(self, i):
         if self.people[i].infection_clock > 14:
