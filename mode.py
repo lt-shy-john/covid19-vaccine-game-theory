@@ -208,7 +208,7 @@ class Mode02(Mode):
     '''
     def __init__(self, people, main_beta):
         super().__init__(people,2)
-        self.overseas = {'Some Places': 0}
+        self.overseas = {'Some Places': 0.14}
         self.travel_prob = 0.1
         self.rS = 1
         self.rI = 1
@@ -313,9 +313,24 @@ class Mode02(Mode):
         '''
         Isolation while overseas, unable to contact with disease.
         '''
-        if self.overseasIsolation[list(self.people[i].overseas.keys())[0]]:
+        if not self.overseasIsolation[list(self.people[i].overseas.keys())[0]]:
+            return False
+        if len(self.people[i].travel_history) < 1:
+            return False   # Simulation immature to isolate people overseas
+
+        if type(self.people[i].travel_history[-1]) != str:
+            return False   # The person is not in overseas.
+
+        if 'isolate' in self.people[i].travel_history[-1]:
             return True
-        return False
+        else:
+            return False
+
+        if days_back_in_local > self.isolationPeriod:
+            if verbose:
+                print('\tPerson is quarantined. {} > {}'.format(days_back_in_local, self.isolationPeriod))
+            return True
+        else: return False
 
     def is_isolated_local(self, i, verbose=False):
         '''
