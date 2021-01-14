@@ -251,10 +251,10 @@ class Epidemic:
 
     def vaccinate(self):
         for i in range(len(self.people)):
+            seed = random.randint(0,10000)/10000
             if 4 in self.mode:
                 if self.verbose_mode == True:
                     print(self.mode[4].P_Alpha[i])
-                seed = random.randint(0,10000)/10000
                 if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
                     if self.verbose_mode == True:
                         print(f'{self.people[i].id} has decided to take vaccine. ')
@@ -273,6 +273,11 @@ class Epidemic:
                 continue
             if self.people[i].suceptible == 1:
                 continue
+
+            if seed < self.vaccinated and self.people[i].vaccinated == 0:
+                if self.verbose_mode == True:
+                    print(f'{self.people[i].id} has decided to take vaccine. ')
+                self.people[i].vaccinated = 1
 
     def removed(self):
         '''
