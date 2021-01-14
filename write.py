@@ -10,7 +10,7 @@ def writeTravelHistory(obs, filename):
     with open(filename, 'a', newline='', encoding='utf8') as f:
         writer = csv.writer(f)
         for i in range(len(obs.people)):
-            writer.writerow(travel_history)
+            writer.writerow(obs.people[i].travel_history)
 
 def WriteStates(obs, filename):
     '''
@@ -263,8 +263,34 @@ def WriteSummary(obs, filename):
                     contents.append('Rewire type: {}\n'.format(obs.contact_nwk.assort))
                 contents.append('Average degree per time step stored in "{}-nwk-deg.csv"\n'.format(obs.filename))
                 contents.append('Assortativity information per time step stored in "{}-nwk-assort.csv"\n'.format(obs.filename))
-        if any(i in obs.modes for i in [1, 7, 8]):
-            contents.append('\n## Longitudinal Network \n')
-            contents.append('# Notes\n')
+        if 2 in obs.modes:
+            contents.append('\n# Overseas travel \n')
+            contents.append('  Location\tBeta\tIsolation\tReturn prob\n')
+            contents.append('  --------\t----\t---------\t-----------\n')
+            for loc, b in obs.modes[2].overseas.items():
+                contents.append(f'  {loc}\t{b}\t{obs.modes[2].overseasIsolation[loc]}\t{obs.modes[2].return_prob[loc]} ')
+            contents.append(f'Isolation period: {obs.modes[2].isolationPeriod} \n')
+            contents.append('\n## Local implementation \n')
+            if obs.modes[2].localIsolation:
+                contents.append(f'Isolation period: {obs.modes[2].isolationPeriod} \n')
+            else:
+                contents.append(f'Isolation period: 0 \n')
+            contents.append('\n## Game Theoretical Attributes \n')
+            contents.append(f'rI: {obs.modes[2].rI} \n')
+            contents.append(f'rS: {obs.modes[2].rS} \n\n')
+            contents.append(f'Travel prob: {obs.modes[2].travel_prob} \n')
+            contents.append(f'Return prob: \n')
+            contents.append('  Location\tReturn prob\n')
+            for loc, b in obs.modes[2].overseas.items():
+                contents.append(f'  {loc}\t{obs.modes[2].return_prob[loc]} ')
+
+        contents.append('\n# Notes\n')
+        if 2 in obs.modes:
+            contents.append('* Reward for travel: rI\n')
+            contents.append('* Reward for not to travel: rS\n')
+
+        contents.append('\n## COVID-19 Information\n')
+        contents.append('Please see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7270519/ for compartment. The actual compartment model is described in https://github.com/lt-shy-john/covid19-vaccine-game-theory/blob/main/report/report.pdf. ')
+        if any(i in obs.modes for i in [1, 7, 8, 10, 11, 14]):
             contents.append('* Epidemic parameter controlled by optional modes. Consult the relevant modes for more information. \n')
         f.writelines(contents)
