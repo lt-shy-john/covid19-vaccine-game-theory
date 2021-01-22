@@ -120,6 +120,8 @@ class ContactNwk:
         '''
         for s_node in self.nwk_graph.nodes():
             for t_node in self.nwk_graph.nodes():
+                if self.verbose_mode:
+                    print('Updating contact network with indepdent rules. ')
                 seed = random.randint(0,10000)/10000
                 # Bond
                 if seed < self.l1 and ((s_node.id,t_node.id) not in self.network or (t_node.id,s_node.id) not in self.network):
