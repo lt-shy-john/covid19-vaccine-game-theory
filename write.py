@@ -253,11 +253,11 @@ def WriteSummary(obs, filename):
             contents.append('Assortativity: {}\n'.format(nx.degree_assortativity_coefficient(obs.contact_nwk.nwk_graph)))
             if obs.contact_nwk.update_rule != None:
                 contents.append('\n## Longitudinal network \n')
-                if obs.contact_nwk.update_rule != 'random':
+                if obs.contact_nwk.update_rule == 'random':
                      contents.append('Type: Independent\n')
                      contents.append('Probability to bond (l0): {}\n'.format(obs.contact_nwk.l0))
                      contents.append('Probability to debond (l1): {}\n'.format(obs.contact_nwk.l1))
-                elif obs.contact_nwk.update_rule != 'XBS':
+                elif obs.contact_nwk.update_rule == 'XBS':
                     contents.append('Type: XBS\n')
                     contents.append('Rewire probability: {}\n'.format(obs.contact_nwk.PUpdate))
                     contents.append('Rewire type: {}\n'.format(obs.contact_nwk.assort))
@@ -284,7 +284,7 @@ def WriteSummary(obs, filename):
             for loc, b in obs.modes[2].overseas.items():
                 contents.append(f'  {loc}\t{obs.modes[2].return_prob[loc]} ')
 
-        contents.append('\n# Notes\n')
+        contents.append('\n\n# Notes\n')
         if 2 in obs.modes:
             contents.append('* Reward for travel: rI\n')
             contents.append('* Reward for not to travel: rS\n')
