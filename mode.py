@@ -1106,7 +1106,7 @@ class Mode52(Mode):
         super().__init__(people,52)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
-        self.m = 1  # Pairing probability
+        self.m = 1  # No. of new edges linked 
 
     def set_network(self):
         '''
