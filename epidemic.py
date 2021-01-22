@@ -567,7 +567,11 @@ class Epidemic:
         self.infected()
         self.immune()
         if 51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode:
+            if self.verbose_mode:
+                print('Entering contact network updates...', end=' ')
             if self.contact_nwk.update_rule == 'random':
+                if self.verbose_mode:
+                    print('(Ind)')
                 self.contact_nwk.update_random_nwk()
                 if filename != '':
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
@@ -575,6 +579,8 @@ class Epidemic:
                     write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
             elif self.contact_nwk.update_rule == 'XBS':
+                if self.verbose_mode:
+                    print('(XBS)')
                 self.contact_nwk.update_xulvi_brunet_sokolov()
                 if filename != '':
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
