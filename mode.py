@@ -1,6 +1,7 @@
 from person import Person
 
 import random
+import math
 import networkx as nx
 import numpy as np
 
@@ -322,15 +323,11 @@ class Mode02(Mode):
             return False   # The person is not in overseas.
 
         if 'isolate' in self.people[i].travel_history[-1]:
-            return True
-        else:
-            return False
-
-        if days_back_in_local > self.isolationPeriod:
             if verbose:
                 print('\tPerson is quarantined. {} > {}'.format(days_back_in_local, self.isolationPeriod))
             return True
-        else: return False
+        else:
+            return False
 
     def is_isolated_local(self, i, verbose=False):
         '''
@@ -811,18 +808,33 @@ class Mode20(Mode):
     def __init__(self, people, contact_nwk, beta):
         super().__init__(people,20)
         self.contact_nwk = contact_nwk
-        self.rV = 1
-        self.rI = -1
         self.beta = beta
         self.local_infection_p = np.ones(len(self.people))  # The proportion, not number of cases.
         self.theta = np.ones(len(self.people))
 
         # Weights on local and global pereption
         self.rho = 1
-
         self.ProbV = np.ones(len(self.people))
 
-    def set_perceived_infection(self, global_infection):
+        # Payoff of each person based on:
+        # * cV (cost of vaccination), or cI (cost of infection)
+        # * Vaccinated or not
+        # * Information spread
+        self.cV = 1
+        self.cI = 1
+        self.cV_ls = np.ones(len(self.people)) * self.cV
+        self.cV_ls = np.ones(len(self.people)) * self.cI
+        # Increament of perceived risk
+        self.kV = 0.6
+        self.kI = 0.7
+        # Spread of information
+        self.sV = 0.8
+        self.sI = 0.8
+        # Prob advere event
+        self.pV = 0.5
+        self.pI = 0.5
+
+    def set_perceived_infection(self, global_infection, verbose=False):
         # Clear objects
         self.theta = np.ones(len(self.people))
         self.local_infection_p = np.ones(len(self.people))
@@ -837,14 +849,132 @@ class Mode20(Mode):
                     pass
             return
         if self.contact_nwk.network != None:
+            # If contact network exists
             for i in range(len(self.people)):
                 for neighbour in self.contact_nwk.nwk_graph.neighbours(self.people[i]):
-                    local_infection[i] += 1
-            print(f'There are {local_infection[i]} people infected around {self.people[i].id}. ')
+                    if neigbour.suceptible == 1:
+                        local_infection[i] += 1
+                if verbose:
+                    print(f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbours(self.people[i])))} contacts infected. ')
             self.local_infection_p = local_infection/len(self.people)
             self.theta = np.add(self.local_infection_p * self.rho, np.ones(len(self.people)) * global_infection * (1-self.rho))
         else:
-            pass
+            self.theta *= global_infection
+            self.local_infection_p *= global_infection
+
+    def assign_costs(self):
+        '''
+        Assign Mode20.cV and Mode20.cI to each person as initial values.
+        '''
+        for person in self.people:
+            person.cV = self.cV
+            person.cI = self.cI
+
+    def event_vaccinated(self, i, verbose=False):
+        if verbose:
+            print(f'{self.people[i].id} is vaccinated, passing info to others... ')
+        incr_cV = np.ones(len(self.people))
+
+        # Adverse event
+        seed = random.randint(0,10000)/10000
+        if seed < self.pV:
+            if self.contact_nwk != None:
+                self.event_vaccinated_dfs(i,verbose)
+            else:
+                self.event_vaccinated_mixed(i,verbose)
+
+    def event_vaccinated_mixed(self, i, verbose=False):
+        '''
+        Randomly pick neighbours and implement adverse event to them.
+        '''
+        other_person = random.choice(self.people)
+        other_person += self.kV * self.sV
+
+    def event_vaccinated_dfs(self, i, verbose=False):
+        '''
+        Run a DFS to all neigbours.
+        '''
+        visited = []
+        layered_ls = []
+        d = 1
+        while len(visited) < len(self.contact_nwk.nodes):
+            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(g, source=node, depth_limit=d))
+            # print(layer)
+            layered_ls.append(layer)
+            layered_ls[-1] = layered_ls[-1].difference(visited)
+
+            # Add costs to vaccination
+            for n in layered_ls[-1]:
+                if n == node:
+                    continue
+                n.cV += (self.kV * self.sV)**d
+                # print(n.cV+(d-1))
+            d += 1
+
+            # Fulfill visited ls
+            for n in layer:
+                visited.append(n)
+        # return layered_ls
+
+    def event_infected(self, i, verbose=False):
+        if verbose:
+            print(f'{self.people[i].id} is infected, passing info to others... ')
+        incr_cI = np.ones(len(self.people))
+
+        # Adverse event
+        seed = random.randint(0,10000)/10000
+        if seed < self.pI:
+            if self.contact_nwk != None:
+                self.event_infected_dfs(i,verbose)
+            else:
+                self.event_infected_mixed(i,verbose)
+
+    def event_infected_dfs(self, i, verbose=False):
+        '''
+        Run a DFS to all neigbours.
+        '''
+        visited = []
+        layered_ls = []
+        d = 1
+        while len(visited) < len(self.contact_nwk.nodes):
+            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(g, source=node, depth_limit=d))
+            # print(layer)
+            layered_ls.append(layer)
+            layered_ls[-1] = layered_ls[-1].difference(visited)
+
+            # Add costs to vaccination
+            for n in layered_ls[-1]:
+                if n == node:
+                    continue
+                n.cI += (self.kI * self.sI)**d
+                # print(n.cV+(d-1))
+            d += 1
+
+            # Fulfill visited ls
+            for n in layer:
+                visited.append(n)
+
+        def event_infected_mixed(self, i, verbose=False):
+            '''
+            Randomly pick neighbours and implement adverse event to them.
+            '''
+            other_person = random.choice(self.people)
+            other_person += self.kI * self.sI
+
+        def get_payoff(self, i):
+            self.people[i].payoff_V = -self.people[i].cV
+            self.people[i].payoff_I = -self.people[i].cI * self.theta[i]
+            return self.people[i].payoff_V - self.people[i].payoff_I
+
+        def FDProb(self, i, verbose=False):
+            '''
+            Compute the probability from Fermi-Dirac distro
+            '''
+            if verbose:
+                payoff = self.get_payoff(i)
+                print(f'\tPayoff of {self.people[i]} is {payoff}.')
+            return lambda p: 1/(1+math.exp(self.get_payoff(i)))
+
 
 '''
 21: Local Majority Rule
@@ -1106,7 +1236,7 @@ class Mode52(Mode):
         super().__init__(people,52)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
-        self.m = 1  # No. of new edges linked 
+        self.m = 1  # No. of new edges linked
 
     def set_network(self):
         '''
