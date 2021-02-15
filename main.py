@@ -662,7 +662,7 @@ for i in range(len(sys.argv)):
                                 localIsolation_temp = True
                                 localIsolation_config = sys.argv[k][4:]
                                 mode02.localIsolation = set_correct_bool_para(localIsolation_config, localIsolation_temp)
-                            elif sys.argv[k][:4] == '*i=':
+                            elif sys.argv[k][:3] == '*i=':
                                 mode02_isolation_period_config = sys.argv[k][3:]
                                 mode02.isolationPeriod = set_correct_para(mode02_isolation_period_config, mode02.isolationPeriod, pos=True)
                             mode02.create_setting()
