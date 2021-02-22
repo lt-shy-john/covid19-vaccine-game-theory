@@ -4,19 +4,8 @@ This is a simulation package written in Python 3 for understanding the upcoming 
 
 The work is published under a capstone project under Master of Complex System provided by Centre of Complex Systems, University of Sydney. This work is still work in progress with additional functions adding here soon. :satisfied:
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-
-- [Getting Started](#getting-started)
-  - [Install](#install)
-  - [First use](#first-use)
-- [Advanced Usage](#advanced-usage)
-- [Mode](#mode)
-- [Contributing](#contributing)
-- [License](#license)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+<!-- START doctoc -->
+<!-- END doctoc -->
 
 ## Getting Started
 
@@ -143,3 +132,11 @@ This work is licensed under [Creative Commons Attribution-ShareAlike 4.0 Interna
 [cc-by]: http://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
+
+## Further Reading
+
+* Idea of mode 20 comes from
+  * Bhattacharyya, S., A. Vutha, and C. T. Bauch (2019). “The impact of rare but severe vaccine adverse events on behaviour-disease dynamics: a network model.” en. In: Scientific reports 9.1, p. 7164. issn: 2045-2322. url: http://search.proquest.com/docview/2231910970/.
+* Local majority rule comes (modes 21 - 24) comes from
+  * Galam, S. (2012). Sociophysics : A Physicist’s Modeling of Psycho-political Phenomena. en. 1st ed. Bibliographic Level Mode of Issuance: Monograph. Springer. isbn: 9781461420323.
+  * Galam, S. and F. Jacobs (2007). “The role of inflexible minorities in the breaking of democratic opinion dynamics”. In: Physica A: Statistical Mechanics and its Applications 381, pp. 366–376.
