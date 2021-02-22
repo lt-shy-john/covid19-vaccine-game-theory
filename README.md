@@ -140,3 +140,5 @@ This work is licensed under [Creative Commons Attribution-ShareAlike 4.0 Interna
 * Local majority rule comes (modes 21 - 24) comes from
   * Galam, S. (2012). Sociophysics : A Physicist’s Modeling of Psycho-political Phenomena. en. 1st ed. Bibliographic Level Mode of Issuance: Monograph. Springer. isbn: 9781461420323.
   * Galam, S. and F. Jacobs (2007). “The role of inflexible minorities in the breaking of democratic opinion dynamics”. In: Physica A: Statistical Mechanics and its Applications 381, pp. 366–376.
+
+Other references of this model are located in the capstone project report. 
