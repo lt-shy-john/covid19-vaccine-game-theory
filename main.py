@@ -735,6 +735,40 @@ for i in range(len(sys.argv)):
                                 modes[11] = mode11
                             else:
                                 modes.pop(11)
+                        elif mode_flag == 20:
+                            if sys.argv[k][:4] == '*cV=':
+                                cV_temp = sys.argv[k][4:]
+                                mode20.set_cV(cV_temp)
+                            elif sys.argv[k][:4] == '*cI=':
+                                cI_temp = sys.argv[k][4:]
+                                mode20.set_cI(cI_temp)
+                            elif sys.argv[k][:4] == '*kV=':
+                                kV_temp = sys.argv[k][4:]
+                                mode20.set_kV(kV_temp)
+                            elif sys.argv[k][:4] == '*kI=':
+                                kI_temp = sys.argv[k][4:]
+                                mode20.set_kI(kI_temp)
+                            elif sys.argv[k][:4] == '*sV=':
+                                sV_temp = sys.argv[k][4:]
+                                mode20.set_sV(sV_temp)
+                            elif sys.argv[k][:4] == '*sI=':
+                                sI_temp = sys.argv[k][4:]
+                                mode20.set_sI(sI_temp)
+                            elif sys.argv[k][:4] == '*pV=':
+                                pV_temp = sys.argv[k][4:]
+                                mode20.set_pV(pV_temp)
+                            elif sys.argv[k][:4] == '*pI=':
+                                pI_temp = sys.argv[k][4:]
+                                mode20.set_pI(pI_temp)
+                            elif sys.argv[k][:3] == '*r=':
+                                rho_temp = sys.argv[k][3:]
+                                mode20.set_rho(rho_temp)
+                            mode20.assign_costs()
+                            mode20.raise_flag()
+                            if mode20.flag == 'X':
+                                modes[20] = mode20
+                            else:
+                                modes.pop(20)
                         elif mode_flag == 21:
                             if sys.argv[k][:3] == '*+=':
                                 mode21_pro_config = sys.argv[k][3:]

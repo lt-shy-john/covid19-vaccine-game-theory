@@ -310,7 +310,7 @@ class Mode02(Mode):
         '''
         return -self.rS
 
-    def is_isolated_overseas(self, i):
+    def is_isolated_overseas(self, i, verbose=False):
         '''
         Isolation while overseas, unable to contact with disease.
         '''
@@ -324,7 +324,7 @@ class Mode02(Mode):
 
         if 'isolate' in self.people[i].travel_history[-1]:
             if verbose:
-                print('\tPerson is quarantined. {} > {}'.format(days_back_in_local, self.isolationPeriod))
+                print('\tPerson is quarantined. ')
             return True
         else:
             return False
@@ -834,6 +834,35 @@ class Mode20(Mode):
         self.pV = 0.5
         self.pI = 0.5
 
+    def set_rho(self, rho_temp):
+        self.rho = super().correct_epi_para(rho_temp)
+
+    def set_cV(self, cV_temp):
+        self.cV = super().correct_epi_para(cV_temp)
+        self.cV_ls = np.ones(len(self.people)) * self.cV
+
+    def set_cI(self, cI_temp):
+        self.cI = super().correct_epi_para(cI_temp)
+        self.cV_ls = np.ones(len(self.people)) * self.cI
+
+    def set_kV(self, kV_temp):
+        self.kV = super().correct_epi_para(kV_temp)
+
+    def set_kI(self, kI_temp):
+        self.kI = super().correct_epi_para(kI_temp)
+
+    def set_sV(self, sV_temp):
+        self.sV = super().correct_epi_para(sV_temp)
+
+    def set_sI(self, sI_temp):
+        self.sI = super().correct_epi_para(sI_temp)
+
+    def set_pV(self, sV_temp):
+        self.pV = super().correct_epi_para(pV_temp)
+
+    def set_pI(self, sI_temp):
+        self.pI = super().correct_epi_para(pI_temp)
+
     def set_perceived_infection(self, global_infection, verbose=False):
         # Clear objects
         self.theta = np.ones(len(self.people))
@@ -974,6 +1003,27 @@ class Mode20(Mode):
                 payoff = self.get_payoff(i)
                 print(f'\tPayoff of {self.people[i]} is {payoff}.')
             return lambda p: 1/(1+math.exp(self.get_payoff(i)))
+
+        def IntimacyGame (self, beta, verbose=False):
+            '''
+            Simulate intimacy game of each time step.
+            '''
+            self.set_perceived_infection(beta)
+
+            for i in range(len(self.people)):
+                self.FDProb(i, verbose)
+
+            for i in range(len(self.people)):
+                if contact_nwk != None:
+                    if self.people[i].suceptible == 1:
+                        self.event_infected(i, verbose)
+                    elif self.people[i].vaccinated == 1:
+                        self.event_vaccinated(i, verbose)
+                else:
+                    if self.people[i].suceptible == 1:
+                        self.event_infected_mixed(i, verbose)
+                    elif self.people[i].vaccinated == 1:
+                        self.event_vaccinated_mixed(i, verbose)
 
 
 '''
