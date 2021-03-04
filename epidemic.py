@@ -261,7 +261,11 @@ class Epidemic:
                     self.people[i].vaccinated = 1
                 continue
             if 20 in self.mode:
-                theta = self.mode[20].set_perceived_infection(self.I/len(self.people))
+                if self.verbose_mode:
+                    print('Applying intimacy game in vaccination. ')
+                threshold = self.mode[20].FDProb(i, self.verbose_mode)
+                if seed < threshold:
+                    self.people[i].vaccinated = 1
                 continue
             if 21 in self.mode:
                 person = self.people[i]
@@ -313,6 +317,19 @@ class Epidemic:
         '''
         Mechanism of infection.
         '''
+
+        # Intimacy game
+        if 20 in self.mode:
+            if self.verbose_mode:
+                print('Applying intimacy game in infection. ')
+            for i in range(len(self.people)):
+                threshold = 1 - (1 - self.infection) ** (self.mode[20].get_infected_neighbours_number(i))
+                seed = random.randint(0,1000)/1000
+
+                if seed < threshold:
+                    self.people[i].suceptible = 1
+                    continue
+
 
         # Network contact controlled by Epidemic.social_contact()
         if any(i in self.mode for i in [51, 52, 53, 53]):
@@ -438,7 +455,7 @@ class Epidemic:
         if self.verbose_mode == True:
             print(f'\t{self.people[i].id} is in overseas. ', end='')
 
-        if self.mode[2].is_isolated_overseas(i):
+        if self.mode[2].is_isolated_overseas(i,self.verbose_mode):
             if self.verbose_mode == True:
                 print('(Isolated)')
             return

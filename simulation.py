@@ -77,6 +77,13 @@ class Simulation:
         print('N = {}'.format(len(self.people)))
         print('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
         epidemic.get_states()
+
+        # Intimacy game
+        if 20 in self.modes:
+            if self.verbose_mode:
+                print('Calculating theta for intimacy game... ')
+            self.modes[20].set_perceived_infection(self.beta, self.verbose_mode)
+
         if self.filename != '':
             write.WriteStates(epidemic, self.filename)
         for t in range(self.T):
@@ -89,6 +96,12 @@ class Simulation:
                     print('!!! Overseas travel alert !!!')
                 self.modes[2].returnOverseas(self.verbose_mode)
                 self.modes[2].make_decision(self.verbose_mode)
+
+            # Intimacy game
+            if 20 in self.modes:
+                if self.verbose_mode:
+                    print('Calculating payoffs (intimacy game)... ')
+                self.modes[20].IntimacyGame(self.beta, self.verbose_mode)
 
             # Info network update
             if 21 in self.modes:

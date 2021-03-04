@@ -880,11 +880,14 @@ class Mode20(Mode):
         if self.contact_nwk.network != None:
             # If contact network exists
             for i in range(len(self.people)):
-                for neighbour in self.contact_nwk.nwk_graph.neighbours(self.people[i]):
-                    if neigbour.suceptible == 1:
-                        local_infection[i] += 1
+                for neighbour in self.contact_nwk.nwk_graph.neighbors(self.people[i]):
+                    try:
+                        if neighbour.suceptible == 1:
+                            local_infection[i] += 1
+                    except networkx.exception.NetworkXError:
+                        continue
                 if verbose:
-                    print(f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbours(self.people[i])))} contacts infected. ')
+                    print(f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))} contacts infected. ')
             self.local_infection_p = local_infection/len(self.people)
             self.theta = np.add(self.local_infection_p * self.rho, np.ones(len(self.people)) * global_infection * (1-self.rho))
         else:
@@ -926,15 +929,15 @@ class Mode20(Mode):
         visited = []
         layered_ls = []
         d = 1
-        while len(visited) < len(self.contact_nwk.nodes):
-            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(g, source=node, depth_limit=d))
+        while len(visited) < len(self.contact_nwk.nwk_graph.nodes):
+            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph, source=self.people[i], depth_limit=d))
             # print(layer)
             layered_ls.append(layer)
             layered_ls[-1] = layered_ls[-1].difference(visited)
 
             # Add costs to vaccination
             for n in layered_ls[-1]:
-                if n == node:
+                if n == self.people[i]:
                     continue
                 n.cV += (self.kV * self.sV)**d
                 # print(n.cV+(d-1))
@@ -965,15 +968,15 @@ class Mode20(Mode):
         visited = []
         layered_ls = []
         d = 1
-        while len(visited) < len(self.contact_nwk.nodes):
-            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(g, source=node, depth_limit=d))
+        while len(visited) < len(self.contact_nwk.nwk_graph.nodes):
+            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph, source=self.people[i], depth_limit=d))
             # print(layer)
             layered_ls.append(layer)
             layered_ls[-1] = layered_ls[-1].difference(visited)
 
             # Add costs to vaccination
             for n in layered_ls[-1]:
-                if n == node:
+                if n == self.people[i]:
                     continue
                 n.cI += (self.kI * self.sI)**d
                 # print(n.cV+(d-1))
@@ -983,47 +986,54 @@ class Mode20(Mode):
             for n in layer:
                 visited.append(n)
 
-        def event_infected_mixed(self, i, verbose=False):
-            '''
-            Randomly pick neighbours and implement adverse event to them.
-            '''
-            other_person = random.choice(self.people)
-            other_person += self.kI * self.sI
+    def event_infected_mixed(self, i, verbose=False):
+        '''
+        Randomly pick neighbours and implement adverse event to them.
+        '''
+        other_person = random.choice(self.people)
+        other_person += self.kI * self.sI
 
-        def get_payoff(self, i):
-            self.people[i].payoff_V = -self.people[i].cV
-            self.people[i].payoff_I = -self.people[i].cI * self.theta[i]
-            return self.people[i].payoff_V - self.people[i].payoff_I
+    def get_payoff(self, i):
+        self.people[i].payoff_V = -self.people[i].cV
+        self.people[i].payoff_I = -self.people[i].cI * self.theta[i]
+        return self.people[i].payoff_V - self.people[i].payoff_I
 
-        def FDProb(self, i, verbose=False):
-            '''
-            Compute the probability from Fermi-Dirac distro
-            '''
-            if verbose:
-                payoff = self.get_payoff(i)
-                print(f'\tPayoff of {self.people[i]} is {payoff}.')
-            return lambda p: 1/(1+math.exp(self.get_payoff(i)))
+    def FDProb(self, i, verbose=False):
+        '''
+        Compute the probability from Fermi-Dirac distro
+        '''
+        if verbose:
+            payoff = self.get_payoff(i)
+            print(f'\tPayoff of {self.people[i].id} is {payoff}.')
+        return 1/(1+math.exp(self.get_payoff(i)))
 
-        def IntimacyGame (self, beta, verbose=False):
-            '''
-            Simulate intimacy game of each time step.
-            '''
-            self.set_perceived_infection(beta)
+    def get_infected_neighbours_number(self, i):
+        count = 0
+        for neighbour in self.contact_nwk.nwk_graph.neighbors(self.people[i]):
+            if neighbour.suceptible == 1:
+                count += 1
+        return count
 
-            for i in range(len(self.people)):
-                self.FDProb(i, verbose)
+    def IntimacyGame(self, beta, verbose=False):
+        '''
+        Simulate intimacy game of each time step.
+        '''
+        self.set_perceived_infection(beta)
 
-            for i in range(len(self.people)):
-                if contact_nwk != None:
-                    if self.people[i].suceptible == 1:
-                        self.event_infected(i, verbose)
-                    elif self.people[i].vaccinated == 1:
-                        self.event_vaccinated(i, verbose)
-                else:
-                    if self.people[i].suceptible == 1:
-                        self.event_infected_mixed(i, verbose)
-                    elif self.people[i].vaccinated == 1:
-                        self.event_vaccinated_mixed(i, verbose)
+        for i in range(len(self.people)):
+            self.FDProb(i, verbose)
+
+        for i in range(len(self.people)):
+            if self.contact_nwk != None:
+                if self.people[i].suceptible == 1:
+                    self.event_infected(i, verbose)
+                elif self.people[i].vaccinated == 1:
+                    self.event_vaccinated(i, verbose)
+            else:
+                if self.people[i].suceptible == 1:
+                    self.event_infected_mixed(i, verbose)
+                elif self.people[i].vaccinated == 1:
+                    self.event_vaccinated_mixed(i, verbose)
 
 
 '''
