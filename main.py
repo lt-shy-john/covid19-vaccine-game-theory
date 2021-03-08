@@ -882,14 +882,14 @@ for i in range(len(sys.argv)):
                                 mode_505 = sys.argv[k][3:]
                                 try:
                                     if int(mode_505) == 1:
-                                        self.mode = 'Hub'
+                                        modes[505].mode = 'Hub'
                                     elif int(mode_505) == 0:
-                                        self.mode = 'Leaf'
+                                        modes[505].mode = 'Leaf'
                                 except ValueError:
                                     if mode_505.lower() == 'hub':
-                                        self.mode = 'Hub'
+                                        modes[505].mode = 'Hub'
                                     elif mode_505.lower() == 'leaf':
-                                        self.mode = 'Leaf'
+                                        modes[505].mode = 'Leaf'
                             mode505.raise_flag()
                             if mode505.flag == 'X':
                                 modes[505] = mode505
@@ -932,6 +932,7 @@ if sys.argv[-1] == 'run':
     # Load modes
     current_run.load_modes(modes)
     if len(modes) > 0:
+        print('modes', current_run.modes)
         print('\nMode objects loaded.\n')
     # Run
     current_run()

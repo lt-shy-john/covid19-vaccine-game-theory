@@ -7,7 +7,7 @@ import write
 
 class Epidemic:
 
-    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode, start=True):
+    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode, modes=None, start=True):
         '''Initial elements
 
         Attributes
@@ -120,6 +120,7 @@ class Epidemic:
             self.dV = self.vaccinated*self.S*self.Pro - self.resus*self.V
 
             if start == True:
+                self.load_modes(modes)
                 self.set_epidemic(1)
                 # Write longitudinal social network data
                 if (51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode) and self.contact_nwk.update_rule != None:
@@ -209,7 +210,10 @@ class Epidemic:
             pass
         if mode == 1:
             self.epidemic = 1
-            Epidemic.start_epidemic(self)
+            if 501 in self.mode:
+                Epidemic.start_epidemic(self, self.mode[501].init_infection)
+            else:
+                Epidemic.start_epidemic(self)
         else:
             self.epidemic = 0
             Epidemic.kill_epidemic(self)
@@ -220,7 +224,13 @@ class Epidemic:
         '''
         if len(self.people) < initial_infection:
             initial_infection = len(self.people)
-        # Pick first 4 people/ random number of people (1-5) infected initially
+        # Pick first 4 people/ random number of people (defined by mode 501) infected initially
+        if 505 in self.mode:
+            if 501 in self.mode:
+                self.mode[505].set_infection(self.mode[501].init_infection)
+            else:
+                self.mode[505].set_infection()
+            return
         for i in range(initial_infection):
             self.people[i].suceptible = 1
 

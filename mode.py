@@ -1609,6 +1609,7 @@ class Mode54(Mode):
 class Mode501(Mode):
     def __init__(self, people, contact_nwk=None):
         super().__init__(people,501)
+        self.contact_nwk = contact_nwk
         self.init_infection = 4
 
     def __call__(self):
@@ -1633,6 +1634,7 @@ class Mode501(Mode):
 class Mode505(Mode):
     def __init__(self, people, contact_nwk=None):
         super().__init__(people,505)
+        self.contact_nwk = contact_nwk
         self.modes = ['Hub', 'Leaf']
         self.mode = None
 
@@ -1643,3 +1645,27 @@ class Mode505(Mode):
         print('-------------------------')
         print('You are creating mode 505. ')
         print('-------------------------\n')
+        print('Please set initial infection mode below. ')
+        print('0\tInfect by leaf')
+        print('1\tInfect by hub')
+        mode_505_temp = input('>>> ')
+        try:
+            if int(mode_505_temp) == 1:
+                self.mode = 'Hub'
+            elif int(mode_505_temp) == 0:
+                self.mode = 'Leaf'
+        except ValueError:
+            if mode_505_temp.lower() == 'hub':
+                self.mode = 'Hub'
+            elif mode_505_temp.lower() == 'leaf':
+                self.mode = 'Leaf'
+        self.raise_flag()
+        print('\nMode 505 equipped. \n')
+
+    def set_infection(self, init_infection = 4):
+        if self.mode == 'Hub':
+            for person_deg in sorted(self.contact_nwk.nwk_graph.degree, key=lambda x: x[1], reverse=True)[:init_infection]:
+                person_deg[0].suceptible = 1
+        elif self.mode == 'Leaf':
+            for person_deg in sorted(self.contact_nwk.nwk_graph.degree, key=lambda x: x[1])[:init_infection]:
+                person_deg[0].suceptible = 1
