@@ -1602,3 +1602,44 @@ class Mode54(Mode):
         self.set_network()
         self.raise_flag()
         print('Preferential attachment graph settings done.')
+
+'''
+501: Initial infection by degree
+'''
+class Mode501(Mode):
+    def __init__(self, people, contact_nwk=None):
+        super().__init__(people,501)
+        self.init_infection = 4
+
+    def __call__(self):
+        '''
+        Setting mode 501 into model.
+        '''
+        print('-------------------------')
+        print('You are creating mode 501. ')
+        print('-------------------------\n')
+        print('Please set initial infection number below. ')
+        Ii_temp = input('>>> ')
+        self.init_infection = super().set_correct_para(Ii_temp, self.init_infection)
+        self.raise_flag()
+        print('\nMode 501 equipped. \n')
+
+    def set_init_infection (self, Ii):
+        return self.correct_para(Ii, pos=True)
+
+'''
+505: Initial infection by degree
+'''
+class Mode505(Mode):
+    def __init__(self, people, contact_nwk=None):
+        super().__init__(people,505)
+        self.modes = ['Hub', 'Leaf']
+        self.mode = None
+
+    def __call__(self):
+        '''
+        Setting mode 505 into model.
+        '''
+        print('-------------------------')
+        print('You are creating mode 505. ')
+        print('-------------------------\n')

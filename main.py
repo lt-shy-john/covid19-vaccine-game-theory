@@ -151,12 +151,14 @@ def usage():
     print('    --23 \t Stubbon to against vaccine.')
     print('    --24 \t Contrary to social groups.')
     print('    --31 \t Medication incorporated.')
-    print('    --41 \t Moral hazard of social distancing.')
+    print('    --41 \t Game of social distancing.')
     print('    --42 \t Moral hazard of treatment.')
     print('    --51 \t Erdos-Renyi topology.')
     print('    --52 \t Preferential attachment.')
     print('    --53 \t Small world network.')
     print('    --54 \t Lattice network.')
+    print('    --501 \t Initial infection by number.')
+    print('    --505 \t Initial infection by degree.')
     print('-f \t\t Export file name.')
     print('-h \t\t Usage.')
     print('run \t\t Run simulation, last argument.')
@@ -280,12 +282,14 @@ def set_mode(mode):
         print('23: Stubbon to against vaccine[{}]'.format(mode23.flag))
         print('24: Contrary to social groups[{}]'.format(mode24.flag))
         print('31: Medication incorporated [{}]'.format(mode31.flag))
-        print('41: Moral hazard of social distancing []')
+        print('41: Game of social distancing []')
         print('42: Moral hazard of treatment []')
         print('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
         print('52: Preferential attachment [{}]'.format(mode52.flag))
         print('53: Small world topology [{}]'.format(mode53.flag))
         print('54: Lattice network [{}]'.format(mode54.flag))
+        print('501: Initial infection by number [{}]'.format(mode501.flag))
+        print('505: Initial infection by degree [{}]'.format(mode505.flag))
         print('Input number codes to change the options.')
         mode_input = input('> ')
         print(mode_input)
@@ -435,6 +439,18 @@ def mode_settings(cmd, mode=None):
                     mode[52] = mode52
                 else:
                     mode.pop(52)
+            elif int(cmd[i]) == 501:
+                mode501()
+                if mode501.flag == 'X':
+                    mode[501] = mode501
+                else:
+                    mode.pop(501)
+            elif int(cmd[i]) == 505:
+                mode505()
+                if mode505.flag == 'X':
+                    mode[505] = mode505
+                else:
+                    mode.pop(505)
     # Remove modes (Check if the modes itself overwrites basic settings)
     if len(rv_modes) > 0:
         for mode_opt in rv_modes:
@@ -553,12 +569,15 @@ mode51 = mode.Mode51(population, contact_nwk)
 mode52 = mode.Mode52(population, contact_nwk)
 mode53 = mode.Mode53(population, contact_nwk)
 mode54 = mode.Mode54(population, contact_nwk)
+mode501 = mode.Mode501(population, contact_nwk)
+mode505 = mode.Mode505(population, contact_nwk)
 
 mode_master_list = [mode01, mode02, mode04, mode05, mode07, mode08,
 mode10, mode11,
 mode20, mode21, mode22, mode23, mode24,
 mode31,
-mode51, mode52, mode53, mode54]
+mode51, mode52, mode53, mode54,
+mode501, mode505]
 
 
 modes = {}
@@ -849,6 +868,17 @@ for i in range(len(sys.argv)):
                                 modes[52] = mode52
                             else:
                                 mode.pop(52)
+                        elif mode_flag == 501:
+                            if sys.argv[k][:4] == '*Ii=':
+                                Ii_temp = sys.argv[k][4:]
+                                mode501.init_infection = mode501.set_init_infection(Ii_temp)
+                            mode501.raise_flag()
+                            if mode501.flag == 'X':
+                                modes[501] = mode501
+                            else:
+                                mode.pop(501)
+                        else:
+                            print('Warning: Mode not detected. ')
 
 
                         # elif mode_flag == 999:
