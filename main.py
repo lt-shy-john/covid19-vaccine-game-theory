@@ -877,6 +877,24 @@ for i in range(len(sys.argv)):
                                 modes[501] = mode501
                             else:
                                 mode.pop(501)
+                        elif mode_flag == 505:
+                            if sys.argv[k][:3] == '*m=':
+                                mode_505 = sys.argv[k][3:]
+                                try:
+                                    if int(mode_505) == 1:
+                                        self.mode = 'Hub'
+                                    elif int(mode_505) == 0:
+                                        self.mode = 'Leaf'
+                                except ValueError:
+                                    if mode_505.lower() == 'hub':
+                                        self.mode = 'Hub'
+                                    elif mode_505.lower() == 'leaf':
+                                        self.mode = 'Leaf'
+                            mode505.raise_flag()
+                            if mode505.flag == 'X':
+                                modes[505] = mode505
+                            else:
+                                mode.pop(505)
                         else:
                             print('Warning: Mode not detected. ')
 
