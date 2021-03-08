@@ -68,7 +68,7 @@ class Simulation:
 
     def __call__(self, modes=None, start=True):
         FILENAME_STATES = ''
-        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.contact_nwk, self.verbose_mode, self.modes, start)
+        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.contact_nwk, self.verbose_mode, self.modes, self.filename, start)
         epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
         epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
         print('After:',epidemic.mode)

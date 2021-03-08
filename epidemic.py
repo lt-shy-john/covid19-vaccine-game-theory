@@ -7,7 +7,7 @@ import write
 
 class Epidemic:
 
-    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode, modes=None, start=True):
+    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode, modes=None, filename=None, start=True):
         '''Initial elements
 
         Attributes
@@ -22,6 +22,7 @@ class Epidemic:
         self.epidemic = 0   # Whether an epidemic occured or not.
         self.people = people
         self.contact_nwk = contact_nwk
+        self.filename = filename
         self.mode = {}  # Dict of modes loaded. Values are mode objects
 
         try:
@@ -124,7 +125,7 @@ class Epidemic:
                 self.set_epidemic(1)
                 # Write longitudinal social network data
                 if (51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode) and self.contact_nwk.update_rule != None:
-                    if filename != '':
+                    if self.filename != '':
                         write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
