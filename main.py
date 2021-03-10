@@ -882,17 +882,18 @@ for i in range(len(sys.argv)):
                                 mode_505 = sys.argv[k][3:]
                                 try:
                                     if int(mode_505) == 1:
-                                        modes[505].mode = 'Hub'
+                                        mode_tmp = 'Hub'
                                     elif int(mode_505) == 0:
-                                        modes[505].mode = 'Leaf'
+                                        mode_tmp = 'Leaf'
                                 except ValueError:
                                     if mode_505.lower() == 'hub':
-                                        modes[505].mode = 'Hub'
+                                        mode_tmp = 'Hub'
                                     elif mode_505.lower() == 'leaf':
-                                        modes[505].mode = 'Leaf'
+                                        mode_tmp = 'Leaf'
                             mode505.raise_flag()
                             if mode505.flag == 'X':
                                 modes[505] = mode505
+                                modes[505].mode= mode_tmp
                             else:
                                 mode.pop(505)
                         else:

@@ -1357,7 +1357,7 @@ class Mode52(Mode):
         print('-------------------------')
         print('You are creating mode 52. ')
         print('-------------------------\n')
-        print('Please set infection parameter below. ')
+        print('Please set connection parameter below. ')
         try:
             m_temp = int(input('m >>> '))
         except ValueError:
