@@ -15,6 +15,8 @@ Main code
 - cmd functions
 - main loop
 '''
+
+
 def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode):
     info = input('Information about the parameters? [y/n] ').lower()
     print()
@@ -40,6 +42,7 @@ def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T
         N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode)
     population = Person.make_population(N)
     return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode
+
 
 def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode):
     print('Adoption parameters \n')
@@ -75,6 +78,7 @@ def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V,
         verbose_mode = False
     return N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode
 
+
 def summary():
     print('N: {}'.format(N))
     print('T: {}'.format(T))
@@ -102,11 +106,13 @@ def summary():
                 print(mode.__dict__)
     print()
 
+
 def show_nwk():
     if contact_nwk.network != None:
         contact_nwk.show_nwk()
     else:
         print('Topology is not set, use command "MODE" to initiate them.')
+
 
 def info_summ():
     print('N - Number of simulated agents.')
@@ -119,6 +125,7 @@ def info_summ():
     print('Delta - Removal rate.')
     print('Tau - COVID-19 Testing rate. ')
 
+
 def help():
     print('LOOK - View partner network.')
     print('MODE - Change mode settings.')
@@ -127,6 +134,7 @@ def help():
     print('OTHER SETTING - Set auxiliary simulation parameters.')
     print('SUMMARY - Print the simulation parameters.')
     print('QUIT/ Q - Quit the software.')
+
 
 def usage():
     print('Usage: python3 main.py [(N) (T) (α) (β) (γ) (φ) (δ)] ...\n\
@@ -163,6 +171,7 @@ def usage():
     print('-h \t\t Usage.')
     print('run \t\t Run simulation, last argument.')
 
+
 def correct_bool_para(b):
     '''
     Convert the parameters into boolean.
@@ -184,6 +193,7 @@ def correct_bool_para(b):
         b_bool = True
         return b_bool
 
+
 def set_correct_bool_para(b, B):
     '''
     Convert the parameters into integers. If input is blank then do nothing.
@@ -197,6 +207,7 @@ def set_correct_bool_para(b, B):
         return B
     else:
         return correct_bool_para(b)
+
 
 def correct_para(p, pos=False):
     '''
@@ -215,6 +226,7 @@ def correct_para(p, pos=False):
         p_num = 1
         return p_num
 
+
 def set_correct_para(p, P, pos=False):
     '''
     Convert the parameters into integers. If input is blank then do nothing.
@@ -228,6 +240,7 @@ def set_correct_para(p, P, pos=False):
         return P
     else:
         return correct_para(p, pos=False)
+
 
 def correct_epi_para(p):
     '''
@@ -893,7 +906,7 @@ for i in range(len(sys.argv)):
                             mode505.raise_flag()
                             if mode505.flag == 'X':
                                 modes[505] = mode505
-                                modes[505].mode= mode_tmp
+                                modes[505].mode = mode_tmp
                             else:
                                 mode.pop(505)
                         else:
