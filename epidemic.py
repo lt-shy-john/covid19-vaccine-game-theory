@@ -124,11 +124,14 @@ class Epidemic:
                 self.load_modes(modes)
                 self.set_epidemic(1)
                 # Write longitudinal social network data
-                if (51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode) and self.contact_nwk.update_rule != None:
+                if (5 in self.mode or 51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode) and self.contact_nwk.update_rule != None:
                     if self.filename != '':
                         write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
+                        write.WriteNodeBetweeness(self.contact_nwk.nwk_graph, filename)
+                        write.WriteNodeBetweeness_I(self.contact_nwk.nwk_graph, filename)
+                        write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
 
 

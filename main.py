@@ -476,6 +476,7 @@ def mode_settings(cmd, mode=None):
                 continue
     return mode
 
+
 def check_main_mode_opinion(modes, code):
     if 21 not in modes:
         print(f'Warning: Mode 21 is requried for activating mode {code}.')
@@ -483,10 +484,12 @@ def check_main_mode_opinion(modes, code):
         return False
     return True
 
+
 def find_mode(code, mode_master_list):
     for mode in mode_master_list:
         if mode.code == code:
             return mode
+
 
 def export(filename):
     print('Coming soon')
