@@ -12,6 +12,7 @@ def writeTravelHistory(obs, filename):
         for i in range(len(obs.people)):
             writer.writerow(obs.people[i].travel_history)
 
+
 def WriteStates(obs, filename):
     '''
         Write everyone's infected state into a .csv file.
@@ -20,6 +21,7 @@ def WriteStates(obs, filename):
     with open(filename, 'a', newline='', encoding='utf8') as f:
         writer = csv.writer(f)
         writer.writerow([obs.S, obs.I, obs.V, obs.R])
+
 
 def WriteCompartmentHistory (obs, filename):
     '''
@@ -31,6 +33,7 @@ def WriteCompartmentHistory (obs, filename):
             writer = csv.writer(f)
             writer.writerow(obs.people[i].compartment_history)
 
+
 def WriteOpinion(obs, filename):
     '''
         Write everyone's opinion and infected state into a .csv file.
@@ -40,6 +43,7 @@ def WriteOpinion(obs, filename):
         writer = csv.writer(f)
         for i in range(len(obs.people)):
             writer.writerow([obs.people[i].group_no, obs.people[i].id, obs.people[i].opinion])
+
 
 def WriteOpinionPersonality(obs, filename):
     '''
@@ -61,6 +65,7 @@ def WriteOpinionPersonality(obs, filename):
         for i in range(len(obs.people)):
             writer.writerow([obs.people[i].group_no, obs.people[i].id, obs.people[i].opinion, obs.people[i].personality])
 
+
 def WriteNetwork(graph_obj, filename):
     export_graph = graph_obj
     mapping = {}
@@ -68,6 +73,7 @@ def WriteNetwork(graph_obj, filename):
         mapping[node] = node.id
     export_graph = nx.relabel_nodes(export_graph, mapping)
     nx.write_graphml(export_graph, filename+'.graphml')
+
 
 def WriteNetworkAvgDegree(graph_obj, filename):
     '''
@@ -82,6 +88,7 @@ def WriteNetworkAvgDegree(graph_obj, filename):
     with open(filename, 'a', newline='') as f:
         writer=csv.writer(f)
         writer.writerow([2 * graph_obj.number_of_edges()/graph_obj.number_of_nodes()])
+
 
 def WriteNetworkAvgDegree_I(graph_obj, filename):
     '''
@@ -103,6 +110,7 @@ def WriteNetworkAvgDegree_I(graph_obj, filename):
     with open(filename, 'a', newline='') as f:
         writer=csv.writer(f)
         writer.writerow(content)
+
 
 def WriteNetworkAvgDegree_S(graph_obj, filename):
     '''
@@ -129,6 +137,7 @@ def WriteNetworkAvgDegree_S(graph_obj, filename):
         writer=csv.writer(f)
         writer.writerow(content)
 
+
 def WriteNetworkAssortativity(graph_obj, filename):
     '''
     Argument
@@ -142,6 +151,70 @@ def WriteNetworkAssortativity(graph_obj, filename):
     with open(filename, 'a', newline='') as f:
         writer=csv.writer(f)
         writer.writerow([nx.degree_assortativity_coefficient(graph_obj)])
+
+
+def WriteNodeBetweeness(graph_obj, filename):
+    '''
+    Write node betweeness.
+
+    Parameters
+    ----------
+    graph_obj: Graph
+        The graph to be calculated.
+    filename: str
+        Output filename.
+    '''
+    filename = filename + '-nwk-btwn.csv'
+    with open(filename, 'a', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow([nx.algorithms.centrality.betweenness_centrality(graph_obj)])
+
+
+def WriteNodeBetweeness_I(graph_obj, filename):
+    '''
+        Write node betweeness of the infected.
+
+        Parameters
+        ----------
+        graph_obj: Graph
+            The graph to be calculated.
+        filename: str
+            Output filename.
+    '''
+    filename = filename + '-nwk-btwn_I.csv'
+    btwn_I = {}
+    btwn = nx.algorithms.centrality.betweenness_centrality(graph_obj)
+    for node in graph_obj.nodes():
+        if node.suceptible == 1 and node.removed == 0:
+            btwn_I[node] = btwn[node]
+    content = [b for b in btwn_I.values()]
+    with open(filename, 'a', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow(content)
+
+
+def WriteNodeBetweeness_S(graph_obj, filename):
+    '''
+        Write node betweeness of the susceptible.
+
+        Parameters
+        ----------
+        graph_obj: Graph
+            The graph to be calculated.
+        filename: str
+            Output filename.
+    '''
+    filename = filename + '-nwk-btwn_I.csv'
+    btwn_S = {}
+    btwn = nx.algorithms.centrality.betweenness_centrality(graph_obj)
+    for node in graph_obj.nodes():
+        if node.suceptible == 0 and node.removed == 0:
+            btwn_S[node] = btwn[node]
+    content = [b for b in btwn_S.values()]
+    with open(filename, 'a', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow(content)
+
 
 def WriteNetworkData(obs):
     '''
@@ -162,12 +235,14 @@ def WriteNetworkData(obs):
     text.append('# Basic data\n\n')
     text.append('Number of agents (N): {}\n\n'.format(len(obs.N)))
 
+
 def WriteTestingHistory(obs, filename):
     filename = str(filename)+'-testing.csv'
     for i in range(len(obs.people)):
         with open(filename, 'a', newline='', encoding='utf8') as f:
             writer = csv.writer(f)
             writer.writerow(obs.people[i].test_history)
+
 
 def WriteSummary(obs, filename):
     '''
