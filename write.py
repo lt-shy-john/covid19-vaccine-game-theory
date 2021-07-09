@@ -167,7 +167,7 @@ def WriteNodeBetweeness(graph_obj, filename):
     filename = filename + '-nwk-btwn.csv'
     with open(filename, 'a', newline='') as f:
         writer=csv.writer(f)
-        writer.writerow([nx.algorithms.centrality.betweenness_centrality(graph_obj)])
+        writer.writerow([v for k, v in nx.algorithms.centrality.betweenness_centrality(graph_obj).items()])
 
 
 def WriteNodeBetweeness_I(graph_obj, filename):
@@ -204,7 +204,7 @@ def WriteNodeBetweeness_S(graph_obj, filename):
         filename: str
             Output filename.
     '''
-    filename = filename + '-nwk-btwn_I.csv'
+    filename = filename + '-nwk-btwn_S.csv'
     btwn_S = {}
     btwn = nx.algorithms.centrality.betweenness_centrality(graph_obj)
     for node in graph_obj.nodes():
@@ -335,7 +335,7 @@ def WriteSummary(obs, filename):
                 elif obs.contact_nwk.update_rule == 'XBS':
                     contents.append('Type: XBS\n')
                     contents.append('Rewire probability: {}\n'.format(obs.contact_nwk.PUpdate))
-                    contents.append('Rewire type: {}\n'.format(obs.contact_nwk.assort))
+                    contents.append(f'Rewire type: {"Assortative" if obs.contact_nwk.assort else "Disassortative"}\n')
                 contents.append('Average degree per time step stored in "{}-nwk-deg.csv"\n'.format(obs.filename))
                 contents.append('Assortativity information per time step stored in "{}-nwk-assort.csv"\n'.format(obs.filename))
         if 2 in obs.modes:
