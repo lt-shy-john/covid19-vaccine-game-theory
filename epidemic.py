@@ -129,9 +129,9 @@ class Epidemic:
                         write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
-                        write.WriteNodeBetweeness(self.contact_nwk.nwk_graph, filename)
-                        write.WriteNodeBetweeness_I(self.contact_nwk.nwk_graph, filename)
-                        write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
+                        # write.WriteNodeBetweeness(self.contact_nwk.nwk_graph, filename)
+                        # write.WriteNodeBetweeness_I(self.contact_nwk.nwk_graph, filename)
+                        # write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
 
 
@@ -608,6 +608,9 @@ class Epidemic:
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
+                    # write.WriteNodeBetweeness(self.contact_nwk.nwk_graph, filename)
+                    # write.WriteNodeBetweeness_I(self.contact_nwk.nwk_graph, filename)
+                    # write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
             elif self.contact_nwk.update_rule == 'XBS':
                 if self.verbose_mode:
@@ -617,6 +620,9 @@ class Epidemic:
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAvgDegree_I(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAvgDegree_S(self.contact_nwk.nwk_graph, filename)
+                    # write.WriteNodeBetweeness(self.contact_nwk.nwk_graph, filename)
+                    # write.WriteNodeBetweeness_I(self.contact_nwk.nwk_graph, filename)
+                    # write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
             self.contact_nwk.update_nwk()
 
