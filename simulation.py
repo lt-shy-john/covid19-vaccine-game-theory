@@ -1,9 +1,13 @@
+import numpy as np
+
 from person import Person
 from epidemic import Epidemic
 from contact import ContactNwk
 import write
 
 import random
+import os
+import networkx as nx
 
 
 class Simulation:
@@ -79,6 +83,14 @@ class Simulation:
         print('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
         epidemic.get_states()
 
+        # Contact network adj matrix
+        if any(i in self.modes for i in [5, 51, 52, 53, 54]):
+            if self.filename != '':
+                path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
+                if self.verbose_mode:
+                    print('Creating a new folder for contact network adjacency matrix at ' + path + '.')
+                os.mkdir(path)
+
         # Intimacy game
         if 20 in self.modes:
             if self.verbose_mode:
@@ -103,6 +115,17 @@ class Simulation:
                 if self.verbose_mode:
                     print('Calculating payoffs (intimacy game)... ')
                 self.modes[20].IntimacyGame(self.beta, self.verbose_mode)
+
+            # Contact network update
+            if any(i in self.modes for i in [5, 51, 52, 53, 54]):
+                if self.filename != '':
+                    path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
+                    if self.verbose_mode:
+                        print('Adding a new adjacency matrix into ' + path + '.')
+                    if os.path.exists(path):
+                        A = nx.convert_matrix.to_numpy_array(self.contact_nwk.nwk_graph)
+                        np.savetxt(path + "\\" + self.filename + '-contact_nwk' + "adj_matrix_" + str(t).zfill(self.T%10) + '.txt', A, fmt="%d")
+
 
             # Info network update
             if 21 in self.modes:
