@@ -5,6 +5,7 @@ import time
 # Import class files
 from person import Person
 from group import Group
+from vaccine import Vaccine
 from simulation import Simulation
 import mode
 from contact import ContactNwk
@@ -386,7 +387,7 @@ def mode_settings(cmd, mode=None):
                 else:
                     mode.pop(10)
             elif int(cmd[i]) == 15:
-                mode15()
+                mode15(alpha, beta, gamma, delta)
                 if mode15.flag == 'X':
                     mode[15] = mode15
                 else:
@@ -571,7 +572,7 @@ verbose_mode = False  # Need to put here for initiating other objects (nwk and p
 population = Person.make_population(N)
 contact_nwk = ContactNwk(population, verbose_mode)
 info_nwk = Group(population, group_size)
-vaccine_available = [Vaccine('Default', 1, )]
+vaccine_available = [Vaccine('Default', 1, 28, None, 0, 0.99, alpha, beta, gamma, delta, phi)]
 filename = ''  # Default file name to export (.csv). Change when use prompt 'export' cmd.
 
 mode_master_list = []
@@ -584,7 +585,7 @@ mode07 = mode.Mode07(population, beta, delta)
 mode08 = mode.Mode08(population, beta, delta)
 mode10 = mode.Mode10(population, phi, beta)
 mode11 = mode.Mode11(population)
-mode15 = mode.Mode15(population, beta=beta, gamma=gamma, delta=delta)
+mode15 = mode.Mode15(population)
 mode20 = mode.Mode20(population, contact_nwk, beta)
 mode21 = mode.Mode21(population, info_nwk)
 mode22 = mode.Mode22(population, info_nwk)
@@ -962,7 +963,7 @@ for i in range(len(sys.argv)):
 
 if sys.argv[-1] == 'run':
     print('===== Simulation Running =====')
-    current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, verbose_mode)
+    current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, vaccine_available, verbose_mode)
     # Load modes
     current_run.load_modes(modes)
     if len(modes) > 0:
@@ -994,7 +995,7 @@ while True:
         help()
     elif cmd == 'start' or cmd == 'run':
         print('===== Simulation Running =====')
-        current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, verbose_mode)
+        current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, vaccine_available, verbose_mode)
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:

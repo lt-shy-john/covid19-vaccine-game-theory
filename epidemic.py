@@ -8,7 +8,7 @@ import write
 
 class Epidemic:
 
-    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, contact_nwk, verbose_mode, modes=None, filename=None, start=True):
+    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, vaccine_ls, contact_nwk, verbose_mode, modes=None, filename=None, start=True):
         '''Initial elements
 
         Attributes
@@ -23,6 +23,7 @@ class Epidemic:
         self.epidemic = 0   # Whether an epidemic occured or not.
         self.people = people
         self.contact_nwk = contact_nwk
+        self.vaccine_ls = vaccine_ls
         self.filename = filename
         self.mode = {}  # Dict of modes loaded. Values are mode objects
 
@@ -301,8 +302,13 @@ class Epidemic:
             if seed < self.vaccinated and self.people[i].vaccinated == 0:
                 if self.verbose_mode == True:
                     print(f'{self.people[i].id} has decided to take vaccine. ')
-                self.people[i].vaccinated = 1
-                self.people[i].vaccine_history.append(1)
+                if self.mode[15].check_multi_dose_vaccine() != None:
+                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                    self.mode[15].write_vaccine_history(i, vaccine_taken)
+                    vaccine_taken = None
+                else:
+                    self.people[i].vaccinated = 1
+                    self.people[i].vaccine_history.append(1)
             else:
                 self.people[i].vaccine_history.append(0)
 

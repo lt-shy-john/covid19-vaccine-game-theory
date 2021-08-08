@@ -6,11 +6,12 @@ import math
 import networkx as nx
 import numpy as np
 
+
 class Mode:
     def __init__(self, people, code):
         self.code = code
         # Flag to alert setting has been loaded.
-        self.flag = ' '   # If loaded then has value 'X'.
+        self.flag = ' '  # If loaded then has value 'X'.
         # Population objects
         self.people = people
 
@@ -51,7 +52,7 @@ class Mode:
 
         Parameters:
         p -- string input.
-        P -- original value.
+        P -- original/ default value.
         pos -- If the parameter is positive number.
         '''
         if p == '':
@@ -91,6 +92,7 @@ class Mode:
         else:
             return self.correct_epi_para(p)
 
+
 '''
 =======================================================
 
@@ -99,10 +101,11 @@ Individual mode settings
 =======================================================
 '''
 
-
 '''
 01: Living in city/ rural
 '''
+
+
 class Mode01(Mode):
     '''
     Attributes
@@ -113,13 +116,13 @@ class Mode01(Mode):
         The infection rate while living in city or rural environment.
     '''
 
-    def __init__(self, people, betas=[0.5,0.5]):
-        super().__init__(people,1)
-        self.weight = [4,6]
+    def __init__(self, people, betas=[0.5, 0.5]):
+        super().__init__(people, 1)
+        self.weight = [4, 6]
         self.betas = betas
 
     def set_weight(self, c, r):
-        self.weight = [c,r]
+        self.weight = [c, r]
         self.check_weight_integrity()
 
     def check_weight_integrity(self):
@@ -132,7 +135,7 @@ class Mode01(Mode):
 
     def assign_regions(self):
         for person in self.people:
-            person.location = random.choices(list(range(2)), weights = self.weight, k=1)[0]
+            person.location = random.choices(list(range(2)), weights=self.weight, k=1)[0]
 
     def __call__(self):
         '''
@@ -175,7 +178,6 @@ class Mode01(Mode):
         '''
         self.betas[idx] = value
 
-
     def infect_01(self, idx, p):
         '''
         Model different infection rate due to residence.
@@ -189,6 +191,8 @@ class Mode01(Mode):
 '''
 02: Travel from overseas
 '''
+
+
 class Mode02(Mode):
     '''
     Travel from overseas
@@ -208,8 +212,9 @@ class Mode02(Mode):
     isolationPeriod: int
         Social isolation period when arriving a new place.
     '''
+
     def __init__(self, people, main_beta):
-        super().__init__(people,2)
+        super().__init__(people, 2)
         self.overseas = {'Some Places': 0.14}
         self.travel_prob = 0.1
         self.rS = 1
@@ -254,7 +259,6 @@ class Mode02(Mode):
         self.raise_flag()
         print('\nMode 2 equipped. \n')
 
-
     def create_setting(self):
         '''
         Assign values to population
@@ -262,7 +266,7 @@ class Mode02(Mode):
         for people in self.people:
             people.A = 1  # Aware the destination has pandemic.
 
-    def create_destination (self, new_dest_name, beta):
+    def create_destination(self, new_dest_name, beta):
         '''
         When calling instance, an option to create more destinations.
         '''
@@ -281,7 +285,7 @@ class Mode02(Mode):
             # The person needs to decide to go overseas by now.
             if person.overseas != None:
                 continue  # The person is in overseas already
-            seed  =  random.randint(0,1000)/1000
+            seed = random.randint(0, 1000) / 1000
             if verbose:
                 print(f'\t{seed} : {self.travel_prob} => {person.id} {seed < self.travel_prob}')
             if seed >= self.travel_prob:
@@ -297,7 +301,6 @@ class Mode02(Mode):
                 person.overseas = {destination: self.overseas[destination]}
                 if verbose:
                     print(f'\t{person.id} decided travel to {list(person.overseas.keys())[0]}. ')
-
 
     def get_Mode02E1(self, i):
         '''
@@ -318,10 +321,10 @@ class Mode02(Mode):
         if not self.overseasIsolation[list(self.people[i].overseas.keys())[0]]:
             return False
         if len(self.people[i].travel_history) < 1:
-            return False   # Simulation immature to isolate people overseas
+            return False  # Simulation immature to isolate people overseas
 
         if type(self.people[i].travel_history[-1]) != str:
-            return False   # The person is not in overseas.
+            return False  # The person is not in overseas.
 
         if 'isolate' in self.people[i].travel_history[-1]:
             if verbose:
@@ -360,8 +363,8 @@ class Mode02(Mode):
             if verbose:
                 print('\tPerson is quarantined. {} > {}'.format(days_back_in_local, self.isolationPeriod))
             return True
-        else: return False
-
+        else:
+            return False
 
     def returnOverseas(self, verbose=False):
         '''
@@ -372,16 +375,16 @@ class Mode02(Mode):
                 if verbose:
                     print(f'\tPerson {person.id} is not subject to overseas isolation (At local). ')
                 continue
-            if list(person.overseas.keys())[0]+':isolate' in person.travel_history[-1]:
+            if list(person.overseas.keys())[0] + ':isolate' in person.travel_history[-1]:
                 if verbose:
                     print(f'\tPerson {person.id} is isolated ovserseas. ')
                 continue
-            if list(person.overseas.keys())[0]+':hospitalised' in person.travel_history[-1]:
+            if list(person.overseas.keys())[0] + ':hospitalised' in person.travel_history[-1]:
                 if verbose:
                     print(f'\tPerson {person.id} is hospitalised. ')
                 continue
 
-            seed  =  random.randint(0,1000)/1000
+            seed = random.randint(0, 1000) / 1000
             if seed < self.return_prob[list(person.overseas.keys())[0]]:
                 person.overseas = None
 
@@ -433,25 +436,27 @@ class Mode02(Mode):
             else:
                 if verbose:
                     print(f'\t{person.id} is quarantined in {list(person.overseas.keys())[0]}. ')
-                person.travel_history.append(list(person.overseas.keys())[0]+':isolate')
+                person.travel_history.append(list(person.overseas.keys())[0] + ':isolate')
                 continue
-
 
             if person.suceptible == 1 and person.exposed == 1 and person.overseas != None:
                 if verbose:
                     print(f'\t{person.id} has been infected in {list(person.overseas.keys())[0]}. ')
-                person.travel_history.append(list(person.overseas.keys())[0]+':hospitalised')
+                person.travel_history.append(list(person.overseas.keys())[0] + ':hospitalised')
 
         for person in self.people:
             if verbose:
                 print(f'{person.id}:', person.travel_history)
 
+
 '''
 04: Bounded rationality of vaccine
 '''
+
+
 class Mode04(Mode):
     def __init__(self, people, alpha):
-        super().__init__(people,4)
+        super().__init__(people, 4)
         self.alpha = alpha
         self.P_Alpha = []
 
@@ -462,7 +467,8 @@ class Mode04(Mode):
         print('You are creating mode 4. ')
         print('-------------------------\n')
         if self.alpha == 0:
-            print('Warning: Adoption parameter is 0, mode4 will not work under this. Please reset adoption parameter first. ')
+            print(
+                'Warning: Adoption parameter is 0, mode4 will not work under this. Please reset adoption parameter first. ')
             return
         print('Please set rationality parameter below. ')
         lambda_BR = self.people[0].lambda_BR
@@ -492,7 +498,8 @@ class Mode04(Mode):
         '''
         utility_fn = [self.alpha * person.lambda_BR * person.rV_BR for person in self.people]
         disutility_fn = [self.alpha * person.lambda_BR * person.rI_BR for person in self.people]
-        self.P_Alpha = np.divide(np.exp(utility_fn),(np.add(np.exp(utility_fn), np.exp(disutility_fn))), out=np.ones_like(utility_fn), where=(utility_fn!=np.inf))
+        self.P_Alpha = np.divide(np.exp(utility_fn), (np.add(np.exp(utility_fn), np.exp(disutility_fn))),
+                                 out=np.ones_like(utility_fn), where=(utility_fn != np.inf))
         # print('QRE: ')
         # print('U =',utility_fn)
         # print('-U =',disutility_fn)
@@ -502,12 +509,13 @@ class Mode04(Mode):
 '''
 05: Edit partner network
 '''
+
+
 class Mode05(Mode):
     def __init__(self, people, g):
-        super().__init__(people,5)
-        self.g = g   # Import from ContactNwk object. Graph of social network
-        self.data = None # User requests to change social network topology
-
+        super().__init__(people, 5)
+        self.g = g  # Import from ContactNwk object. Graph of social network
+        self.data = None  # User requests to change social network topology
 
     def view_network(self):
         '''
@@ -562,9 +570,12 @@ class Mode05(Mode):
             if cmd == 'y':
                 return
 
+
 '''
 07: Age distribution
 '''
+
+
 class Mode07(Mode):
     '''
     Attributes
@@ -579,7 +590,7 @@ class Mode07(Mode):
     '''
 
     def __init__(self, people, beta, delta):
-        super().__init__(people,7)
+        super().__init__(people, 7)
         self.beta_age = [beta for x in range(10)]
         self.delta_age = [delta for x in range(10)]
 
@@ -595,8 +606,6 @@ class Mode07(Mode):
         '''
         for person in self.people:
             person.set_age()
-
-
 
     def __call__(self):
         print('-------------------------')
@@ -655,9 +664,12 @@ class Mode07(Mode):
         self.raise_flag()
         print('\nMode 7 equipped. \n')
 
+
 '''
 08: Gender distribution
 '''
+
+
 class Mode08(Mode):
     '''
     Attributes
@@ -672,7 +684,7 @@ class Mode08(Mode):
     '''
 
     def __init__(self, people, beta, delta):
-        super().__init__(people,8)
+        super().__init__(people, 8)
         self.beta_gender = [beta for x in range(2)]
         self.delta_gender = [delta for x in range(2)]
 
@@ -688,7 +700,6 @@ class Mode08(Mode):
         '''
         for person in self.people:
             person.set_gender()
-
 
     def __call__(self):
         print('-------------------------')
@@ -709,12 +720,15 @@ class Mode08(Mode):
         self.raise_flag()
         print('\nMode 8 equipped. \n')
 
+
 '''
 10: Type of vaccine (One-off/ Seasonal/ Chemoprophylaxis)
 '''
+
+
 class Mode10(Mode):
     def __init__(self, people, phi, beta):
-        super().__init__(people,10)
+        super().__init__(people, 10)
         self.types = ['One-off', 'Seasonal', 'Chemoprophylaxis']
         self.type = None
 
@@ -724,7 +738,7 @@ class Mode10(Mode):
         print('-------------------------\n')
         print('Please set infection parameter below. ')
         for i in range(len(self.types)):
-            print(f'{i+1}. {self.types[i]}')
+            print(f'{i + 1}. {self.types[i]}')
         cmd = input('Please choose one option: ')
         if cmd == '1':
             self.type = 1
@@ -750,9 +764,11 @@ class Mode10(Mode):
 '''
 11: Stop transmissability/ reduce severity
 '''
+
+
 class Mode11(Mode):
     def __init__(self, people):
-        super().__init__(people,11)
+        super().__init__(people, 11)
         self.types = ['Stop transmissability', 'Reduce severity']
         self.type = None
 
@@ -766,7 +782,7 @@ class Mode11(Mode):
         print('-------------------------\n')
         print('Please set infection parameter below. ')
         for i in range(len(self.types)):
-            print(f'{i+1}. {self.types[i]}')
+            print(f'{i + 1}. {self.types[i]}')
         cmd = input('Please choose one option: ')
         if cmd == '1':
             self.type = 1
@@ -795,9 +811,11 @@ class Mode11(Mode):
     def check_beta(self, beta):
         if beta < self.beta_V:
             print('Warning: Your setting implies vaccine may cause higher tranmissibility. ')
+
     def check_gamma(self, gamma):
         if gamma > self.gamma_V:
             print('Warning: Your setting implies vaccine may cause lower effectiveness. ')
+
     def check_delta(self, delta):
         if delta > self.delta_V:
             print('Warning: Your setting implies vaccine may cause higher death rate. ')
@@ -806,25 +824,121 @@ class Mode11(Mode):
 '''
 15: Advanced vaccine options
 '''
+
+
 class Mode15(Mode):
-    def __init__(self, people, vaccine=None, beta=None, gamma=None, delta=None):
-        super().__init__(people,15)
-        # try:
-        #     if vaccine == None and beta == None and gamma == None and delta == None:
-        #         raise ValueError
-        # except ValueError:
-        #     print("Either vaccine or epidemic parameters must be spplied to mode 15. ")
-        # if vaccine == None:
-        #     self.vaccine.append(Vaccine('sample', 1, 1, beta, gamma, delta))
-        # else:
-        #     self.vaccine = vaccine
+    def __init__(self, people):
+        super().__init__(people, 15)
+        self.vaccine_doses = None
+
+    def __call__(self, vaccine_ls, alpha, beta, gamma, delta):
+        print('-------------------------')
+        print('You are creating mode 15. ')
+        print('-------------------------\n')
+        if vaccine_ls == []:
+            print('To initiate mode 15, you will need to create the vaccines available first. ')
+            print('Create new vaccine?')
+            cmd = input('[y/n]>>> ')
+            if cmd == 'y':
+                self.create_vaccine_type(alpha, beta, gamma, delta)
+        else:
+            self.raise_flag()
+            print('\nMode 15 equipped. \n')
+
+    def create_vaccine_type(self, alpha, beta, gamma, delta):
+        print('Please set new vaccine name below. ')
+        name = input('>>> ')
+        print('Please set vaccine dose number below. ')
+        dose = input('>>> ')
+        dose = super().set_correct_para(dose, 1, pos=True)
+        print('Please set vaccine adoption rate below. ')
+        new_alpha_temp = input('>>> ')
+        alpha = super().set_correct_epi_para(new_alpha_temp, alpha)
+        print('Please set vaccine type below. ')
+        vaccine_type = input('>>> ')
+        if int(vaccine_type) < 1 or int(vaccine_type > 3):
+            print('Invalid vaccine type, reverting to 1')
+            vaccine_type = 1
+        print('Please set vaccine cost number below. ')
+        cost = input('>>> ')
+        cost = super().set_correct_para(cost, 0, pos=True)
+        print('Please set vaccine efficacy number below. ')
+        efficacy = input('>>> ')
+        efficacy = super().set_correct_epi_para(efficacy, 1)
+        print('Please specify whether the vaccine stop transmissability/ reduce severity below. ')
+        cmd = input('Please choose one option [1/2]: ')
+        if cmd == '1':
+            self.type = 1
+            new_beta_temp = input('Beta >>> ')
+            beta = super().set_correct_epi_para(new_beta_temp, beta)
+        elif cmd == '2':
+            self.type = 2
+            new_gamma_temp = input('Gamma >>> ')
+            gamma = super().set_correct_epi_para(new_gamma_temp, gamma)
+            new_delta_temp = input('Delta >>> ')
+            delta = super().set_correct_epi_para(new_delta_temp, delta)
+
+        new_vaccine = Vaccine(name, dose, vaccine_type, cost, efficacy, alpha, beta, gamma, delta, phi)
+        self.vaccine_doses.append(new_vaccine)
+        self.check_multi_dose_vaccine(self.vaccine_doses)
+        return new_vaccine
+
+    def check_multi_dose_vaccine(self, vaccine_ls):
+        '''
+        Returns a flag if there is a vaccine that requires multiple doses (w/ vaccine name)
+
+        parameter
+        ---------
+        vaccine_ls: list
+            List of vaccines from main code
+        '''
+
+        vaccine_dose_count = {}
+        for vaccine in vaccine_ls:
+            if vaccine.brand not in vaccine_dose_count:
+                vaccine_dose_count[vaccine.brand] = 0
+            else:
+                vaccine_dose_count[vaccine.brand] += 1
+        self.vaccine_doses = vaccine_dose_count
+
+    def write_vaccine_history(self, i, vaccine):
+        if self.vaccine_doses[vaccine.brand] > 1:
+            self.people[i].vaccine_history.append(vaccine.brand + ":" + str(self.dose))
+        else:
+            self.people[i].vaccine_history.append(vaccine.brand)
+
+    def take_multi_dose_vaccine(self, i, vaccine_ls, verbose=False):
+        # Check which vaccine is taken
+        for i in range(len(self.person[i].vaccine_history)-1, -1, -1):
+            if type(self.person[i].vaccine_history[i]) == str:
+                vaccine_brand = self.person[i].vaccine_history[i].split(":")[0]
+                vaccine_dose = self.person[i].vaccine_history[i].split(":")[1]
+                days_before = i - len(self.person[i].vaccine_history)
+                break
+
+        for vaccine in vaccine_ls:
+            if vaccine_brand == vaccine.brand and vaccine_dose == vaccine.dose:
+                vaccine_used = vaccine
+        # Check when the vaccine is taken (and if it is the time to take the second dose)
+        # e.g. ls[-1] means day before, ls[-2] means 2 days before. This is possible when the current history is yet appended to ls.
+        if days_before < vaccine_used.days_to_next_dose:
+            pass
+
+        # Take the vaccine
+        seed = random.randint(0, 10000) / 10000
+        if seed < vaccine.alpha_V:
+            self.people[i].vaccinated = 1
+            return vaccine_used
+
 
 '''
 20: Intimacy game
 '''
+
+
 class Mode20(Mode):
     def __init__(self, people, contact_nwk, beta):
-        super().__init__(people,20)
+        super().__init__(people, 20)
         self.contact_nwk = contact_nwk
         self.beta = beta
         self.local_infection_p = np.ones(len(self.people))  # The proportion, not number of cases.
@@ -905,9 +1019,11 @@ class Mode20(Mode):
                     except networkx.exception.NetworkXError:
                         continue
                 if verbose:
-                    print(f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))} contacts infected. ')
-            self.local_infection_p = local_infection/len(self.people)
-            self.theta = np.add(self.local_infection_p * self.rho, np.ones(len(self.people)) * global_infection * (1-self.rho))
+                    print(
+                        f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))} contacts infected. ')
+            self.local_infection_p = local_infection / len(self.people)
+            self.theta = np.add(self.local_infection_p * self.rho,
+                                np.ones(len(self.people)) * global_infection * (1 - self.rho))
         else:
             self.theta *= global_infection
             self.local_infection_p *= global_infection
@@ -926,12 +1042,12 @@ class Mode20(Mode):
         incr_cV = np.ones(len(self.people))
 
         # Adverse event
-        seed = random.randint(0,10000)/10000
+        seed = random.randint(0, 10000) / 10000
         if seed < self.pV:
             if self.contact_nwk != None:
-                self.event_vaccinated_dfs(i,verbose)
+                self.event_vaccinated_dfs(i, verbose)
             else:
-                self.event_vaccinated_mixed(i,verbose)
+                self.event_vaccinated_mixed(i, verbose)
 
     def event_vaccinated_mixed(self, i, verbose=False):
         '''
@@ -948,7 +1064,9 @@ class Mode20(Mode):
         layered_ls = []
         d = 1
         while len(visited) < len(self.contact_nwk.nwk_graph.nodes):
-            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph, source=self.people[i], depth_limit=d))
+            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph,
+                                                                                      source=self.people[i],
+                                                                                      depth_limit=d))
             # print(layer)
             layered_ls.append(layer)
             layered_ls[-1] = layered_ls[-1].difference(visited)
@@ -957,7 +1075,7 @@ class Mode20(Mode):
             for n in layered_ls[-1]:
                 if n == self.people[i]:
                     continue
-                n.cV += (self.kV * self.sV)**d
+                n.cV += (self.kV * self.sV) ** d
                 # print(n.cV+(d-1))
             d += 1
 
@@ -972,12 +1090,12 @@ class Mode20(Mode):
         incr_cI = np.ones(len(self.people))
 
         # Adverse event
-        seed = random.randint(0,10000)/10000
+        seed = random.randint(0, 10000) / 10000
         if seed < self.pI:
             if self.contact_nwk != None:
-                self.event_infected_dfs(i,verbose)
+                self.event_infected_dfs(i, verbose)
             else:
-                self.event_infected_mixed(i,verbose)
+                self.event_infected_mixed(i, verbose)
 
     def event_infected_dfs(self, i, verbose=False):
         '''
@@ -987,7 +1105,9 @@ class Mode20(Mode):
         layered_ls = []
         d = 1
         while len(visited) < len(self.contact_nwk.nwk_graph.nodes):
-            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph, source=self.people[i], depth_limit=d))
+            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph,
+                                                                                      source=self.people[i],
+                                                                                      depth_limit=d))
             # print(layer)
             layered_ls.append(layer)
             layered_ls[-1] = layered_ls[-1].difference(visited)
@@ -996,7 +1116,7 @@ class Mode20(Mode):
             for n in layered_ls[-1]:
                 if n == self.people[i]:
                     continue
-                n.cI += (self.kI * self.sI)**d
+                n.cI += (self.kI * self.sI) ** d
                 # print(n.cV+(d-1))
             d += 1
 
@@ -1023,7 +1143,7 @@ class Mode20(Mode):
         if verbose:
             payoff = self.get_payoff(i)
             print(f'\tPayoff of {self.people[i].id} is {payoff}.')
-        return 1/(1+math.exp(self.get_payoff(i)))
+        return 1 / (1 + math.exp(self.get_payoff(i)))
 
     def get_infected_neighbours_number(self, i):
         count = 0
@@ -1057,9 +1177,11 @@ class Mode20(Mode):
 '''
 21: Local Majority Rule
 '''
+
+
 class Mode21(Mode):
     def __init__(self, people, info_nwk):
-        super().__init__(people,21)
+        super().__init__(people, 21)
         self.info_nwk = info_nwk
         self.propro = None
         self.agpro = None
@@ -1082,7 +1204,7 @@ class Mode21(Mode):
         print('\nMode 21 equipped. \n')
 
     def get_prop(self):
-        return self.propro/(self.propro+self.agpro)
+        return self.propro / (self.propro + self.agpro)
 
     def set_pro(self, propro_temp):
         self.propro = super().correct_para(propro_temp)
@@ -1092,7 +1214,7 @@ class Mode21(Mode):
 
     def set_opinion(self):
         for person in self.people:
-            seed = random.randint(0,1000)/1000
+            seed = random.randint(0, 1000) / 1000
             if seed < self.get_prop():
                 person.opinion = 1
             else:
@@ -1102,12 +1224,15 @@ class Mode21(Mode):
         for person in self.people:
             person.personality = 0
 
+
 '''
 22: Stubbon to take vaccine
 '''
+
+
 class Mode22(Mode):
     def __init__(self, people, info_nwk):
-        super().__init__(people,22)
+        super().__init__(people, 22)
         self.info_nwk = info_nwk
         self.InflexProProportion = None
 
@@ -1128,17 +1253,20 @@ class Mode22(Mode):
         p = super().set_correct_epi_para(p, 0)
         for person in self.people:
             if person.personality == 0:
-                seed = random.randint(0,1000)/1000
+                seed = random.randint(0, 1000) / 1000
                 if seed < p:
                     person.personality = 1
                     person.opinion = 1
 
+
 '''
 23: Stubbon to against vaccine
 '''
+
+
 class Mode23(Mode):
     def __init__(self, people, info_nwk):
-        super().__init__(people,23)
+        super().__init__(people, 23)
         self.info_nwk = info_nwk
         self.InflexAgProportion = None
 
@@ -1159,17 +1287,20 @@ class Mode23(Mode):
         p = super().set_correct_epi_para(p, 0)
         for person in self.people:
             if person.personality == 0:
-                seed = random.randint(0,1000)/1000
+                seed = random.randint(0, 1000) / 1000
                 if seed < p:
                     person.personality = 2
                     person.opinion = 0
 
+
 '''
 24: Contrary to social groups
 '''
+
+
 class Mode24(Mode):
     def __init__(self, people, info_nwk):
-        super().__init__(people,24)
+        super().__init__(people, 24)
         self.info_nwk = info_nwk
         self.BalancerProportion = None
 
@@ -1191,17 +1322,19 @@ class Mode24(Mode):
         p = super().set_correct_epi_para(p, 0)
         for person in self.people:
             if person.personality == 0:
-                seed = random.randint(0,1000)/1000
+                seed = random.randint(0, 1000) / 1000
                 if seed < p:
                     person.personality = 3
+
 
 '''
 31: Medication incorporated
 '''
+
+
 class Mode31(Mode):
     def __init__(self, people):
-        super().__init__(people,31)
-
+        super().__init__(people, 31)
 
     def __call__(self):
         print('-------------------------')
@@ -1209,12 +1342,15 @@ class Mode31(Mode):
         print('-------------------------\n')
         self.raise_flag()
 
+
 '''
 51: Erdos-Renyi topology
 '''
+
+
 class Mode51(Mode):
     def __init__(self, people, contact_nwk):
-        super().__init__(people,51)
+        super().__init__(people, 51)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.p = 0.1  # Pairing probability
@@ -1309,9 +1445,11 @@ class Mode51(Mode):
 '''
 52: Preferential attachment.
 '''
+
+
 class Mode52(Mode):
     def __init__(self, people, contact_nwk=None):
-        super().__init__(people,52)
+        super().__init__(people, 52)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.m = 1  # No. of new edges linked
@@ -1404,12 +1542,15 @@ class Mode52(Mode):
         self.raise_flag()
         print('Preferential attachment graph settings done.')
 
+
 '''
 53: Small world network
 '''
+
+
 class Mode53(Mode):
     def __init__(self, people, contact_nwk=None):
-        super().__init__(people,53)
+        super().__init__(people, 53)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.k = 1  # k neighbours are joined
@@ -1519,16 +1660,19 @@ class Mode53(Mode):
         self.raise_flag()
         print('Watts-Strogatz graph settings done.')
 
+
 '''
 54: Lattice network
 '''
+
+
 class Mode54(Mode):
     def __init__(self, people, contact_nwk=None):
-        super().__init__(people,54)
+        super().__init__(people, 54)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.m = 1  # Nunber of rows
-        self.n = len(self.people)//self.m  # Nunber of columns
+        self.n = len(self.people) // self.m  # Nunber of columns
 
     def set_network(self):
         '''
@@ -1548,7 +1692,7 @@ class Mode54(Mode):
             self.m = 1
         else:
             self.m = m
-        self.n = len(self.people)//self.m
+        self.n = len(self.people) // self.m
 
     def set_pupdate(self, p):
         '''
@@ -1621,12 +1765,15 @@ class Mode54(Mode):
         self.raise_flag()
         print('Preferential attachment graph settings done.')
 
+
 '''
 501: Initial infection by number
 '''
+
+
 class Mode501(Mode):
     def __init__(self, people, contact_nwk=None):
-        super().__init__(people,501)
+        super().__init__(people, 501)
         self.contact_nwk = contact_nwk
         self.init_infection = 4
 
@@ -1643,15 +1790,18 @@ class Mode501(Mode):
         self.raise_flag()
         print('\nMode 501 equipped. \n')
 
-    def set_init_infection (self, Ii):
+    def set_init_infection(self, Ii):
         return self.correct_para(Ii, pos=True)
+
 
 '''
 505: Initial infection by degree
 '''
+
+
 class Mode505(Mode):
     def __init__(self, people, contact_nwk=None):
-        super().__init__(people,505)
+        super().__init__(people, 505)
         self.contact_nwk = contact_nwk
         self.modes = ['Hub', 'Leaf']
         self.mode = None
@@ -1680,9 +1830,10 @@ class Mode505(Mode):
         self.raise_flag()
         print('\nMode 505 equipped. \n')
 
-    def set_infection(self, init_infection = 4):
+    def set_infection(self, init_infection=4):
         if self.mode == 'Hub':
-            for person_deg in sorted(self.contact_nwk.nwk_graph.degree, key=lambda x: x[1], reverse=True)[:init_infection]:
+            for person_deg in sorted(self.contact_nwk.nwk_graph.degree, key=lambda x: x[1], reverse=True)[
+                              :init_infection]:
                 person_deg[0].suceptible = 1
         elif self.mode == 'Leaf':
             for person_deg in sorted(self.contact_nwk.nwk_graph.degree, key=lambda x: x[1])[:init_infection]:
