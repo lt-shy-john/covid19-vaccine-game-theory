@@ -160,6 +160,8 @@ class Simulation:
         print('There are {} people infected.'.format(epidemic.I))
         print('There are {} people vaccinated.'.format(epidemic.V))
         print()
+
+        # Return any data
         if self.filename != '':
             print('Data stored in \'{}.csv\''.format(self.filename))
             write.WriteCompartmentHistory(self, self.filename)
@@ -169,6 +171,9 @@ class Simulation:
             if 2 in self.modes:
                 write.writeTravelHistory(self, self.filename)
                 print('Travel history exported in \'{}-travel.csv\''.format(self.filename))
+            if self.alpha > 0 or 15 in self.modes:
+                write.writeVaccinePassport(self, self.filename)
+                print('Vaccine history exported in \'{}-vaccination.csv\''.format(self.filename))
             if any(i in self.modes for i in [22, 23, 24]):
                 print('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
             elif 21 in self.modes:
@@ -180,4 +185,3 @@ class Simulation:
             print('Summary exported in \'{}-summary.txt\''.format(self.filename))
             print()
 
-        # Return any data

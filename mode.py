@@ -1,3 +1,4 @@
+from vaccine import Vaccine
 from person import Person
 
 import random
@@ -800,6 +801,18 @@ class Mode11(Mode):
     def check_delta(self, delta):
         if delta > self.delta_V:
             print('Warning: Your setting implies vaccine may cause higher death rate. ')
+
+
+'''
+15: Advanced vaccine options
+'''
+class Mode15(Mode):
+    def __init__(self, people, vaccine=None):
+        super().__init__(people,15)
+        if vaccine == None:
+            self.vaccine = Vaccine('sample', 1, 1)
+        else:
+            self.vaccine = vaccine
 
 '''
 20: Intimacy game

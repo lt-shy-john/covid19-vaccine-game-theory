@@ -153,6 +153,7 @@ def usage():
     print('    --12 \t Cost of vaccine.')
     print('    --13 \t Accessibility to vaccine.')
     print('    --14 \t Side effects of vaccine.')
+    print('    --15 \t Advanced vaccine options.')
     print('    --20 \t Intimacy game.')
     print('    --21 \t Local majority rule.')
     print('    --22 \t Stubbon to take vaccine.')
@@ -289,6 +290,7 @@ def set_mode(mode):
         print('12: Cost of vaccine []')
         print('13: Accessibility to vaccine []')
         print('14: Side effects of vaccine []')
+        print('15: Advanced vaccine options [{}]'.format(mode15.flag))
         print('20: Imitation game [{}]'.format(mode20.flag))
         print('21: Local majority rule [{}]'.format(mode21.flag))
         print('22: Stubbon to take vaccine[{}]'.format(mode22.flag))
@@ -381,6 +383,12 @@ def mode_settings(cmd, mode=None):
                 mode11()
                 if mode11.flag == 'X':
                     mode[11] = mode11
+                else:
+                    mode.pop(10)
+            elif int(cmd[i]) == 15:
+                mode15()
+                if mode15.flag == 'X':
+                    mode[15] = mode15
                 else:
                     mode.pop(10)
             elif int(cmd[i]) == 20:
@@ -575,6 +583,7 @@ mode07 = mode.Mode07(population, beta, delta)
 mode08 = mode.Mode08(population, beta, delta)
 mode10 = mode.Mode10(population, phi, beta)
 mode11 = mode.Mode11(population)
+mode15 = mode.Mode15(population)
 mode20 = mode.Mode20(population, contact_nwk, beta)
 mode21 = mode.Mode21(population, info_nwk)
 mode22 = mode.Mode22(population, info_nwk)
@@ -589,7 +598,7 @@ mode501 = mode.Mode501(population, contact_nwk)
 mode505 = mode.Mode505(population, contact_nwk)
 
 mode_master_list = [mode01, mode02, mode04, mode05, mode07, mode08,
-mode10, mode11,
+mode10, mode11, mode15,
 mode20, mode21, mode22, mode23, mode24,
 mode31,
 mode51, mode52, mode53, mode54,
@@ -770,6 +779,13 @@ for i in range(len(sys.argv)):
                                 modes[11] = mode11
                             else:
                                 modes.pop(11)
+
+                        elif mode_flag == 15:
+                            mode15.raise_flag()
+                            if mode15.flag == 'X':
+                                modes[15] = mode15
+                            else:
+                                modes.pop(15)
                         elif mode_flag == 20:
                             if sys.argv[k][:4] == '*cV=':
                                 cV_temp = sys.argv[k][4:]

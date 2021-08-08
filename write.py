@@ -34,6 +34,24 @@ def WriteCompartmentHistory (obs, filename):
             writer.writerow(obs.people[i].compartment_history)
 
 
+def writeVaccinePassport(obs, filename):
+    '''
+    Write vaccination record per person.
+
+    parameter
+    ---------
+    obs: Simulation
+        Accepts Simulation object
+    filename: str
+        File name for export
+    '''
+    filename = str(filename) + '-vaccination.csv'
+    with open(filename, 'w', newline='', encoding='utf8') as f:
+        writer = csv.writer(f)
+        for i in range(len(obs.people)):
+            writer.writerow(obs.people[i].vaccine_history)
+
+
 def WriteOpinion(obs, filename):
     '''
         Write everyone's opinion and infected state into a .csv file.
@@ -49,7 +67,9 @@ def WriteOpinionPersonality(obs, filename):
     '''
         Write everyone's opinion into a .csv file. Their personality are flagged as well.
 
-        Coulmns
+        Note
+        ----
+        Columns
         - Group number of the agent
         - Agent name
         - Agent's personality

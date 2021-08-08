@@ -2,6 +2,7 @@ import random
 import numpy as np
 
 from contact import ContactNwk
+from vaccine import Vaccine
 import person
 import write
 
@@ -273,6 +274,7 @@ class Epidemic:
                     if self.verbose_mode == True:
                         print(f'{self.people[i].id} has decided to take vaccine. ')
                     self.people[i].vaccinated = 1
+                self.people[i].vaccine_history.append(0)
                 continue
             if 20 in self.mode:
                 if self.verbose_mode:
@@ -280,6 +282,7 @@ class Epidemic:
                 threshold = self.mode[20].FDProb(i, self.verbose_mode)
                 if seed < threshold:
                     self.people[i].vaccinated = 1
+                self.people[i].vaccine_history.append(0)
                 continue
             if 21 in self.mode:
                 person = self.people[i]
@@ -288,14 +291,21 @@ class Epidemic:
                     if self.verbose_mode == True:
                         print(f'***, {seed} <= {self.alpha_V}')
                     person.vaccinated = 1
+                self.people[i].vaccine_history.append(0)
                 continue
             if self.people[i].suceptible == 1:
+                self.people[i].vaccine_history.append(0)
                 continue
 
+            # Vaccinate
             if seed < self.vaccinated and self.people[i].vaccinated == 0:
                 if self.verbose_mode == True:
                     print(f'{self.people[i].id} has decided to take vaccine. ')
                 self.people[i].vaccinated = 1
+                self.people[i].vaccine_history.append(1)
+            else:
+                self.people[i].vaccine_history.append(0)
+
 
     def removed(self):
         '''
@@ -313,7 +323,7 @@ class Epidemic:
                     if self.people[i].vaccinated == 1:
                         delta_pp[i] = np.multiply(self.mode[11].delta_V, delta_pp[i])
                 if self.verbose_mode == True:
-                    print(f'Delta for {self.people[i].id} is {beta_pp[i]}. ')
+                    print(f'Delta for {self.people[i].id} is {delta_pp[i]}. ')
 
 
         for i in range(len(self.people)):
