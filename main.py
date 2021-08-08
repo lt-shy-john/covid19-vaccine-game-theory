@@ -571,6 +571,7 @@ verbose_mode = False  # Need to put here for initiating other objects (nwk and p
 population = Person.make_population(N)
 contact_nwk = ContactNwk(population, verbose_mode)
 info_nwk = Group(population, group_size)
+vaccine_available = [Vaccine('Default', 1, )]
 filename = ''  # Default file name to export (.csv). Change when use prompt 'export' cmd.
 
 mode_master_list = []
@@ -583,7 +584,7 @@ mode07 = mode.Mode07(population, beta, delta)
 mode08 = mode.Mode08(population, beta, delta)
 mode10 = mode.Mode10(population, phi, beta)
 mode11 = mode.Mode11(population)
-mode15 = mode.Mode15(population)
+mode15 = mode.Mode15(population, beta=beta, gamma=gamma, delta=delta)
 mode20 = mode.Mode20(population, contact_nwk, beta)
 mode21 = mode.Mode21(population, info_nwk)
 mode22 = mode.Mode22(population, info_nwk)
@@ -1025,7 +1026,7 @@ while True:
         print('\n\nPrimary supervisor')
         print('Dr Mahendrarajah Piraveenan\n')
         time.sleep(3)
-        print('This study dedicates to the humanity that strives in the COVID-19 pandemic. \n\n\n')
+        print('This study dedicates to the society that strives in the COVID-19 pandemic. \n\n\n')
         time.sleep(1)
         print('==== Thank you ====')
     elif cmd == 'quit' or cmd == 'q':

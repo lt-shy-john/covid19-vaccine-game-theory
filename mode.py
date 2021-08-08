@@ -807,12 +807,17 @@ class Mode11(Mode):
 15: Advanced vaccine options
 '''
 class Mode15(Mode):
-    def __init__(self, people, vaccine=None):
+    def __init__(self, people, vaccine=None, beta=None, gamma=None, delta=None):
         super().__init__(people,15)
-        if vaccine == None:
-            self.vaccine = Vaccine('sample', 1, 1)
-        else:
-            self.vaccine = vaccine
+        # try:
+        #     if vaccine == None and beta == None and gamma == None and delta == None:
+        #         raise ValueError
+        # except ValueError:
+        #     print("Either vaccine or epidemic parameters must be spplied to mode 15. ")
+        # if vaccine == None:
+        #     self.vaccine.append(Vaccine('sample', 1, 1, beta, gamma, delta))
+        # else:
+        #     self.vaccine = vaccine
 
 '''
 20: Intimacy game
@@ -1617,7 +1622,7 @@ class Mode54(Mode):
         print('Preferential attachment graph settings done.')
 
 '''
-501: Initial infection by degree
+501: Initial infection by number
 '''
 class Mode501(Mode):
     def __init__(self, people, contact_nwk=None):
