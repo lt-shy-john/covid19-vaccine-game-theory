@@ -275,7 +275,17 @@ class Epidemic:
                     if self.verbose_mode == True:
                         print(f'{self.people[i].id} has decided to take vaccine. ')
                     self.people[i].vaccinated = 1
-                self.people[i].vaccine_history.append(0)
+                    self.people[i].vaccine_history.append(1)
+                else:
+                    self.people[i].vaccine_history.append(0)
+                continue
+            if 15 in self.mode:
+                if self.mode[15].check_multi_dose_vaccine(self.vaccine_ls):
+                    if self.verbose_mode:
+                        print("Vaccine with multiple dose detected. ")
+                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                    self.mode[15].write_vaccine_history(i, vaccine_taken)
+                    vaccine_taken = None
                 continue
             if 20 in self.mode:
                 if self.verbose_mode:
@@ -283,7 +293,9 @@ class Epidemic:
                 threshold = self.mode[20].FDProb(i, self.verbose_mode)
                 if seed < threshold:
                     self.people[i].vaccinated = 1
-                self.people[i].vaccine_history.append(0)
+                    self.people[i].vaccine_history.append(1)
+                else:
+                    self.people[i].vaccine_history.append(0)
                 continue
             if 21 in self.mode:
                 person = self.people[i]
@@ -292,7 +304,9 @@ class Epidemic:
                     if self.verbose_mode == True:
                         print(f'***, {seed} <= {self.alpha_V}')
                     person.vaccinated = 1
-                self.people[i].vaccine_history.append(0)
+                    self.people[i].vaccine_history.append(1)
+                else:
+                    self.people[i].vaccine_history.append(0)
                 continue
             if self.people[i].suceptible == 1:
                 self.people[i].vaccine_history.append(0)
@@ -302,13 +316,8 @@ class Epidemic:
             if seed < self.vaccinated and self.people[i].vaccinated == 0:
                 if self.verbose_mode == True:
                     print(f'{self.people[i].id} has decided to take vaccine. ')
-                if self.mode[15].check_multi_dose_vaccine() != None:
-                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
-                    self.mode[15].write_vaccine_history(i, vaccine_taken)
-                    vaccine_taken = None
-                else:
-                    self.people[i].vaccinated = 1
-                    self.people[i].vaccine_history.append(1)
+                self.people[i].vaccinated = 1
+                self.people[i].vaccine_history.append(1)
             else:
                 self.people[i].vaccine_history.append(0)
 
@@ -571,6 +580,14 @@ class Epidemic:
                     seed = random.randint(0,100000)/100000
                     if self.people[i].vaccinated == 1 and seed <= self.resus:
                         self.people[i].vaccinated = 0
+        if 15 in self.mode:
+            # Find recent vaccine taken
+            for i in range(len(self.people)):
+                vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
+                seed = random.randint(0, 100000) / 100000
+                if self.people[i].vaccinated == 1 and seed <= vaccine_used.phi_V:
+                    self.people[i].vaccinated = 0
+            return
         for i in range(len(self.people)):
             seed = random.randint(0,100000)/100000
             if self.people[i].vaccinated == 1 and seed <= self.resus:

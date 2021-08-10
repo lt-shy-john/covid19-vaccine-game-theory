@@ -89,7 +89,7 @@ def summary():
     print('gamma: {}'.format(gamma))
     print('phi: {}'.format(phi))
     print('delta: {}'.format(delta))
-    cmd = input('Show other epidemic paremeters? [y/n] ')
+    cmd = input('Show other epidemic parameters? [y/n] ')
     if cmd == 'y':
         print('alpha_V = {}'.format(alpha_V))
         print('alpha_T = {}'.format(alpha_T))
@@ -499,6 +499,59 @@ def find_mode(code, mode_master_list):
         if mode.code == code:
             return mode
 
+'''
+(Semi) Express Mode: Reading pre-formatted setting files
+'''
+def read_settings(filename, verbose=False):
+    '''
+    Read and parse pre-filled settings file.
+    '''
+    if verbose:
+        print("Reading filename")
+    with open(filename, 'r') as settings_f:
+        settings_text = settings_f.readlines()
+    print('Read successfully')
+
+    l1_flags = []
+    l2_flags = []
+
+    for i in range(len(settings_text)):
+        if settings_text[i].split(" ")[0] == '#':
+            l1_flags.append(i)
+        elif settings_text[i].split(" ")[0] == '##':
+            l2_flags.append(i)
+
+
+    vaccines = []
+    # Parse vaccine creation
+    for idx in l2_flags:
+        parsed_line = settings_text[idx].split(' ')
+        if parsed_line[0] == '##' and parsed_line[1] == 'Vaccine\n':
+            vaccine_contents = settings_text[idx+1:idx+12]
+            vaccines.append(parse_vaccine_setting(vaccine_contents))
+
+    return vaccines
+
+
+def parse_vaccine_setting(contents):
+    param = {'name': None, 'dose': None, 'days': None, 'vaccine_type': None, 'cost': None, 'efficacy': None, 'alpha': None, 'beta': None, 'gamma': None, 'delta': None, 'phi': None}
+    i = 0
+    for k, v in param.items():
+        try:
+            if k == 'dose' or k == 'days' or k == 'vaccine_type':
+                param[k] = int(contents[i].split(':')[1].strip())
+            elif k == 'cost' or k == 'efficacy' or k == 'alpha' or k == 'beta' or k == 'gamma' or k == 'delta' or k == 'phi':
+                param[k] = float(contents[i].split(':')[1].strip())
+            else:
+                param[k] = contents[i].split(':')[1].strip()
+        except IndexError:
+            print(f'There are no param {k} specified.')
+        except ValueError:
+            print(f'{k} has invalid parameters, changing to None. ')
+            param[k] = None
+        i += 1
+    return Vaccine(**param)
+
 
 def export(filename):
     print('Coming soon')
@@ -624,6 +677,15 @@ for i in range(len(sys.argv)):
         elif sys.argv[i] == '-test_rate':
             test_rate_temp = sys.argv[i+1]
             test_rate = set_correct_epi_para(test_rate_temp, test_rate)
+        elif sys.argv[i] == '-import' or sys.argv[i] == '--i':
+            if i == len(sys.argv)-1:
+                print("No setting file has been specified. ")
+                continue
+            if sys.argv[i+1][0] == '-' or not sys.argv[i+1][0].isalpha():
+                print("Invalid setting file name specified. ")
+                continue
+            vaccine_available = read_settings(sys.argv[i+1])
+            [print(x.__dict__) for x in vaccine_available]
         elif sys.argv[i] == '-verbose' or sys.argv[i] == '--v':
             verbose_mode = True
         elif sys.argv[i] == '-m':
@@ -634,6 +696,12 @@ for i in range(len(sys.argv)):
                     print('Loading mode: {}'.format(mode_flag))
 
                     # Activate modes with no options needed
+                    if mode_flag == 15:
+                        mode15.raise_flag()
+                        if mode15.flag == 'X':
+                            modes[15] = mode15
+                        else:
+                            mode.pop(15)
                     if mode_flag == 21:
                         info_nwk.set_roster()
                         info_nwk.set_population()
@@ -657,15 +725,6 @@ for i in range(len(sys.argv)):
                             modes[51] = mode51
                         else:
                             modes.pop(51)
-                    # elif mode_flag == 52:
-                    #     if 51 in modes:
-                    #         print('Mode 51 has been activated. Ignore mode 52. ')
-                    #         break
-                    #     mode52()
-                    #     if mode52.flag == 'X':
-                    #         modes[52] = mode52
-                    #     else:
-                    #         mode.pop(52)
 
                     # Loop through config values
                     for k in range(j+1,len(sys.argv)):

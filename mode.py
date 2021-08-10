@@ -896,38 +896,110 @@ class Mode15(Mode):
         vaccine_dose_count = {}
         for vaccine in vaccine_ls:
             if vaccine.brand not in vaccine_dose_count:
-                vaccine_dose_count[vaccine.brand] = 0
+                vaccine_dose_count[vaccine.brand] = 1
             else:
                 vaccine_dose_count[vaccine.brand] += 1
         self.vaccine_doses = vaccine_dose_count
 
-    def write_vaccine_history(self, i, vaccine):
+        for counts in vaccine_dose_count.values():
+            if counts > 1:
+                return True
+
+
+    def check_recent_vaccine(self, i, vaccine_ls):
+        '''
+        Check the last vaccine taken of a person.
+
+        parameter
+        ---------
+        i: str
+            Index of the person enquired
+        vaccine_ls: list
+            List of vaccines used in this simulation
+        '''
+        vaccine_used = None
+        for t in range(len(self.people[i].vaccine_history)-1, -1, -1):
+            if self.people[i].vaccine_history[t] == 1:
+                vaccine_used = "1"
+                break
+            elif self.people[i].vaccine_history[t] != 0:
+                vaccine_used = self.people[i].vaccine_history[t]
+                break
+        if vaccine_used == None:
+            return None
+        for vaccine in vaccine_ls:
+            parsed_vaccine_used = vaccine_used.split(":")
+            if parsed_vaccine_used[0] == vaccine.brand:
+                vaccine_used = vaccine
+                return vaccine_used
+        return None
+
+
+    def write_vaccine_history(self, i, vaccine, verbose=False):
+        if vaccine == None:
+            self.people[i].vaccine_history.append(0)
+            return
         if self.vaccine_doses[vaccine.brand] > 1:
-            self.people[i].vaccine_history.append(vaccine.brand + ":" + str(self.dose))
+            self.people[i].vaccine_history.append(vaccine.brand + ":" + str(vaccine.dose))
         else:
             self.people[i].vaccine_history.append(vaccine.brand)
 
     def take_multi_dose_vaccine(self, i, vaccine_ls, verbose=False):
+        # If person first time, then return
+        # Need to find from the person history (not compartment) as vaccines have efficacy.
+        # V compartmemt implies immunity.
+        vaccine_taken_flag = False
+        for t in range(len(self.people[i].vaccine_history)):
+            if self.people[i].vaccine_history[t] != 0:
+                vaccine_taken_flag = True
+        if not vaccine_taken_flag:
+            # Find vaccine of first dose
+            for vaccine in vaccine_ls:
+                if vaccine.dose == 1:
+                    vaccine_used = vaccine
+                    break
+            # Take the vaccine
+            seed = random.randint(0, 10000) / 10000
+            if seed < vaccine_used.alpha_V:
+                self.people[i].vaccinated = 1
+                return vaccine_used
+            else:
+                if verbose:
+                    print("Person did not take vaccine.")
+                return None
+
         # Check which vaccine is taken
-        for i in range(len(self.person[i].vaccine_history)-1, -1, -1):
-            if type(self.person[i].vaccine_history[i]) == str:
-                vaccine_brand = self.person[i].vaccine_history[i].split(":")[0]
-                vaccine_dose = self.person[i].vaccine_history[i].split(":")[1]
-                days_before = i - len(self.person[i].vaccine_history)
+        for t in range(len(self.people[i].vaccine_history)-1, -1, -1):
+            if verbose:
+                print(f"Reading index {t} or length {len(self.people[i].vaccine_history)}")
+            if type(self.people[i].vaccine_history[t]) == str:
+                vaccine_brand = self.people[i].vaccine_history[t].split(":")[0]
+                vaccine_dose = int(self.people[i].vaccine_history[t].split(":")[1])
+                days_before = len(self.people[i].vaccine_history) - t
                 break
 
+        vaccine_used = None
         for vaccine in vaccine_ls:
-            if vaccine_brand == vaccine.brand and vaccine_dose == vaccine.dose:
+            # Find next dose
+            if vaccine_brand == vaccine.brand and vaccine_dose + 1 == vaccine.dose:
                 vaccine_used = vaccine
+        if vaccine_used == None:
+            return None
         # Check when the vaccine is taken (and if it is the time to take the second dose)
         # e.g. ls[-1] means day before, ls[-2] means 2 days before. This is possible when the current history is yet appended to ls.
         if days_before < vaccine_used.days_to_next_dose:
-            pass
+            if verbose:
+                print(days_before, vaccine_used.days_to_next_dose)
+                print(f"Person {i+1} has taken vaccine recently. Need to wait for another {vaccine_used.days_to_next_dose - days_before} days. ")
+            return None
 
         # Take the vaccine
         seed = random.randint(0, 10000) / 10000
         if seed < vaccine.alpha_V:
-            self.people[i].vaccinated = 1
+            # Efficacy
+            seed_e = random.randint(0, 10000) / 10000
+            if seed_e < vaccine.efficacy:
+                self.people[i].vaccinated = 1
             return vaccine_used
 
 
