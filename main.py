@@ -281,36 +281,36 @@ def set_correct_epi_para(p, P):
 def set_mode(mode):
     cmd = ''
     while cmd != 'y':
-        print('Select the following options:')
-        print('01: Living in city/ rural [{}]'.format(mode01.flag))
-        print('02: Travel from overseas [{}]'.format(mode02.flag))
-        print('04: Bounded rationality of vaccine [{}]'.format(mode04.flag))
-        print('05: Edit contact network')
-        print('07: Age distribution [{}]'.format(mode07.flag))
-        print('08: Gender population [{}]'.format(mode08.flag))
-        print('10: Type of vaccine [{}]'.format(mode10.flag))
-        print('11: Stop transmissability/ reduce severity [{}]'.format(mode11.flag))
-        print('12: Cost of vaccine []')
-        print('13: Accessibility to vaccine []')
-        print('14: Side effects of vaccine []')
-        print('15: Advanced vaccine options [{}]'.format(mode15.flag))
-        print('20: Imitation game [{}]'.format(mode20.flag))
-        print('21: Local majority rule [{}]'.format(mode21.flag))
-        print('22: Stubbon to take vaccine[{}]'.format(mode22.flag))
-        print('23: Stubbon to against vaccine[{}]'.format(mode23.flag))
-        print('24: Contrary to social groups[{}]'.format(mode24.flag))
-        print('31: Medication incorporated [{}]'.format(mode31.flag))
-        print('41: Game of social distancing []')
-        print('42: Moral hazard of treatment []')
-        print('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
-        print('52: Preferential attachment [{}]'.format(mode52.flag))
-        print('53: Small world topology [{}]'.format(mode53.flag))
-        print('54: Lattice network [{}]'.format(mode54.flag))
-        print('501: Initial infection by number [{}]'.format(mode501.flag))
-        print('505: Initial infection by degree [{}]'.format(mode505.flag))
-        print('Input number codes to change the options.')
+        logging.info('Select the following options:')
+        logging.info('01: Living in city/ rural [{}]'.format(mode01.flag))
+        logging.info('02: Travel from overseas [{}]'.format(mode02.flag))
+        logging.info('04: Bounded rationality of vaccine [{}]'.format(mode04.flag))
+        logging.info('05: Edit contact network')
+        logging.info('07: Age distribution [{}]'.format(mode07.flag))
+        logging.info('08: Gender population [{}]'.format(mode08.flag))
+        logging.info('10: Type of vaccine [{}]'.format(mode10.flag))
+        logging.info('11: Stop transmissability/ reduce severity [{}]'.format(mode11.flag))
+        logging.info('12: Cost of vaccine []')
+        logging.info('13: Accessibility to vaccine []')
+        logging.info('14: Side effects of vaccine []')
+        logging.info('15: Advanced vaccine options [{}]'.format(mode15.flag))
+        logging.info('20: Imitation game [{}]'.format(mode20.flag))
+        logging.info('21: Local majority rule [{}]'.format(mode21.flag))
+        logging.info('22: Stubbon to take vaccine[{}]'.format(mode22.flag))
+        logging.info('23: Stubbon to against vaccine[{}]'.format(mode23.flag))
+        logging.info('24: Contrary to social groups[{}]'.format(mode24.flag))
+        logging.info('31: Medication incorporated [{}]'.format(mode31.flag))
+        logging.info('41: Game of social distancing []')
+        logging.info('42: Moral hazard of treatment []')
+        logging.info('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
+        logging.info('52: Preferential attachment [{}]'.format(mode52.flag))
+        logging.info('53: Small world topology [{}]'.format(mode53.flag))
+        logging.info('54: Lattice network [{}]'.format(mode54.flag))
+        logging.info('501: Initial infection by number [{}]'.format(mode501.flag))
+        logging.info('505: Initial infection by degree [{}]'.format(mode505.flag))
+        logging.info('Input number codes to change the options.')
         mode_input = input('> ')
-        print(mode_input)
+        logging.debug(mode_input)
         mode = mode_settings(mode_input, mode)
         cmd = input('Return to main menu? [y/n] ')
     return mode
@@ -325,9 +325,9 @@ def mode_settings(cmd, mode=None):
         removal_idx = cmd.index('-dp')
     print('Adding: ')
     if '-dp' in cmd:
-        print(cmd[:removal_idx])
-        print('Removing')
-        print(cmd[removal_idx+1:])
+        logging.debug(cmd[:removal_idx])
+        logging.debug('Removing')
+        logging.debug(cmd[removal_idx+1:])
 
         rv_modes = cmd[removal_idx+1:]
         cmd = cmd[:removal_idx]
@@ -586,7 +586,7 @@ def gen_logging(filename, verbose=False, verbose_flag = None):
             root.setLevel(logging.CRITICAL)
             ch.setLevel(logging.CRITICAL)
 
-    formatter = logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s")
+    formatter = LevelFormatter(fmt="[%(asctime)s] %(levelname)s: %(message)s", level_fmts={logging.INFO: "%(message)s"}) 
 
     if filename != "":
         log_f.setFormatter(formatter)
@@ -597,10 +597,10 @@ def gen_logging(filename, verbose=False, verbose_flag = None):
     root.addHandler(ch)
 
 
-print('  ==========================================  \n\n')
-print('  Agent Based Modelling: COVID-19 SUEP Model  \n\n')
-print('  ==========================================  ')
-print()
+logging.info('  ==========================================  \n\n')
+logging.info('  Agent Based Modelling: COVID-19 SUEP Model  \n\n')
+logging.info('  ==========================================  ')
+logging.info()
 # Express mode: Call usage information
 if len(sys.argv) == 2 and (sys.argv[1] == '-help' or sys.argv[1] == '-h'):
     usage()
@@ -622,7 +622,7 @@ if len(sys.argv) == 1:
     delta = input('Removal rate (delta): ')
     delta = correct_epi_para(delta)
 elif len(sys.argv) > 1:
-    print('Using pre-defined inputs. ')
+    logging.info('Using pre-defined inputs. ')
     try:
         N = correct_para(sys.argv[1], pos=True)
         T = correct_para(sys.argv[2])
@@ -720,10 +720,10 @@ for i in range(len(sys.argv)):
             test_rate = set_correct_epi_para(test_rate_temp, test_rate)
         elif sys.argv[i] == '-import' or sys.argv[i] == '--i':
             if i == len(sys.argv)-1:
-                print("No setting file has been specified. ")
+                logging.info("No setting file has been specified. ")
                 continue
             if sys.argv[i+1][0] == '-' or not sys.argv[i+1][0].isalpha():
-                print("Invalid setting file name specified. ")
+                logging.info("Invalid setting file name specified. ")
                 continue
             vaccine_available = read_settings(sys.argv[i+1])
             [print(x.__dict__) for x in vaccine_available]
@@ -734,7 +734,7 @@ for i in range(len(sys.argv)):
                 # Skip at other options
                 if sys.argv[j][:2] == '--':
                     mode_flag = int(sys.argv[j][2:])
-                    print('Loading mode: {}'.format(mode_flag))
+                    logging.debug('Loading mode: {}'.format(mode_flag))
 
                     # Activate modes with no options needed
                     if mode_flag == 21:
@@ -1081,7 +1081,7 @@ while True:
         N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode = setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode)
         population = Person.make_population(N)
     elif cmd == 'other setting':
-        print('Leave blank if not changing the value(s).')
+        logging.info('Leave blank if not changing the value(s).')
         N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode)
     elif cmd == 'summary':
         summary()
@@ -1090,12 +1090,12 @@ while True:
     elif cmd == 'help':
         help()
     elif cmd == 'start' or cmd == 'run':
-        print('===== Simulation Running =====')
+        logging.info('===== Simulation Running =====')
         current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, vaccine_available, verbose_mode)
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:
-            print('\nMode objects loaded.\n')
+            logging.debug('\nMode objects loaded.\n')
         # Run
         current_run()
         print('=====  Simulation Ended  =====')
@@ -1127,10 +1127,10 @@ while True:
         time.sleep(1)
         print('==== Thank you ====')
     elif cmd == 'quit' or cmd == 'q':
-        print('See you!')
+        logging.info('See you!')
         quit()
     else:
-        print('Invalid input. Please check your command again.')
+        logging.info('Invalid input. Please check your command again.')
         cmd = input('Commands [y/n]')
         if cmd == 'y':
             usage()
