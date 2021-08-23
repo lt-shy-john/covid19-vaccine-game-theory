@@ -102,9 +102,9 @@ class Simulation:
         if self.filename != '':
             write.WriteStates(epidemic, self.filename)
         for t in range(self.T):
-            print('=========== t = {} ============\n'.format(t+1))
-            print('N = {}'.format(len(self.people)))
-            print('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
+            logging.info('=========== t = {} ============\n'.format(t+1))
+            logging.info('N = {}'.format(len(self.people)))
+            logging.info('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
             # Overseas travel
             if 2 in self.modes:
                 if self.verbose_mode:
@@ -159,9 +159,9 @@ class Simulation:
             if 2 in self.modes:
                 self.modes[2].writeTravelHistory(self.verbose_mode)
 
-        print('\n=========== Result ============\n')
-        print('There are {} people infected.'.format(epidemic.I))
-        print('There are {} people vaccinated.'.format(epidemic.V))
+        logging.info('\n=========== Result ============\n')
+        logging.info('There are {} people infected.'.format(epidemic.I))
+        logging.info('There are {} people vaccinated.'.format(epidemic.V))
         print()
 
         # Return any data
