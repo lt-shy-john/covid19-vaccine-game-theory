@@ -1,6 +1,6 @@
 class Vaccine:
 
-    def __init__(self, name, dose, days, vaccine_type, cost, efficacy, alpha, beta, gamma, delta, phi):
+    def __init__(self, name='Sample', dose=0, days=0, vaccine_type=0, cost=0, efficacy=0, alpha=0, beta=0, gamma=0, delta=0, phi=0):
         self.brand = name
         self.dose = dose
         self.days_to_next_dose = days
