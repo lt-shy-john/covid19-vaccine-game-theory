@@ -1,6 +1,7 @@
 # Import libraries
 import sys
 import time
+import logging
 
 # Import class files
 from person import Person
@@ -9,6 +10,7 @@ from vaccine import Vaccine
 from simulation import Simulation
 import mode
 from contact import ContactNwk
+from levelFormatter import LevelFormatter
 
 '''
 Main code
@@ -556,6 +558,45 @@ def parse_vaccine_setting(contents):
 def export(filename):
     print('Coming soon')
 
+
+def gen_logging(filename, verbose=False, verbose_flag = None):
+    root = logging.getLogger()
+
+    if filename != "":
+        log_f = logging.filehandler(filename + ".log")
+    ch = logging.StreamHandler(sys.stdout)
+
+    root.setLevel(logging.INFO)
+    ch.setLevel(logging.INFO)
+
+    if verbose:
+        if verbose_flag.lower() == 'debug':
+            root.setLevel(logging.DEBUG)
+            ch.setLevel(logging.DEBUG)
+        elif verbose_flag.lower() == 'info':
+            root.setLevel(logging.INFO)
+            ch.setLevel(logging.INFO)
+        elif verbose_flag.lower() == 'warning':
+            root.setLevel(logging.WARNING)
+            ch.setLevel(logging.WARNING)
+        elif verbose_flag.lower() == 'error':
+            root.setLevel(logging.ERROR)
+            ch.setLevel(logging.ERROR)
+        elif verbose_flag.lower() == 'critical':
+            root.setLevel(logging.CRITICAL)
+            ch.setLevel(logging.CRITICAL)
+
+    formatter = logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s")
+
+    if filename != "":
+        log_f.setFormatter(formatter)
+    ch.setFormatter(formatter)
+
+    if filename != "":
+        root.addHandler(log_f)
+    root.addHandler(ch)
+
+
 print('  ==========================================  \n\n')
 print('  Agent Based Modelling: COVID-19 SUEP Model  \n\n')
 print('  ==========================================  ')
@@ -696,12 +737,6 @@ for i in range(len(sys.argv)):
                     print('Loading mode: {}'.format(mode_flag))
 
                     # Activate modes with no options needed
-                    if mode_flag == 15:
-                        mode15.raise_flag()
-                        if mode15.flag == 'X':
-                            modes[15] = mode15
-                        else:
-                            mode.pop(15)
                     if mode_flag == 21:
                         info_nwk.set_roster()
                         info_nwk.set_population()
@@ -840,8 +875,9 @@ for i in range(len(sys.argv)):
                                 modes[11] = mode11
                             else:
                                 modes.pop(11)
-
                         elif mode_flag == 15:
+                            if sys.argv[k][:3] == '*f=':
+                                mode15.raise_flag()
                             mode15.raise_flag()
                             if mode15.flag == 'X':
                                 modes[15] = mode15
@@ -1019,6 +1055,7 @@ for i in range(len(sys.argv)):
         continue
     except IndexError:
         break
+
 
 if sys.argv[-1] == 'run':
     print('===== Simulation Running =====')
