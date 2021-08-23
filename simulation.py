@@ -11,10 +11,11 @@ import networkx as nx
 
 
 class Simulation:
-    def __init__(self, N, T, people, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, tau, immune_time, verbose_mode, groups_of=3):
+    def __init__(self, N, T, people, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, tau, immune_time, vaccine_ls, verbose_mode, groups_of=3):
         self.N = N
         self.groups_of = groups_of
         self.people = people   # List of people objects
+        self.vaccine_ls = vaccine_ls
         self.contact_nwk = contact_nwk
         self.info_nwk = info_nwk
         self.groups = None
@@ -73,7 +74,7 @@ class Simulation:
 
     def __call__(self, modes=None, start=True):
         FILENAME_STATES = ''
-        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.contact_nwk, self.verbose_mode, self.modes, self.filename, start)
+        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate, self.immune_time, self.vaccine_ls, self.contact_nwk, self.verbose_mode, self.modes, self.filename, start)
         epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
         epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
         print('After:',epidemic.mode)
@@ -85,11 +86,12 @@ class Simulation:
 
         # Contact network adj matrix
         if any(i in self.modes for i in [5, 51, 52, 53, 54]):
-            if self.filename != '':
-                path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
-                if self.verbose_mode:
-                    print('Creating a new folder for contact network adjacency matrix at ' + path + '.')
-                os.mkdir(path)
+            pass # Commented out since it produces large files
+            # if self.filename != '':
+            #     path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
+            #     if self.verbose_mode:
+            #         print('Creating a new folder for contact network adjacency matrix at ' + path + '.')
+            #     os.mkdir(path)
 
         # Intimacy game
         if 20 in self.modes:
@@ -118,13 +120,14 @@ class Simulation:
 
             # Contact network update
             if any(i in self.modes for i in [5, 51, 52, 53, 54]):
-                if self.filename != '':
-                    path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
-                    if self.verbose_mode:
-                        print('Adding a new adjacency matrix into ' + path + '.')
-                    if os.path.exists(path):
-                        A = nx.convert_matrix.to_numpy_array(self.contact_nwk.nwk_graph)
-                        np.savetxt(path + "\\" + self.filename + '-contact_nwk' + "adj_matrix_" + str(t).zfill(self.T%10) + '.txt', A, fmt="%d")
+                pass # Have to comment out adj matrix functionality as it produces a large file.
+                # if self.filename != '':
+                #     path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
+                #     if self.verbose_mode:
+                #         print('Adding a new adjacency matrix into ' + path + '.')
+                #     if os.path.exists(path):
+                #         A = nx.convert_matrix.to_numpy_array(self.contact_nwk.nwk_graph)
+                #         np.savetxt(path + "\\" + self.filename + '-contact_nwk' + "adj_matrix_" + str(t).zfill(self.T%10) + '.txt', A, fmt="%d")
 
 
             # Info network update
