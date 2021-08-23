@@ -330,7 +330,7 @@ def WriteSummary(obs, filename):
                 contents.append('N: {} people\n'.format(len(obs.N)))
                 contents.append('Value: {} \n'.format(obs.people[0].lambda_BR))
                 contents.append('P(V): {} \n'.format(obs.modes[4].P_Alpha[0]))
-        if any(i in obs.modes for i in [51, 52, 53, 54]):
+        if any(i in obs.modes for i in [5, 51, 52, 53, 54, 501, 505]):
             contents.append('\n# Network Topology \n')
             if 51 in obs.modes:
                 nwk_type = "Erdos-Renyi"
@@ -340,6 +340,8 @@ def WriteSummary(obs, filename):
                 nwk_type = "Watts-Strogatz"
             elif 54 in obs.modes:
                 nwk_type = "Lattice"
+            else:
+                nwk_type = "Custom"
             contents.append('Type: {}\n\n'.format(nwk_type))
             contents.append('\n## Basic Network Quantities \n')
             contents.append('Nodes: {}\n'.format(obs.contact_nwk.nwk_graph.number_of_nodes()))
@@ -358,6 +360,12 @@ def WriteSummary(obs, filename):
                     contents.append(f'Rewire type: {"Assortative" if obs.contact_nwk.assort else "Disassortative"}\n')
                 contents.append('Average degree per time step stored in "{}-nwk-deg.csv"\n'.format(obs.filename))
                 contents.append('Assortativity information per time step stored in "{}-nwk-assort.csv"\n'.format(obs.filename))
+            if any(i in obs.modes for i in [501, 505]):
+                contents.append('\n## Initial Infection \n')
+                if 501 in obs.modes:
+                    contents.append('Initial infection: {}\n\n'.format(obs.modes[501].init_infection))
+                if 505 in obs.modes:
+                    contents.append('By: {}\n\n'.format(obs.modes[505].modes))
         if 2 in obs.modes:
             contents.append('\n# Overseas travel \n')
             contents.append('  Location\tBeta\tIsolation\tReturn prob\n')
