@@ -5,10 +5,11 @@ from epidemic import Epidemic
 from contact import ContactNwk
 import write
 
-import logging
 import random
 import os
 import networkx as nx
+import logging
+from levelFormatter import LevelFormatter
 
 
 class Simulation:
