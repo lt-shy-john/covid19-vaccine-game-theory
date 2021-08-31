@@ -3,13 +3,13 @@ import numpy as np
 from person import Person
 from epidemic import Epidemic
 from contact import ContactNwk
+from levelFormatter import LevelFormatter
 import write
 
 import random
 import os
 import networkx as nx
 import logging
-from levelFormatter import LevelFormatter
 
 
 class Simulation:
