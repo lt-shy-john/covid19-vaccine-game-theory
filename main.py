@@ -10,7 +10,7 @@ from vaccine import Vaccine
 from simulation import Simulation
 import mode
 from contact import ContactNwk
-from levelFormatter import LevelFormatter
+import customLogger
 
 '''
 Main code
