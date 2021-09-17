@@ -6,7 +6,7 @@ from contact import ContactNwk
 from vaccine import Vaccine
 import person
 import write
-from levelFormatter import LevelFormatter
+import customLogger
 
 class Epidemic:
 
