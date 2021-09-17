@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import logging
 
 from person import Person
-from levelFormatter import LevelFormatter
+import customLogger
 
 class ContactNwk:
 
