@@ -1,6 +1,6 @@
 from vaccine import Vaccine
 from person import Person
-from levelFormatter import LevelFormatter
+import customLogger
 
 import random
 import math
