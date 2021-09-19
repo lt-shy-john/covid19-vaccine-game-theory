@@ -728,7 +728,7 @@ for i in range(len(sys.argv)):
             vaccine_available = read_settings(sys.argv[i+1])
             [print(x.__dict__) for x in vaccine_available]
         elif sys.argv[i] == '-verbose' or sys.argv[i] == '--v':
-            verbose_mode = True
+            verbose_mode = True # Legcy mode: Should be controlled by logger instead. 
         elif sys.argv[i] == '-m':
             for j in range(i+1,len(sys.argv)):
                 # Skip at other options
