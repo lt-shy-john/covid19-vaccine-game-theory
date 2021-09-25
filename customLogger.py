@@ -26,9 +26,6 @@ def gen_logging(filename, verbose=False, verbose_flag = None):
         log_f = logging.FileHandler(filename + ".log")
     ch = logging.StreamHandler(sys.stdout)
 
-    root.setLevel(logging.INFO)
-    ch.setLevel(logging.INFO)
-
     if verbose:
         if verbose_flag.lower() == 'debug':
             root.setLevel(logging.DEBUG)
@@ -45,6 +42,9 @@ def gen_logging(filename, verbose=False, verbose_flag = None):
         elif verbose_flag.lower() == 'critical':
             root.setLevel(logging.CRITICAL)
             ch.setLevel(logging.CRITICAL)
+        else:
+            root.setLevel(logging.INFO)
+            ch.setLevel(logging.INFO)
 
     formatter = LevelFormatter(fmt="[%(asctime)s] %(levelname)s: %(message)s", level_fmts={logging.INFO: "%(message)s"})
 
@@ -57,4 +57,6 @@ def gen_logging(filename, verbose=False, verbose_flag = None):
     root.addHandler(ch)
 
     root.propagate = False
+
+    return root
 
