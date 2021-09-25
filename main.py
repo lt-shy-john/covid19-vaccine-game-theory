@@ -559,48 +559,12 @@ def export(filename):
     print('Coming soon')
 
 
-def gen_logging(filename, verbose=False, verbose_flag = None):
-    root = logging.getLogger()
+root = customLogger.gen_logging('', False, None)
 
-    if filename != "":
-        log_f = logging.filehandler(filename + ".log")
-    ch = logging.StreamHandler(sys.stdout)
+root.info('  ==========================================  \n\n')
+root.info('  Agent Based Modelling: COVID-19 SUEP Model  \n\n')
+root.info('  ==========================================  \n')
 
-    root.setLevel(logging.INFO)
-    ch.setLevel(logging.INFO)
-
-    if verbose:
-        if verbose_flag.lower() == 'debug':
-            root.setLevel(logging.DEBUG)
-            ch.setLevel(logging.DEBUG)
-        elif verbose_flag.lower() == 'info':
-            root.setLevel(logging.INFO)
-            ch.setLevel(logging.INFO)
-        elif verbose_flag.lower() == 'warning':
-            root.setLevel(logging.WARNING)
-            ch.setLevel(logging.WARNING)
-        elif verbose_flag.lower() == 'error':
-            root.setLevel(logging.ERROR)
-            ch.setLevel(logging.ERROR)
-        elif verbose_flag.lower() == 'critical':
-            root.setLevel(logging.CRITICAL)
-            ch.setLevel(logging.CRITICAL)
-
-    formatter = LevelFormatter(fmt="[%(asctime)s] %(levelname)s: %(message)s", level_fmts={logging.INFO: "%(message)s"}) 
-
-    if filename != "":
-        log_f.setFormatter(formatter)
-    ch.setFormatter(formatter)
-
-    if filename != "":
-        root.addHandler(log_f)
-    root.addHandler(ch)
-
-
-logging.info('  ==========================================  \n\n')
-logging.info('  Agent Based Modelling: COVID-19 SUEP Model  \n\n')
-logging.info('  ==========================================  ')
-logging.info()
 # Express mode: Call usage information
 if len(sys.argv) == 2 and (sys.argv[1] == '-help' or sys.argv[1] == '-h'):
     usage()
@@ -728,7 +692,25 @@ for i in range(len(sys.argv)):
             vaccine_available = read_settings(sys.argv[i+1])
             [print(x.__dict__) for x in vaccine_available]
         elif sys.argv[i] == '-verbose' or sys.argv[i] == '--v':
-            verbose_mode = True # Legcy mode: Should be controlled by logger instead. 
+            verbose_mode = True # Legacy mode: Should be replaced by logging level
+            logging_level = ['debug', 'info', 'warning', 'error', 'critical']
+            filename = ''
+
+            if type(sys.argv[i+1]) == str:
+                if sys.argv[i+1].lower() in logging_level:
+                    logging.debug(sys.argv[i+1])
+                    verbose_level = sys.argv[i+1]
+            else:
+                verbose_level = 'info'
+
+            # Get filename
+            for j in range(i, len(sys.argv)):
+                if sys.argv[j] == '-f':
+                    if sys.argv[j + 1] == 'run':
+                        raise ValueError
+                    filename = sys.argv[j + 1]
+
+            root = customLogger.gen_logging(filename, verbose_mode, verbose_level)
         elif sys.argv[i] == '-m':
             for j in range(i+1,len(sys.argv)):
                 # Skip at other options
