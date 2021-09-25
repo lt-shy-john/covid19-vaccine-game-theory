@@ -17,6 +17,7 @@ class LevelFormatter(logging.Formatter):
 
         return super(LevelFormatter, self).format(record)
 
+
 def gen_logging(filename, verbose=False, verbose_flag = None):
 
     root = logging.getLogger(__name__)
@@ -55,4 +56,5 @@ def gen_logging(filename, verbose=False, verbose_flag = None):
         root.addHandler(log_f)
     root.addHandler(ch)
 
-    return root
+    root.propagate = False
+

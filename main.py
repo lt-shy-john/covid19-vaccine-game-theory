@@ -83,20 +83,20 @@ def setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V,
 
 
 def summary():
-    logging.info('N: {}'.format(N))
-    logging.info('T: {}'.format(T))
-    logging.info('===== SIR Rate =====')
-    logging.info('alpha: {}'.format(alpha))
-    logging.info('beta: {}'.format(beta))
-    logging.info('gamma: {}'.format(gamma))
-    logging.info('phi: {}'.format(phi))
-    logging.info('delta: {}'.format(delta))
+    root.info('N: {}'.format(N))
+    root.info('T: {}'.format(T))
+    root.info('===== SIR Rate =====')
+    root.info('alpha: {}'.format(alpha))
+    root.info('beta: {}'.format(beta))
+    root.info('gamma: {}'.format(gamma))
+    root.info('phi: {}'.format(phi))
+    root.info('delta: {}'.format(delta))
     cmd = input('Show other epidemic parameters? [y/n] ')
     if cmd == 'y':
-        logging.info('alpha_V = {}'.format(alpha_V))
-        logging.info('alpha_T = {}'.format(alpha_T))
-        logging.info('immune time = {}'.format(immune_time))
-        logging.info('test rate: {}'.format(test_rate))
+        root.info('alpha_V = {}'.format(alpha_V))
+        root.info('alpha_T = {}'.format(alpha_T))
+        root.info('immune time = {}'.format(immune_time))
+        root.info('test rate: {}'.format(test_rate))
     print()
     info = input('Information about the parameters? [y/n] ').lower()
     if info == 'y':
@@ -118,62 +118,62 @@ def show_nwk():
 
 
 def info_summ():
-    logging.info('N - Number of simulated agents.')
-    logging.info('T - Time steps/ period of simulation.')
-    logging.info('Alpha - Adoption of vaccination/ PrEP (willingness).')
-    logging.info('Beta - Infection rate.')
-    logging.info('Gamma - Recovery rate.')
-    logging.info('Delta - Removal rate.')
-    logging.info('Phi - Protection wear off rate.')
-    logging.info('Delta - Removal rate.')
-    logging.info('Tau - COVID-19 Testing rate. ')
+    root.info('N - Number of simulated agents.')
+    root.info('T - Time steps/ period of simulation.')
+    root.info('Alpha - Adoption of vaccination/ PrEP (willingness).')
+    root.info('Beta - Infection rate.')
+    root.info('Gamma - Recovery rate.')
+    root.info('Delta - Removal rate.')
+    root.info('Phi - Protection wear off rate.')
+    root.info('Delta - Removal rate.')
+    root.info('Tau - COVID-19 Testing rate. ')
 
 
 def help():
-    logging.info('LOOK - View partner network.')
-    logging.info('MODE - Change mode settings.')
-    logging.info('RUN/ START - Start the simulation.')
-    logging.info('SETTING - Set simulation settings.')
-    logging.info('OTHER SETTING - Set auxiliary simulation parameters.')
-    logging.info('SUMMARY - Print the simulation parameters.')
-    logging.info('QUIT/ Q - Quit the software.')
+    root.info('LOOK - View partner network.')
+    root.info('MODE - Change mode settings.')
+    root.info('RUN/ START - Start the simulation.')
+    root.info('SETTING - Set simulation settings.')
+    root.info('OTHER SETTING - Set auxiliary simulation parameters.')
+    root.info('SUMMARY - Print the simulation parameters.')
+    root.info('QUIT/ Q - Quit the software.')
 
 
 def usage():
-    logging.info('Usage: python3 main.py [(N) (T) (α) (β) (γ) (φ) (δ)] ...\n\
+    root.info('Usage: python3 main.py [(N) (T) (α) (β) (γ) (φ) (δ)] ...\n\
     [-m  <modes_config>] [-f (filename)] [-verbose | --v] [run]\n')
-    logging.info('-immune_time \t Immune time after recovered, in days.')
-    logging.info('-test_rate \t COVID-19 testing rate.')
-    logging.info('-m \t\t Mode')
-    logging.info('    --1 \t Living in city/ rural.')
-    logging.info('    --2 \t Travelled back from overseas.')
-    logging.info('    --4 \t Bounded rationality of vaccine.')
-    logging.info('    --5 \t Edit contact network.')
-    logging.info('    --7 \t Age distribution.')
-    logging.info('    --8 \t Gender distribution.')
-    logging.info('    --10 \t Type of vaccine.')
-    logging.info('    --11 \t Stop transmissability/ reduce severity.')
-    logging.info('    --12 \t Cost of vaccine.')
-    logging.info('    --13 \t Accessibility to vaccine.')
-    logging.info('    --14 \t Side effects of vaccine.')
-    logging.info('    --15 \t Advanced vaccine options.')
-    logging.info('    --20 \t Intimacy game.')
-    logging.info('    --21 \t Local majority rule.')
-    logging.info('    --22 \t Stubbon to take vaccine.')
-    logging.info('    --23 \t Stubbon to against vaccine.')
-    logging.info('    --24 \t Contrary to social groups.')
-    logging.info('    --31 \t Medication incorporated.')
-    logging.info('    --41 \t Game of social distancing.')
-    logging.info('    --42 \t Moral hazard of treatment.')
-    logging.info('    --51 \t Erdos-Renyi topology.')
-    logging.info('    --52 \t Preferential attachment.')
-    logging.info('    --53 \t Small world network.')
-    logging.info('    --54 \t Lattice network.')
-    logging.info('    --501 \t Initial infection by number.')
-    logging.info('    --505 \t Initial infection by degree.')
-    logging.info('-f \t\t Export file name.')
-    logging.info('-h \t\t Usage.')
-    logging.info('run \t\t Run simulation, last argument.')
+    root.info('-immune_time \t Immune time after recovered, in days.')
+    root.info('-test_rate \t COVID-19 testing rate.')
+    root.info('-m \t\t Mode')
+    root.info('    --1 \t Living in city/ rural.')
+    root.info('    --2 \t Travelled back from overseas.')
+    root.info('    --4 \t Bounded rationality of vaccine.')
+    root.info('    --5 \t Edit contact network.')
+    root.info('    --7 \t Age distribution.')
+    root.info('    --8 \t Gender distribution.')
+    root.info('    --10 \t Type of vaccine.')
+    root.info('    --11 \t Stop transmissability/ reduce severity.')
+    root.info('    --12 \t Cost of vaccine.')
+    root.info('    --13 \t Accessibility to vaccine.')
+    root.info('    --14 \t Side effects of vaccine.')
+    root.info('    --15 \t Advanced vaccine options.')
+    root.info('    --20 \t Intimacy game.')
+    root.info('    --21 \t Local majority rule.')
+    root.info('    --22 \t Stubbon to take vaccine.')
+    root.info('    --23 \t Stubbon to against vaccine.')
+    root.info('    --24 \t Contrary to social groups.')
+    root.info('    --31 \t Medication incorporated.')
+    root.info('    --41 \t Game of social distancing.')
+    root.info('    --42 \t Moral hazard of treatment.')
+    root.info('    --51 \t Erdos-Renyi topology.')
+    root.info('    --52 \t Preferential attachment.')
+    root.info('    --53 \t Small world network.')
+    root.info('    --54 \t Lattice network.')
+    root.info('    --501 \t Initial infection by number.')
+    root.info('    --505 \t Initial infection by degree.')
+    root.info('-f \t\t Export file name.')
+    root.info('-h \t\t Usage.')
+    root.info('run \t\t Run simulation, last argument.')
 
 
 def correct_bool_para(b):
@@ -281,36 +281,36 @@ def set_correct_epi_para(p, P):
 def set_mode(mode):
     cmd = ''
     while cmd != 'y':
-        logging.info('Select the following options:')
-        logging.info('01: Living in city/ rural [{}]'.format(mode01.flag))
-        logging.info('02: Travel from overseas [{}]'.format(mode02.flag))
-        logging.info('04: Bounded rationality of vaccine [{}]'.format(mode04.flag))
-        logging.info('05: Edit contact network')
-        logging.info('07: Age distribution [{}]'.format(mode07.flag))
-        logging.info('08: Gender population [{}]'.format(mode08.flag))
-        logging.info('10: Type of vaccine [{}]'.format(mode10.flag))
-        logging.info('11: Stop transmissability/ reduce severity [{}]'.format(mode11.flag))
-        logging.info('12: Cost of vaccine []')
-        logging.info('13: Accessibility to vaccine []')
-        logging.info('14: Side effects of vaccine []')
-        logging.info('15: Advanced vaccine options [{}]'.format(mode15.flag))
-        logging.info('20: Imitation game [{}]'.format(mode20.flag))
-        logging.info('21: Local majority rule [{}]'.format(mode21.flag))
-        logging.info('22: Stubbon to take vaccine[{}]'.format(mode22.flag))
-        logging.info('23: Stubbon to against vaccine[{}]'.format(mode23.flag))
-        logging.info('24: Contrary to social groups[{}]'.format(mode24.flag))
-        logging.info('31: Medication incorporated [{}]'.format(mode31.flag))
-        logging.info('41: Game of social distancing []')
-        logging.info('42: Moral hazard of treatment []')
-        logging.info('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
-        logging.info('52: Preferential attachment [{}]'.format(mode52.flag))
-        logging.info('53: Small world topology [{}]'.format(mode53.flag))
-        logging.info('54: Lattice network [{}]'.format(mode54.flag))
-        logging.info('501: Initial infection by number [{}]'.format(mode501.flag))
-        logging.info('505: Initial infection by degree [{}]'.format(mode505.flag))
-        logging.info('Input number codes to change the options.')
+        root.info('Select the following options:')
+        root.info('01: Living in city/ rural [{}]'.format(mode01.flag))
+        root.info('02: Travel from overseas [{}]'.format(mode02.flag))
+        root.info('04: Bounded rationality of vaccine [{}]'.format(mode04.flag))
+        root.info('05: Edit contact network')
+        root.info('07: Age distribution [{}]'.format(mode07.flag))
+        root.info('08: Gender population [{}]'.format(mode08.flag))
+        root.info('10: Type of vaccine [{}]'.format(mode10.flag))
+        root.info('11: Stop transmissability/ reduce severity [{}]'.format(mode11.flag))
+        root.info('12: Cost of vaccine []')
+        root.info('13: Accessibility to vaccine []')
+        root.info('14: Side effects of vaccine []')
+        root.info('15: Advanced vaccine options [{}]'.format(mode15.flag))
+        root.info('20: Imitation game [{}]'.format(mode20.flag))
+        root.info('21: Local majority rule [{}]'.format(mode21.flag))
+        root.info('22: Stubbon to take vaccine[{}]'.format(mode22.flag))
+        root.info('23: Stubbon to against vaccine[{}]'.format(mode23.flag))
+        root.info('24: Contrary to social groups[{}]'.format(mode24.flag))
+        root.info('31: Medication incorporated [{}]'.format(mode31.flag))
+        root.info('41: Game of social distancing []')
+        root.info('42: Moral hazard of treatment []')
+        root.info('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
+        root.info('52: Preferential attachment [{}]'.format(mode52.flag))
+        root.info('53: Small world topology [{}]'.format(mode53.flag))
+        root.info('54: Lattice network [{}]'.format(mode54.flag))
+        root.info('501: Initial infection by number [{}]'.format(mode501.flag))
+        root.info('505: Initial infection by degree [{}]'.format(mode505.flag))
+        root.info('Input number codes to change the options.')
         mode_input = input('> ')
-        logging.debug(mode_input)
+        root.debug(mode_input)
         mode = mode_settings(mode_input, mode)
         cmd = input('Return to main menu? [y/n] ')
     return mode
@@ -325,9 +325,9 @@ def mode_settings(cmd, mode=None):
         removal_idx = cmd.index('-dp')
     print('Adding: ')
     if '-dp' in cmd:
-        logging.debug(cmd[:removal_idx])
-        logging.debug('Removing')
-        logging.debug(cmd[removal_idx+1:])
+        root.debug(cmd[:removal_idx])
+        root.debug('Removing')
+        root.debug(cmd[removal_idx+1:])
 
         rv_modes = cmd[removal_idx+1:]
         cmd = cmd[:removal_idx]
@@ -586,7 +586,7 @@ if len(sys.argv) == 1:
     delta = input('Removal rate (delta): ')
     delta = correct_epi_para(delta)
 elif len(sys.argv) > 1:
-    logging.info('Using pre-defined inputs. ')
+    root.info('Using pre-defined inputs. ')
     try:
         N = correct_para(sys.argv[1], pos=True)
         T = correct_para(sys.argv[2])
@@ -684,10 +684,10 @@ for i in range(len(sys.argv)):
             test_rate = set_correct_epi_para(test_rate_temp, test_rate)
         elif sys.argv[i] == '-import' or sys.argv[i] == '--i':
             if i == len(sys.argv)-1:
-                logging.info("No setting file has been specified. ")
+                root.info("No setting file has been specified. ")
                 continue
             if sys.argv[i+1][0] == '-' or not sys.argv[i+1][0].isalpha():
-                logging.info("Invalid setting file name specified. ")
+                root.info("Invalid setting file name specified. ")
                 continue
             vaccine_available = read_settings(sys.argv[i+1])
             [print(x.__dict__) for x in vaccine_available]
@@ -698,8 +698,9 @@ for i in range(len(sys.argv)):
 
             if type(sys.argv[i+1]) == str:
                 if sys.argv[i+1].lower() in logging_level:
-                    logging.debug(sys.argv[i+1])
+                    root.debug(sys.argv[i+1])
                     verbose_level = sys.argv[i+1]
+                else: verbose_level = 'info'
             else:
                 verbose_level = 'info'
 
@@ -716,7 +717,7 @@ for i in range(len(sys.argv)):
                 # Skip at other options
                 if sys.argv[j][:2] == '--':
                     mode_flag = int(sys.argv[j][2:])
-                    logging.debug('Loading mode: {}'.format(mode_flag))
+                    root.debug('Loading mode: {}'.format(mode_flag))
 
                     # Activate modes with no options needed
                     if mode_flag == 21:
@@ -1040,13 +1041,16 @@ for i in range(len(sys.argv)):
 
 
 if sys.argv[-1] == 'run':
-    print('===== Simulation Running =====')
-    current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, vaccine_available, verbose_mode)
+    root.info('===== Simulation Running =====')
+    current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename,
+                             alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI,
+                             beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time,
+                             vaccine_available, verbose_mode, 'info')
     # Load modes
     current_run.load_modes(modes)
     if len(modes) > 0:
-        print('modes', current_run.modes)
-        print('\nMode objects loaded.\n')
+        root.debug('modes', current_run.modes)
+        root.debug('\nMode objects loaded.\n')
     # Run
     current_run()
     print('=====  Simulation Ended  =====')
@@ -1063,7 +1067,7 @@ while True:
         N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode = setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode)
         population = Person.make_population(N)
     elif cmd == 'other setting':
-        logging.info('Leave blank if not changing the value(s).')
+        root.info('Leave blank if not changing the value(s).')
         N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode = setting_other(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode)
     elif cmd == 'summary':
         summary()
@@ -1072,12 +1076,15 @@ while True:
     elif cmd == 'help':
         help()
     elif cmd == 'start' or cmd == 'run':
-        logging.info('===== Simulation Running =====')
-        current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time, vaccine_available, verbose_mode)
+        root.info('===== Simulation Running =====')
+        current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta,
+                                 filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR,
+                                 beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate,
+                                 immune_time, vaccine_available, verbose_mode, 'info')
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:
-            logging.debug('\nMode objects loaded.\n')
+            root.debug('\nMode objects loaded.\n')
         # Run
         current_run()
         print('=====  Simulation Ended  =====')
@@ -1109,10 +1116,10 @@ while True:
         time.sleep(1)
         print('==== Thank you ====')
     elif cmd == 'quit' or cmd == 'q':
-        logging.info('See you!')
+        root.info('See you!')
         quit()
     else:
-        logging.info('Invalid input. Please check your command again.')
+        root.info('Invalid input. Please check your command again.')
         cmd = input('Commands [y/n]')
         if cmd == 'y':
             usage()
