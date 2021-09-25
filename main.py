@@ -1045,7 +1045,7 @@ if sys.argv[-1] == 'run':
     current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename,
                              alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI,
                              beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time,
-                             vaccine_available, verbose_mode, 'info')
+                             vaccine_available, verbose_mode, 'info', root)
     # Load modes
     current_run.load_modes(modes)
     if len(modes) > 0:
@@ -1080,7 +1080,7 @@ while True:
         current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta,
                                  filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR,
                                  beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate,
-                                 immune_time, vaccine_available, verbose_mode, 'info')
+                                 immune_time, vaccine_available, verbose_mode, 'info', root)
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:
