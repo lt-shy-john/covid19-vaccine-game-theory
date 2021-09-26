@@ -906,7 +906,19 @@ class Mode15(Mode):
                 return True
 
 
-    def check_recent_vaccine(self, i, vaccine_ls):
+    def check_latest_dose(self, vaccine_ls, brand):
+        '''
+        How many boosters in a vaccine brand.
+        '''
+        latest = 1
+        for vaccine in vaccine_ls:
+            if vaccine.brand != brand:
+                continue
+            if vaccine.dose > latest:
+                latest = vaccine.dose
+        return latest
+
+    def check_recent_vaccine(self, i, vaccine_ls, verbose=False):
         '''
         Check the last vaccine taken of a person.
 
@@ -918,22 +930,45 @@ class Mode15(Mode):
             List of vaccines used in this simulation
         '''
         vaccine_used = None
+        if verbose:
+            print(f"Checking last vaccine from {self.people[i].id}")
         for t in range(len(self.people[i].vaccine_history)-1, -1, -1):
             if self.people[i].vaccine_history[t] == 1:
                 vaccine_used = "1"
+                if verbose:
+                    print(f"\t Checked: Used normal vaccine. ")
                 break
             elif self.people[i].vaccine_history[t] != 0:
                 vaccine_used = self.people[i].vaccine_history[t]
+                if verbose:
+                    print(f"\t Checked: Used {vaccine_used}. ")
                 break
+        # No vaccination history, signal to take first one
         if vaccine_used == None:
+            if verbose:
+                print("\t Checked: No vaccination history. ")
             return None
+        # Choosing which vaccine to take
         for vaccine in vaccine_ls:
             parsed_vaccine_used = vaccine_used.split(":")
-            if parsed_vaccine_used[0] == vaccine.brand:
-                vaccine_used = vaccine
-                return vaccine_used
-        return None
+            parsed_vaccine_used_brand = parsed_vaccine_used[0]
+            parsed_vaccine_used_dose = int(parsed_vaccine_used[1])
+            latest_vaccine_used = self.check_latest_dose(vaccine_ls, parsed_vaccine_used_brand)
 
+            if parsed_vaccine_used_brand == vaccine.brand:
+                if verbose:
+                    print(f"\tFound vaccine {vaccine.brand}...")
+                if latest_vaccine_used == parsed_vaccine_used_dose and parsed_vaccine_used_dose == vaccine.dose:
+                    if verbose:
+                        print(f"\tTaking last booster again (Excpected: {latest_vaccine_used}, Actual: {vaccine.dose}).")
+                    vaccine_used = vaccine
+                    return vaccine_used
+                elif vaccine.dose > parsed_vaccine_used_dose and latest_vaccine_used >= parsed_vaccine_used_dose:
+                    if verbose:
+                        print(f"\tTaking {vaccine.dose}-th booster.")
+                    vaccine_used = vaccine
+                    return vaccine_used
+        return None
 
     def write_vaccine_history(self, i, vaccine, verbose=False):
         if vaccine == None:
@@ -965,18 +1000,22 @@ class Mode15(Mode):
                 return vaccine_used
             else:
                 if verbose:
-                    print("Person did not take vaccine.")
+                    print(f"Person {self.people[i].id} did not take vaccine.")
                 return None
 
-        # Check which vaccine is taken
+        # Check which vaccine is taken (and take the next booster)
+        if verbose:
+            print(f"Person {self.people[i].id} is seeking to take next dose of vaccine.")
         for t in range(len(self.people[i].vaccine_history)-1, -1, -1):
             if verbose:
-                print(f"Reading index {t} or length {len(self.people[i].vaccine_history)}")
+                print(f"\tReading index {t} or length {len(self.people[i].vaccine_history)}")
             if type(self.people[i].vaccine_history[t]) == str:
                 vaccine_brand = self.people[i].vaccine_history[t].split(":")[0]
                 vaccine_dose = int(self.people[i].vaccine_history[t].split(":")[1])
                 days_before = len(self.people[i].vaccine_history) - t
                 break
+        if verbose:
+            print(f'\tBrand: {vaccine_brand}, Dose: {vaccine_dose}, Days taken: {days_before-1} days. ')
 
         vaccine_used = None
         for vaccine in vaccine_ls:
@@ -989,18 +1028,20 @@ class Mode15(Mode):
         # e.g. ls[-1] means day before, ls[-2] means 2 days before. This is possible when the current history is yet appended to ls.
         if days_before < vaccine_used.days_to_next_dose:
             if verbose:
-                print(days_before, vaccine_used.days_to_next_dose)
+                print(f'Vaccine taken {days_before} days before. {vaccine_used.days_to_next_dose} days to next dose. ')
                 print(f"Person {i+1} has taken vaccine recently. Need to wait for another {vaccine_used.days_to_next_dose - days_before} days. ")
             return None
 
-        # Take the vaccine
+        # Take the (next) vaccine
         seed = random.randint(0, 10000) / 10000
         if seed < vaccine.alpha_V:
             # Efficacy
             seed_e = random.randint(0, 10000) / 10000
             if seed_e < vaccine.efficacy:
+                if verbose:
+                    print(f'{self.people[i].id} has taken vaccine with efficacy {vaccine.efficacy} and wear-off rate {vaccine.phi_V}.')
                 self.people[i].vaccinated = 1
-            return vaccine_used
+            return vaccine
 
 
 '''
