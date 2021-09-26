@@ -461,8 +461,8 @@ class Epidemic:
             if edge[0].exposed == 1 or edge[1].exposed == 1:
                 self.logger.debug(f'One of the contacts are quarantined. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            self.logger.debug(edge[0].id, edge[1].id)
-            self.logger.debug('  ', edge[0].suceptible, edge[1].suceptible)
+            self.logger.debug('Edge: {} {}'.format(edge[0].id, edge[1].id))
+            self.logger.debug('S:    {} {}'.format(edge[0].suceptible, edge[1].suceptible))
 
             # Infect (or not)
             seed = random.randint(0,100000)/100000
