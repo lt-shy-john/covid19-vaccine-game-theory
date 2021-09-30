@@ -365,7 +365,7 @@ def WriteSummary(obs, filename):
                 if 501 in obs.modes:
                     contents.append('Initial infection: {}\n\n'.format(obs.modes[501].init_infection))
                 if 505 in obs.modes:
-                    contents.append('By: {}\n\n'.format(obs.modes[505].modes))
+                    contents.append('By: {}\n\n'.format(obs.modes[505].mode))
         if 2 in obs.modes:
             contents.append('\n# Overseas travel \n')
             contents.append('  Location\tBeta\tIsolation\tReturn prob\n')

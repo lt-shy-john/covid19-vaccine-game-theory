@@ -1,3 +1,4 @@
+import logging
 import random
 import numpy as np
 import logging
@@ -287,7 +288,7 @@ class Epidemic:
                 continue
             if 15 in self.mode:
                 if self.mode[15].check_multi_dose_vaccine(self.vaccine_ls):
-                    self.logger.debug("Vaccine with multiple dose detected. ")
+                    self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
                     vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
                     self.mode[15].write_vaccine_history(i, vaccine_taken)
                     vaccine_taken = None
@@ -557,19 +558,25 @@ class Epidemic:
                             continue
                     # Else
                     seed = random.randint(0,100000)/100000
-                    if self.people[i].vaccinated == 1 and seed <= self.resus:
+                    if self.people[i].vaccinated == 1 and seed < self.resus:
                         self.people[i].vaccinated = 0
         if 15 in self.mode:
             # Find recent vaccine taken
             for i in range(len(self.people)):
-                vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
+                vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                if self.verbose_mode:
+                    if vaccine_used != None:
+                        print(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
+                    else:
+                        print(f"No vaccine taken from {self.people[i].id}")
                 seed = random.randint(0, 100000) / 100000
-                if self.people[i].vaccinated == 1 and seed <= vaccine_used.phi_V:
+                if self.people[i].vaccinated == 1 and seed < vaccine_used.phi_V:
+                    logging.debug(f"Wear off for {self.people[i].id}: {seed}, {vaccine_used.phi_V}")
                     self.people[i].vaccinated = 0
             return
         for i in range(len(self.people)):
             seed = random.randint(0,100000)/100000
-            if self.people[i].vaccinated == 1 and seed <= self.resus:
+            if self.people[i].vaccinated == 1 and seed < self.resus:
                 self.people[i].vaccinated = 0
 
     def testing(self):
