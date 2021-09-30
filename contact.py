@@ -1,12 +1,14 @@
 import random
 import networkx as nx
 from matplotlib import pyplot as plt
+import logging
 
-import person
+from person import Person
+import customLogger
 
 class ContactNwk:
 
-    def __init__(self, people, verbose_mode):
+    def __init__(self, people, verbose_mode, root):
         self.people = people
         self.group_no = None
         self.network = None  # Graph to show partner topology
@@ -22,6 +24,8 @@ class ContactNwk:
         self.l1 = 0.5
         self.assort = True
         self.PUpdate = 0.5 # For Contact.update_xulvi_brunet_sokolov()
+
+        self.logger = root
 
     def set_default_edge_list(self):
         '''
@@ -63,23 +67,19 @@ class ContactNwk:
         Update the network. In ContactNwk().
         '''
         deg_ls = dict(self.nwk_graph.degree)  # Need this in the loop.
-        if self.verbose_mode == True:
-            print('Degree of all nodes loaded. ')
+        self.logger.debug('Degree of all nodes loaded. ')
 
         seed = random.randint(0,10000)/10000
         if seed > self.PUpdate:
             return
 
-        if self.verbose_mode == True:
-            print('Proceeding to updating network... \n')
+        self.logger.debug('Proceeding to updating network... \n')
         tmp_edge_ls = self.network
         random.shuffle(tmp_edge_ls)
-        if self.verbose_mode == True:
-            print('Edge list shuffled, repairing them now. ')
+        self.logger.debug('Edge list shuffled, repairing them now. ')
         edge_pairs_idx = 0
         while edge_pairs_idx < len(tmp_edge_ls):
-            if self.verbose_mode == True:
-                print(f'Pairing edges {edge_pairs_idx} and {edge_pairs_idx + 1} out of {len(tmp_edge_ls)}. ')
+            self.logger.debug(f'Pairing edges {edge_pairs_idx} and {edge_pairs_idx + 1} out of {len(tmp_edge_ls)}. ')
             if edge_pairs_idx == len(tmp_edge_ls)-1:
                 break
             pair_nodes = [*tmp_edge_ls[edge_pairs_idx], *tmp_edge_ls[edge_pairs_idx+1]]
@@ -120,8 +120,7 @@ class ContactNwk:
         '''
         for s_node in self.nwk_graph.nodes():
             for t_node in self.nwk_graph.nodes():
-                if self.verbose_mode:
-                    print('Updating contact network with indepdent rules. ')
+                self.logger.debug('Updating contact network with indepdent rules. ')
                 seed = random.randint(0,10000)/10000
                 # Bond
                 if seed < self.l1 and ((s_node.id,t_node.id) not in self.network or (t_node.id,s_node.id) not in self.network):

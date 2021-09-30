@@ -1,15 +1,18 @@
 import logging
 import random
 import numpy as np
+import logging
 
 from contact import ContactNwk
 from vaccine import Vaccine
 import person
 import write
+import customLogger
 
 class Epidemic:
 
-    def __init__ (self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, vaccine_ls, contact_nwk, verbose_mode, modes=None, filename=None, start=True):
+    def __init__(self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, vaccine_ls,
+                 contact_nwk, verbose_mode, root, modes=None, filename=None, start=True):
         '''Initial elements
 
         Attributes
@@ -20,6 +23,10 @@ class Epidemic:
 
         people - People
             Agents for simulation
+
+        Parameters
+        ----------
+        logger
         '''
         self.epidemic = 0   # Whether an epidemic occured or not.
         self.people = people
@@ -80,6 +87,7 @@ class Epidemic:
 
             # Auxillary parameter
             self.verbose_mode = verbose_mode
+            self.logger = root
 
 
             '''Compartment statics
@@ -213,7 +221,7 @@ class Epidemic:
             if mode > 1 or mode < 0:
                 raise ValueError
         except ValueError:
-            print('Mode must be either 1 or 0')
+            logging.error('Mode must be either 1 or 0')
             pass
         if mode == 1:
             self.epidemic = 1
@@ -270,11 +278,9 @@ class Epidemic:
         for i in range(len(self.people)):
             seed = random.randint(0,10000)/10000
             if 4 in self.mode:
-                if self.verbose_mode == True:
-                    print(self.mode[4].P_Alpha[i])
+                logging.debug(self.mode[4].P_Alpha[i])
                 if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
-                    if self.verbose_mode == True:
-                        print(f'{self.people[i].id} has decided to take vaccine. ')
+                    self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
                     self.people[i].vaccinated = 1
                     self.people[i].vaccine_history.append(1)
                 else:
@@ -282,15 +288,13 @@ class Epidemic:
                 continue
             if 15 in self.mode:
                 if self.mode[15].check_multi_dose_vaccine(self.vaccine_ls):
-                    if self.verbose_mode:
-                        print(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
+                    self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
                     vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
                     self.mode[15].write_vaccine_history(i, vaccine_taken)
                     vaccine_taken = None
                 continue
             if 20 in self.mode:
-                if self.verbose_mode:
-                    print('Applying intimacy game in vaccination. ')
+                self.logger.debug('Applying intimacy game in vaccination. ')
                 threshold = self.mode[20].FDProb(i, self.verbose_mode)
                 if seed < threshold:
                     self.people[i].vaccinated = 1
@@ -302,8 +306,7 @@ class Epidemic:
                 person = self.people[i]
                 seed = random.randint(0,10000)/10000
                 if person.opinion == 1 and seed < self.alpha_V:
-                    if self.verbose_mode == True:
-                        print(f'***, {seed} <= {self.alpha_V}')
+                    self.logger.debug(f'***, {seed} <= {self.alpha_V}')
                     person.vaccinated = 1
                     self.people[i].vaccine_history.append(1)
                 else:
@@ -315,8 +318,7 @@ class Epidemic:
 
             # Vaccinate
             if seed < self.vaccinated and self.people[i].vaccinated == 0:
-                if self.verbose_mode == True:
-                    print(f'{self.people[i].id} has decided to take vaccine. ')
+                self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
                 self.people[i].vaccinated = 1
                 self.people[i].vaccine_history.append(1)
             else:
@@ -329,7 +331,7 @@ class Epidemic:
         '''
         delta_pp = np.ones(len(self.people))
         for i in range(len(self.people)):
-            if any(i in self.mode for i in [7, 8]):
+            if any(m in self.mode for m in [7, 8]):
                 # Fetch all parameters:
                 if 7 in self.mode:
                     delta_pp[i] = np.multiply(self.mode[7].delta_age[int(self.people[i].age//10)], delta_pp[i])
@@ -338,15 +340,14 @@ class Epidemic:
                 if 11 in self.mode:
                     if self.people[i].vaccinated == 1:
                         delta_pp[i] = np.multiply(self.mode[11].delta_V, delta_pp[i])
-                if self.verbose_mode == True:
-                    print(f'Delta for {self.people[i].id} is {delta_pp[i]}. ')
+                self.logger.debug(f'Delta for {self.people[i].id} is {delta_pp[i]}. ')
 
 
         for i in range(len(self.people)):
             if self.people[i].suceptible != 1:
                 continue
             seed = random.randint(0,1000)/1000
-            if any(i in self.mode for i in [7, 8]):
+            if any(m in self.mode for m in [7, 8]):
                 if seed < delta_pp[i]:
                     self.people[i].removed = 1
 
@@ -360,8 +361,7 @@ class Epidemic:
 
         # Intimacy game
         if 20 in self.mode:
-            if self.verbose_mode:
-                print('Applying intimacy game in infection. ')
+            self.logger.debug('Applying intimacy game in infection. ')
             for i in range(len(self.people)):
                 threshold = 1 - (1 - self.infection) ** (self.mode[20].get_infected_neighbours_number(i))
                 seed = random.randint(0,1000)/1000
@@ -373,8 +373,7 @@ class Epidemic:
 
         # Network contact controlled by Epidemic.social_contact()
         if any(i in self.mode for i in [51, 52, 53, 53]):
-            if self.verbose_mode == True:
-                print('Social contact applies to infection. ')
+            self.logger.debug('Social contact applies to infection. ')
             self.social_contact()
 
             for i in range(len(self.people)):
@@ -385,7 +384,7 @@ class Epidemic:
         # Creating customised infection parameter for each person.
         beta_pp = np.ones(len(self.people))
         for i in range(len(self.people)):
-            if any(i in self.mode for i in [1, 7, 8, 11]):
+            if any(m in self.mode for m in [1, 7, 8, 11]):
                 # Fetch all parameters:
                 if 1 in self.mode:
                     beta_pp[i] = np.multiply(self.mode[1].betas[self.people[i].location], beta_pp[i])
@@ -402,26 +401,22 @@ class Epidemic:
             Infect (or not)
             '''
             if self.people[i].suceptible == 1:
-                if self.verbose_mode == True:
-                    print(f'{self.people[i].id} has already been infected and will not be infected. ')
+                self.logger.debug(f'{self.people[i].id} has already been infected and will not be infected. ')
                 continue  # Skip
             if self.people[i].removed == 1 :
-                if self.verbose_mode == True:
-                    print(f'{self.people[i].id} is removed and will not be infected. ')
+                self.logger.debug(f'{self.people[i].id} is removed and will not be infected. ')
                 continue  # Skip
 
             if 11 not in self.mode and self.people[i].vaccinated == 1:
-                if self.verbose_mode == True:
-                    print(f'{self.people[i].id} is vaccinated and will not be infected. ')
+                self.logger.debug(f'{self.people[i].id} is vaccinated and will not be infected. ')
                 continue
 
             seed = random.randint(0,1000)/1000
             '''
             Customised infection from modes (excl. network contact)
             '''
-            if any(i in self.mode for i in [1, 7, 8]):
-                if self.verbose_mode == True:
-                    print(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
+            if any(m in self.mode for m in [1, 7, 8]):
+                self.logger.debug(f'Beta for {self.people[i].id} is {beta_pp[i]}. ')
                 if seed < beta_pp[i]:
                     self.people[i].suceptible = 1
                 continue
@@ -437,8 +432,7 @@ class Epidemic:
             Normal infection event
             '''
             if seed < self.infection:
-                if self.verbose_mode == True:
-                    print(f'{self.people[i].id} is infected. ')
+                logging.debug(f'{self.people[i].id} is infected. ')
                 self.people[i].suceptible = 1
 
     def social_contact(self):
@@ -448,69 +442,54 @@ class Epidemic:
         for edge in self.contact_nwk.network:
             # This is edge of People objects.
             # Conditions where disease will not spread (SS, VV, RR)
-            if self.verbose_mode == True:
-                print('{}/ {}'.format(self.contact_nwk.network.index(edge), len(self.contact_nwk.network)))
+            self.logger.debug('{}/ {}'.format(self.contact_nwk.network.index(edge), len(self.contact_nwk.network)))
             if edge[0].suceptible == 0 and edge[1].suceptible == 0:
-                if self.verbose_mode == True:
-                    print(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
+                self.logger.debug(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             # The following will not apply if mode 11 has been activated, skips this condition.
             if (edge[0].vaccinated == 1 and edge[1].vaccinated == 1) and 11 not in self.mode:
-                if self.verbose_mode == True:
-                    print(f'Both ends are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
+                self.logger.debug(f'Both ends are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             elif edge[0].vaccinated == 1 and 11 not in self.mode:
-                if self.verbose_mode == True:
-                    print(f'{edge[0].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
+                self.logger.debug(f'{edge[0].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             elif edge[1].vaccinated == 1 and 11 not in self.mode:
-                if self.verbose_mode == True:
-                    print(f'{edge[1].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
+                self.logger.debug(f'{edge[1].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].removed == 1 or edge[1].removed == 1:
-                if self.verbose_mode == True:
-                    print(f'One of the contacts are removed. Skip ({edge[0].id}, {edge[1].id}). ')
+                self.logger.debug(f'One of the contacts are removed. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].exposed == 1 or edge[1].exposed == 1:
-                if self.verbose_mode == True:
-                    print(f'One of the contacts are quarantined. Skip ({edge[0].id}, {edge[1].id}). ')
+                self.logger.debug(f'One of the contacts are quarantined. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            if self.verbose_mode == True:
-                print(edge[0].id, edge[1].id)
-                print('  ', edge[0].suceptible, edge[1].suceptible)
+            self.logger.debug('Edge: {} {}'.format(edge[0].id, edge[1].id))
+            self.logger.debug('S:    {} {}'.format(edge[0].suceptible, edge[1].suceptible))
 
             # Infect (or not)
             seed = random.randint(0,100000)/100000
             if seed < self.infection:
                 edge[0].suceptible = 1
                 edge[1].suceptible = 1
-                if self.verbose_mode == True:
-                    print(f'{edge[0].id}-{edge[1].id} pair is infected.')
+                self.logger.debug(f'{edge[0].id}-{edge[1].id} pair is infected.')
 
     def overseas_infect(self, i):
         '''
         People infect from overseas.
         '''
 
-        if self.verbose_mode == True:
-            print(f'\t{self.people[i].id} is in overseas. ', end='')
+        self.logger.debug(f'\t{self.people[i].id} is in overseas. ', end='')
 
         if self.mode[2].is_isolated_overseas(i,self.verbose_mode):
-            if self.verbose_mode == True:
-                print('(Isolated)')
+            self.logger.debug('(Isolated)')
             return
-        if self.verbose_mode == True:
-            print('... ', end='')
+        self.logger.debug('... ', end='')
         seed = random.randint(0,1000)/1000
-        if self.verbose_mode == True:
-            print(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}', end='')
+        self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}', end='')
 
         if self.people[i].suceptible == 1:
-            if self.verbose_mode == True:
-                print('(Infected*)')
+            self.logger.debug('(Infected*)')
         elif seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]:
-            if self.verbose_mode == True:
-                print('(Infected)')
+            self.logger.debug('(Infected)')
             self.people[i].suceptible = 1
         else: print()
 
@@ -638,11 +617,9 @@ class Epidemic:
         self.infected()
         self.immune()
         if 51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode:
-            if self.verbose_mode:
-                print('Entering contact network updates...', end=' ')
+            self.logger.debug('Entering contact network updates...')
             if self.contact_nwk.update_rule == 'random':
-                if self.verbose_mode:
-                    print('(Ind)')
+                self.logger.debug('(Ind)')
                 self.contact_nwk.update_random_nwk()
                 if filename != '':
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
@@ -653,8 +630,7 @@ class Epidemic:
                     # write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
             elif self.contact_nwk.update_rule == 'XBS':
-                if self.verbose_mode:
-                    print('(XBS)')
+                self.logger.debug('(XBS)')
                 self.contact_nwk.update_xulvi_brunet_sokolov()
                 if filename != '':
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
