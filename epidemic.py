@@ -1,18 +1,15 @@
-import logging
 import random
 import numpy as np
-import logging
 
 from contact import ContactNwk
 from vaccine import Vaccine
 import person
 import write
-import customLogger
 
 class Epidemic:
 
     def __init__(self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, vaccine_ls,
-                 contact_nwk, verbose_mode, root, modes=None, filename=None, start=True):
+                 contact_nwk, verbose_mode, logger, modes=None, filename=None, start=True):
         '''Initial elements
 
         Attributes
@@ -23,10 +20,7 @@ class Epidemic:
 
         people - People
             Agents for simulation
-
-        Parameters
-        ----------
-        logger
+            :param logger:
         '''
         self.epidemic = 0   # Whether an epidemic occured or not.
         self.people = people
@@ -87,8 +81,7 @@ class Epidemic:
 
             # Auxillary parameter
             self.verbose_mode = verbose_mode
-            self.logger = root
-
+            self.logger = logger
 
             '''Compartment statics
 
@@ -147,7 +140,7 @@ class Epidemic:
 
 
         except ValueError:
-            print('Check your parameters if they are probabilities.')
+            self.loger.error('Check your parameters if they are probabilities.')
 
     def set_other_alpha_param(self, alpha_V, alpha_T):
         self.alpha_V = alpha_V
@@ -221,7 +214,7 @@ class Epidemic:
             if mode > 1 or mode < 0:
                 raise ValueError
         except ValueError:
-            logging.error('Mode must be either 1 or 0')
+            self.logger.error('Mode must be either 1 or 0')
             pass
         if mode == 1:
             self.epidemic = 1
@@ -275,23 +268,56 @@ class Epidemic:
         pro = 0
 
     def vaccinate(self):
+        self.logger.debug('Starting method Epidemic.vaccine()...')
         for i in range(len(self.people)):
             seed = random.randint(0,10000)/10000
+            self.logger.debug(f'Seed for person {self.people[i].id}: {seed}')
             if 4 in self.mode:
-                logging.debug(self.mode[4].P_Alpha[i])
+                self.logger.debug('Mode 4 activated for %s - α: %s'.format(self.people[i].id, self.mode[4].P_Alpha[i]))
                 if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
                     self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
                     self.people[i].vaccinated = 1
                     self.people[i].vaccine_history.append(1)
                 else:
+                    self.logger.debug(f'{self.people[i].id} has decided not to take vaccine. ({self.mode[4].P_Alpha[i]} < {seed}, {seed < self.mode[4].P_Alpha[i] })')
                     self.people[i].vaccine_history.append(0)
                 continue
             if 15 in self.mode:
-                if self.mode[15].check_multi_dose_vaccine(self.vaccine_ls):
+                self.logger.debug(f'Mode 15 activated for {self.people[i].id}')
+                has_multiple_vaccine = self.mode[15].check_multi_dose_vaccine(self.vaccine_ls)
+                # Combination with other modes
+                if has_multiple_vaccine and any(m in self.mode for m in [21, 22, 23, 24]):
+                    self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
+                    if 20 in self.mode:
+                        self.logger.debug('Applying local group updates in vaccination. ')
+                    else:
+                        self.logger.debug('Applying personal opinions in vaccination. ')
+                    person = self.people[i]
+                    seed = random.randint(0, 10000) / 10000
+                    last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
+                    next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
+                    self.logger.debug(f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
+                    if person.opinion == 1 and seed < next_vaccine.alpha_V:
+                        self.logger.debug(f"{self.people[i].id} is willing to take vaccine. ")
+                        self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
+                        vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                        if vaccine_taken != None:
+                            self.mode[15].write_vaccine_history(i, vaccine_taken)
+                            vaccine_taken = None
+                    else:
+                        if self.people[i].opinion == 0:
+                            self.logger.debug(f'Person does not want to take vaccine, {seed} >= {next_vaccine.alpha_V}')
+                        else:
+                            self.logger.debug(f'Person did not take vaccine, {seed} >= {next_vaccine.alpha_V}')
+                        self.people[i].vaccine_history.append(0)
+                elif has_multiple_vaccine:
                     self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
                     vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
                     self.mode[15].write_vaccine_history(i, vaccine_taken)
                     vaccine_taken = None
+                else:
+                    self.logger.debug(f'Person did not take vaccine, {seed} >= {self.alpha_V}')
+                    self.people[i].vaccine_history.append(0)
                 continue
             if 20 in self.mode:
                 self.logger.debug('Applying intimacy game in vaccination. ')
@@ -302,18 +328,21 @@ class Epidemic:
                 else:
                     self.people[i].vaccine_history.append(0)
                 continue
-            if 21 in self.mode:
+            if any(m in self.mode for m in [21, 22, 23, 24]):
+                self.logger.debug('Applying local group updates in vaccination. ')
                 person = self.people[i]
                 seed = random.randint(0,10000)/10000
                 if person.opinion == 1 and seed < self.alpha_V:
-                    self.logger.debug(f'***, {seed} <= {self.alpha_V}')
+                    self.logger.debug(f'Person {self.people[i].id} taken vaccine, {seed} < {self.alpha_V}')
                     person.vaccinated = 1
                     self.people[i].vaccine_history.append(1)
                 else:
+                    self.logger.debug(f'Person did not take vaccine, {seed} >= {self.alpha_V}')
                     self.people[i].vaccine_history.append(0)
                 continue
             if self.people[i].suceptible == 1:
                 self.people[i].vaccine_history.append(0)
+                self.logger.debug('Person is already infected, not taking vaccine. ')
                 continue
 
             # Vaccinate
@@ -359,6 +388,7 @@ class Epidemic:
         Mechanism of infection.
         '''
 
+        self.logger.debug('Starting method Epidemic.infect()...')
         # Intimacy game
         if 20 in self.mode:
             self.logger.debug('Applying intimacy game in infection. ')
@@ -372,7 +402,7 @@ class Epidemic:
 
 
         # Network contact controlled by Epidemic.social_contact()
-        if any(i in self.mode for i in [51, 52, 53, 53]):
+        if any(m in self.mode for m in [51, 52, 53, 53]):
             self.logger.debug('Social contact applies to infection. ')
             self.social_contact()
 
@@ -432,17 +462,19 @@ class Epidemic:
             Normal infection event
             '''
             if seed < self.infection:
-                logging.debug(f'{self.people[i].id} is infected. ')
+                self.logger.debug(f'{self.people[i].id} is infected. ')
                 self.people[i].suceptible = 1
 
     def social_contact(self):
         '''
         Simulate social contacts.
         '''
+
+        self.logger.debug('Starting method Epidemic.social_contact()...')
         for edge in self.contact_nwk.network:
             # This is edge of People objects.
             # Conditions where disease will not spread (SS, VV, RR)
-            self.logger.debug('{}/ {}'.format(self.contact_nwk.network.index(edge), len(self.contact_nwk.network)))
+            self.logger.debug(f'Edge {self.contact_nwk.network.index(edge)}/ {len(self.contact_nwk.network)} ({round(self.contact_nwk.network.index(edge)/ len(self.contact_nwk.network), 4)})')
             if edge[0].suceptible == 0 and edge[1].suceptible == 0:
                 self.logger.debug(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
@@ -462,8 +494,9 @@ class Epidemic:
             if edge[0].exposed == 1 or edge[1].exposed == 1:
                 self.logger.debug(f'One of the contacts are quarantined. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            self.logger.debug('Edge: {} {}'.format(edge[0].id, edge[1].id))
-            self.logger.debug('S:    {} {}'.format(edge[0].suceptible, edge[1].suceptible))
+            self.logger.debug('Checked:')
+            self.logger.debug(f'  {edge[0].id}\t{edge[1].id}')
+            self.logger.debug(f'S: {edge[0].suceptible}\t{edge[1].suceptible}')
 
             # Infect (or not)
             seed = random.randint(0,100000)/100000
@@ -477,21 +510,20 @@ class Epidemic:
         People infect from overseas.
         '''
 
-        self.logger.debug(f'\t{self.people[i].id} is in overseas. ', end='')
-
+        self.logger.debug('Starting method Epidemic.overseas_infect()...')
         if self.mode[2].is_isolated_overseas(i,self.verbose_mode):
-            self.logger.debug('(Isolated)')
+            self.logger.debug(f'\t{self.people[i].id} is in overseas. (Isolated)')
             return
-        self.logger.debug('... ', end='')
+        self.logger.debug(f'\t{self.people[i].id} is in overseas... ')
         seed = random.randint(0,1000)/1000
-        self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}', end='')
+        self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}')
 
         if self.people[i].suceptible == 1:
             self.logger.debug('(Infected*)')
         elif seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]:
             self.logger.debug('(Infected)')
             self.people[i].suceptible = 1
-        else: print()
+        else: self.logger.debug()
 
     def infection_clock(self, i):
         if self.people[i].infection_clock > 14:
@@ -503,6 +535,8 @@ class Epidemic:
 
         If the person is tested, we may put them into E compartment.
         '''
+
+        self.logger.debug('Starting method Epidemic.infected()...')
         for i in range(len(self.people)):
             if self.people[i].suceptible == 1 and self.people[i].removed == 0:
                 self.people[i].infection_clock += 1
@@ -512,6 +546,7 @@ class Epidemic:
             self.infection_clock(i)
 
     def recovery(self):
+        self.logger.debug('Starting method Epidemic.recovery()...')
         for i in range(len(self.people)):
             seed = random.randint(0,100000)/100000
             if 11 in self.mode:
@@ -521,11 +556,14 @@ class Epidemic:
             if seed < self.recover:
                 self.people[i].suceptible = 0
                 self.people[i].exposed = 0
+                self.logger.debug(f'{self.people[i].id} recovered. ({seed} < {self.recover})')
 
     def immune(self):
         '''
         Assume there is a period of immunity since recovery.
         '''
+
+        self.logger.debug('Starting method Epidemic.immune()...')
         if self.immune_time == 0:
             return
         for i in range(len(self.people)):
@@ -542,6 +580,7 @@ class Epidemic:
         '''
         Vaccine may wear off.
         '''
+        self.logger.debug('Starting method Epidemic.wear_off()...')
         if 10 in self.mode:
             if self.mode[10].type == 1:
                 return # Patients will not have their vaccine wear-off.
@@ -561,17 +600,18 @@ class Epidemic:
                     if self.people[i].vaccinated == 1 and seed < self.resus:
                         self.people[i].vaccinated = 0
         if 15 in self.mode:
+            self.logger.debug('Applying advanced vaccine options in vaccine wear off. ')
             # Find recent vaccine taken
             for i in range(len(self.people)):
                 vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls, self.verbose_mode)
                 if self.verbose_mode:
                     if vaccine_used != None:
-                        print(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
+                        self.logger.debug(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
                     else:
-                        print(f"No vaccine taken from {self.people[i].id}")
+                        self.logger.debug(f"No vaccine taken from {self.people[i].id}")
                 seed = random.randint(0, 100000) / 100000
                 if self.people[i].vaccinated == 1 and seed < vaccine_used.phi_V:
-                    logging.debug(f"Wear off for {self.people[i].id}: {seed}, {vaccine_used.phi_V}")
+                    self.logger.debug(f"Wear off for {self.people[i].id}: {seed}, {vaccine_used.phi_V}")
                     self.people[i].vaccinated = 0
             return
         for i in range(len(self.people)):
@@ -583,6 +623,8 @@ class Epidemic:
         '''
         COVID-19 testing and people who are in the E compartment will become I.
         '''
+
+        self.logger.debug('Starting method Epidemic.testing()...')
         for i in range(len(self.people)):
             seed = random.randint(0,100000)/100000
             if seed < self.test_rate:
@@ -617,9 +659,8 @@ class Epidemic:
         self.infected()
         self.immune()
         if 51 in self.mode or 52 in self.mode or 53 in self.mode or 54 in self.mode:
-            self.logger.debug('Entering contact network updates...')
             if self.contact_nwk.update_rule == 'random':
-                self.logger.debug('(Ind)')
+                self.logger.debug('Entering contact network updates...(Ind)')
                 self.contact_nwk.update_random_nwk()
                 if filename != '':
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)
@@ -630,7 +671,7 @@ class Epidemic:
                     # write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                     write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
             elif self.contact_nwk.update_rule == 'XBS':
-                self.logger.debug('(XBS)')
+                self.logger.debug('Entering contact network updates...(XBS)')
                 self.contact_nwk.update_xulvi_brunet_sokolov()
                 if filename != '':
                     write.WriteNetworkAvgDegree(self.contact_nwk.nwk_graph, filename)

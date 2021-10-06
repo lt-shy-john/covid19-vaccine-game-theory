@@ -81,12 +81,13 @@ class Simulation:
 
     def __call__(self, modes=None, start=True):
         FILENAME_STATES = ''
+        self.logger.debug(f'Modes loading to Epidemic class: {self.modes}. ')
         epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate,
-                            self.immune_time, self.vaccine_ls, self.contact_nwk, self.verbose_mode, self.logger, self.modes,
-                            self.filename, start)
+                            self.immune_time, self.vaccine_ls, self.contact_nwk, self.verbose_mode, self.logger,
+                            self.modes, self.filename)
         epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
         epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
-        self.logger.info('After:' + str(epidemic.mode))
+        self.logger.debug(f'Modes loaded to Epidemic class: {epidemic.mode}. ')
         self.logger.info('beta = {}, alpha = {}, gamma = {}, phi = {}, lambda = {}'.format(epidemic.infection, epidemic.vaccinated, epidemic.recover, epidemic.resus, epidemic.test_rate))
         self.logger.info('=========== t = 0 ============\n')
         self.logger.info('N = {}'.format(len(self.people)))
@@ -137,12 +138,12 @@ class Simulation:
 
 
             # Info network update
-            if 21 in self.modes:
+            if any(i in self.modes for i in [21, 22, 23, 24]):
                 if any(i in self.modes for i in [22, 23]):
                     self.info_nwk.inflexible_prework()
                 self.logger.debug('Opinion (before)')
                 for group_no, group in self.info_nwk.roster.items():
-                    self.logger.debug(f'{group_no}:', [x.opinion for x in group])
+                    self.logger.debug(f'{group_no}: {[x.opinion for x in group]}')
                 self.info_nwk.update(self.verbose_mode)
                 if any(i in self.modes for i in [22, 23]):
                     self.info_nwk.inflexible()
@@ -150,7 +151,7 @@ class Simulation:
                     self.info_nwk.balance(self.verbose_mode)
                 self.logger.debug('Opinion (after)')
                 for group_no, group in self.info_nwk.roster.items():
-                    self.logger.debug(f'{group_no}:', [x.opinion for x in group])
+                    self.logger.debug(f'{group_no}: {[x.opinion for x in group]}')
                 if any(i in self.modes for i in [22, 23, 24]) and self.filename != '':
                     write.WriteOpinionPersonality(self, self.filename)
                 elif self.filename != '':

@@ -389,7 +389,7 @@ def mode_settings(cmd, mode=None):
                 else:
                     mode.pop(10)
             elif int(cmd[i]) == 15:
-                mode15(alpha, beta, gamma, delta)
+                mode15(alpha, beta, gamma, delta, phi)
                 if mode15.flag == 'X':
                     mode[15] = mode15
                 else:
@@ -629,33 +629,33 @@ group_size = 3
 verbose_mode = False  # Need to put here for initiating other objects (nwk and person if needed).
 population = Person.make_population(N)
 contact_nwk = ContactNwk(population, verbose_mode, root)
-info_nwk = Group(population, group_size)
+info_nwk = Group(population, root, group_size)
 vaccine_available = [Vaccine('Default', 1, 28, None, 0, 0.99, alpha, beta, gamma, delta, phi)]
 filename = ''  # Default file name to export (.csv). Change when use prompt 'export' cmd.
 
 mode_master_list = []
 # All objects should add into mode_master_list
-mode01 = mode.Mode01(population)
-mode02 = mode.Mode02(population, beta)
-mode04 = mode.Mode04(population, alpha)
-mode05 = mode.Mode05(population, contact_nwk)
-mode07 = mode.Mode07(population, beta, delta)
-mode08 = mode.Mode08(population, beta, delta)
-mode10 = mode.Mode10(population, phi, beta)
-mode11 = mode.Mode11(population)
-mode15 = mode.Mode15(population)
-mode20 = mode.Mode20(population, contact_nwk, beta)
-mode21 = mode.Mode21(population, info_nwk)
-mode22 = mode.Mode22(population, info_nwk)
-mode23 = mode.Mode23(population, info_nwk)
-mode24 = mode.Mode24(population, info_nwk)
-mode31 = mode.Mode31(population)
-mode51 = mode.Mode51(population, contact_nwk)
-mode52 = mode.Mode52(population, contact_nwk)
-mode53 = mode.Mode53(population, contact_nwk)
-mode54 = mode.Mode54(population, contact_nwk)
-mode501 = mode.Mode501(population, contact_nwk)
-mode505 = mode.Mode505(population, contact_nwk)
+mode01 = mode.Mode01(population, root)
+mode02 = mode.Mode02(population, beta, root)
+mode04 = mode.Mode04(population, alpha, root)
+mode05 = mode.Mode05(population, contact_nwk, root)
+mode07 = mode.Mode07(population, beta, delta, root)
+mode08 = mode.Mode08(population, beta, delta, root)
+mode10 = mode.Mode10(population, phi, beta, root)
+mode11 = mode.Mode11(population, root)
+mode15 = mode.Mode15(population, root)
+mode20 = mode.Mode20(population, contact_nwk, beta, root)
+mode21 = mode.Mode21(population, info_nwk, root)
+mode22 = mode.Mode22(population, info_nwk, root)
+mode23 = mode.Mode23(population, info_nwk, root)
+mode24 = mode.Mode24(population, info_nwk, root)
+mode31 = mode.Mode31(population, root)
+mode51 = mode.Mode51(population, contact_nwk, root)
+mode52 = mode.Mode52(population, root, contact_nwk)
+mode53 = mode.Mode53(population, root, contact_nwk)
+mode54 = mode.Mode54(population, root, contact_nwk)
+mode501 = mode.Mode501(population, root, contact_nwk)
+mode505 = mode.Mode505(population, root, contact_nwk)
 
 mode_master_list = [mode01, mode02, mode04, mode05, mode07, mode08,
 mode10, mode11, mode15,
@@ -730,13 +730,13 @@ for i in range(len(sys.argv)):
                             mode.pop(21)
                     elif mode_flag == 51:
                         if 52 in modes:
-                            print('Mode 52 has been activated. Ignore mode 51. ')
+                            root.debug('Mode 52 has been activated. Ignore mode 51. ')
                             break
                         elif 53 in modes:
-                            print('Mode 53 has been activated. Ignore mode 52. ')
+                            root.debug('Mode 53 has been activated. Ignore mode 52. ')
                             break
                         elif 54 in modes:
-                            print('Mode 54 has been activated. Ignore mode 52. ')
+                            root.debug('Mode 54 has been activated. Ignore mode 52. ')
                             break
                         mode51()
                         if mode51.flag == 'X':
@@ -859,6 +859,7 @@ for i in range(len(sys.argv)):
                             else:
                                 modes.pop(11)
                         elif mode_flag == 15:
+                            root.debug('Express mode: Activating mode 15. ')
                             if sys.argv[k][:3] == '*f=':
                                 mode15.raise_flag()
                             mode15.raise_flag()
@@ -901,67 +902,101 @@ for i in range(len(sys.argv)):
                             else:
                                 modes.pop(20)
                         elif mode_flag == 21:
+                            root.debug('Express mode: Activating mode 21. ')
                             if sys.argv[k][:3] == '*+=':
                                 mode21_pro_config = sys.argv[k][3:]
-                                mode21.set_pro(mode21_pro_config)
+                                mode21.info_nwk.set_pro(mode21_pro_config)
                             elif sys.argv[k][:3] == '*-=':
                                 mode21_ag_config = sys.argv[k][3:]
-                                mode21.set_ag(mode21_ag_config)
-                            if mode21.propro != None and mode21.agpro != None:
-                                mode21.set_opinion()
+                                mode21.info_nwk.set_ag(mode21_ag_config)
+                            if mode21.info_nwk.propro != None and mode21.info_nwk.agpro != None:
+                                mode21.info_nwk.set_opinion()
                                 mode21.set_personality()
                                 mode21.raise_flag()
-                            if mode21.flag == 'X':
-                                modes[21] = mode21
-                            else:
-                                modes.pop(21)
+                                if mode21.flag == 'X':
+                                    modes[21] = mode21
+                                else:
+                                    modes.pop(21)
                         elif mode_flag == 22:
+                            root.debug('Express mode: Activating mode 22. ')
                             if sys.argv[k][:3] == '*p=':
                                 mode22_pro_config = sys.argv[k][3:]
                                 mode22.assign_personality(mode22_pro_config)
+                            elif sys.argv[k][:3] == '*+=':
+                                mode22_pro_config = sys.argv[k][3:]
+                                mode22.info_nwk.set_pro(mode22_pro_config)
+                            elif sys.argv[k][:3] == '*-=':
+                                mode22_ag_config = sys.argv[k][3:]
+                                mode22.info_nwk.set_ag(mode22_ag_config)
+                            if mode22.info_nwk.propro != None and mode22.info_nwk.agpro != None:
+                                mode22.info_nwk.set_opinion()
+                                mode22.set_personality()
                                 mode22.raise_flag()
-                            if mode22.flag == 'X':
-                                modes[22] = mode22
-                            else:
-                                modes.pop(22)
+                                if mode22.flag == 'X':
+                                    modes[22] = mode22
+                                else:
+                                    modes.pop(22)
                         elif mode_flag == 23:
+                            root.debug('Express mode: Activating mode 23. ')
                             if sys.argv[k][:3] == '*p=':
+                                mode23_ag_config = sys.argv[k][3:]
+                                root.debug(f'Proportion of stubbonly against vaccination are {mode23_ag_config}. ')
+                                mode23.assign_personality(mode23_ag_config)
+                                root.debug('Assigned personality to the population. ')
+                            elif sys.argv[k][:3] == '*+=':
                                 mode23_pro_config = sys.argv[k][3:]
-                                mode23.assign_personality(mode23_pro_config)
+                                root.debug(f'Proportion of pro-vaccine is {mode23_pro_config}. ')
+                                mode23.info_nwk.set_pro(mode23_pro_config)
+                            elif sys.argv[k][:3] == '*-=':
+                                mode23_ag_config = sys.argv[k][3:]
+                                root.debug(f'Proportion of against vaccine is {mode23_pro_config}. ')
+                                mode23.info_nwk.set_ag(mode23_ag_config)
+                            if mode23.info_nwk.propro != None and mode23.info_nwk.agpro != None and mode23.InflexAgProportion != None:
+                                mode23.info_nwk.set_opinion()
                                 mode23.raise_flag()
-
-                            if mode23.flag == 'X':
-                                modes[23] = mode23
-                            else:
-                                modes.pop(23)
+                                if mode23.flag == 'X':
+                                    modes[23] = mode23
+                                else:
+                                    modes.pop(23)
                         elif mode_flag == 24:
+                            root.debug('Express mode: Activating mode 24. ')
                             if sys.argv[k][:3] == '*p=':
                                 mode24_pro_config = sys.argv[k][3:]
                                 mode24.assign_personality(mode24_pro_config)
+                            elif sys.argv[k][:3] == '*+=':
+                                mode24_pro_config = sys.argv[k][3:]
+                                mode24.info_nwk.set_pro(mode24_pro_config)
+                            elif sys.argv[k][:3] == '*-=':
+                                mode24_ag_config = sys.argv[k][3:]
+                                mode24.info_nwk.set_ag(mode24_ag_config)
+                            if mode24.info_nwk.propro != None and mode24.info_nwk.agpro != None:
+                                mode24.info_nwk.set_opinion()
                                 mode24.raise_flag()
-
-                            if mode24.flag == 'X':
-                                modes[24] = mode24
-                            else:
-                                modes.pop(24)
+                                if mode24.flag == 'X':
+                                    modes[24] = mode24
+                                else:
+                                    modes.pop(24)
                         elif mode_flag == 52:
+                            root.debug('Express mode: Activating mode 52. ')
                             if 51 in modes:
-                                print('Mode 51 has been activated. Ignore mode 52. ')
+                                root.debug('Mode 51 has been activated. Ignore mode 52. ')
                                 break
                             elif 53 in modes:
-                                print('Mode 53 has been activated. Ignore mode 52. ')
+                                root.debug('Mode 53 has been activated. Ignore mode 52. ')
                                 break
                             elif 54 in modes:
-                                print('Mode 54 has been activated. Ignore mode 52. ')
+                                root.debug('Mode 54 has been activated. Ignore mode 52. ')
                                 break
 
                             if sys.argv[k][:3] == '*m=':
                                 mode52_m_config = int(sys.argv[k][3:])
                                 mode52.set_m(mode52_m_config)
+                                root.debug(f'Set number of connections m = {mode52.m}. ')
                             elif sys.argv[k][:3] == '*p=':
                                 contact_nwk.update_rule = 'XBS'
                                 mode52_p_config = float(sys.argv[k][3:])
                                 mode52.set_pupdate(mode52_p_config)
+                                root.debug(f'Probability of updates p = {contact_nwk.PUpdate}. ')
                             elif sys.argv[k][:3] == '*a=':
                                 contact_nwk.update_rule = 'XBS'
                                 mode52_assort = int(sys.argv[k][3:])
@@ -969,18 +1004,22 @@ for i in range(len(sys.argv)):
                                     contact_nwk.assort = True
                                 elif mode52_assort == 0:
                                     contact_nwk.assort = False
+                                root.debug(f'Update rule: XBS. ')
                             elif sys.argv[k][:3] == '*l=':
                                 contact_nwk.update_rule = 'random'
                                 mode52_l_config = [int(x) for x in sys.argv[k][3:].split(',')]
                                 mode52.set_l0(mode52_l_config[0])
                                 mode52.set_l1(mode52_l_config[1])
+                                root.debug(f'Update rule: random. ')
                             mode52.set_network()
+                            root.debug(f'Preferential attachment is created. ')
                             mode52.raise_flag()
                             if mode52.flag == 'X':
                                 modes[52] = mode52
                             else:
                                 mode.pop(52)
                         elif mode_flag == 501:
+                            root.debug('Express mode: Activating mode 501. ')
                             if sys.argv[k][:4] == '*Ii=':
                                 Ii_temp = sys.argv[k][4:]
                                 mode501.init_infection = mode501.set_init_infection(Ii_temp)
@@ -990,6 +1029,7 @@ for i in range(len(sys.argv)):
                             else:
                                 mode.pop(501)
                         elif mode_flag == 505:
+                            root.debug('Express mode: Activating mode 505. ')
                             if sys.argv[k][:3] == '*m=':
                                 mode_505 = sys.argv[k][3:]
                                 try:
@@ -1084,7 +1124,8 @@ while True:
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:
-            root.debug('\nMode objects loaded.\n')
+            root.debug('Mode objects loaded.')
+            root.debug(modes)
         # Run
         current_run()
         print('=====  Simulation Ended  =====')

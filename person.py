@@ -46,9 +46,9 @@ class Person:
 
         # Epidemic state
         self.suceptible = 0 #int(round(random.uniform(0, 1), 0))   # 0 means without disease, 1 means infected
-        self.exposed    = 0
+        self.exposed = 0
         self.vaccinated = 0 # Assume all 0 (None of them took vaccine).
-        self.removed    = 0 # 0 means not in R compartment, 1 is.
+        self.removed = 0 # 0 means not in R compartment, 1 is.
 
         self.infection_clock = 0
 

@@ -1,16 +1,39 @@
 import random
 
-import write
-
 
 class Group:
-    def __init__(self, people, group_size=3):
+    def __init__(self, people, logger, group_size=3):
         self.people = people
         self.size = group_size
+
+        self.propro = None
+        self.agpro = None
+
         self.roster = {}
 
         self.set_population()
         self.set_roster()
+
+        self.logger = logger
+
+    def correct_para(self, p, pos=False):
+        '''
+        Convert the parameters into integers.
+
+        Parameters
+        p: int
+            input.
+        pos: boolean
+            If the parameter is positive number.
+        '''
+        try:
+            p_num = int(p)
+            if pos == True and p_num < 1:
+                p_num = 1
+            return p_num
+        except ValueError:
+            p_num = 1
+            return p_num
 
     def set_population(self):
         '''
@@ -25,6 +48,24 @@ class Group:
         for i in range(len(self.people)):
             self.roster[self.people[i].group_no].append(self.people[i])
 
+    def get_prop(self):
+        return self.propro / (self.propro + self.agpro)
+
+    def set_pro(self, propro_temp):
+        self.propro = self.correct_para(propro_temp)
+
+    def set_ag(self, ag_temp):
+        self.agpro = self.correct_para(ag_temp)
+
+    def set_opinion(self):
+        for person in self.people:
+            seed = random.randint(0, 1000) / 1000
+            if seed < self.get_prop():
+                person.opinion = 1
+            else:
+                person.opinion = 0
+            self.logger.debug(f'{person.id} has opinion of {person.opinion}. ')
+
     def update_group(self, verbose_mode=False):
         '''
         Permutate everyone into another group.
@@ -32,32 +73,27 @@ class Group:
         # print(self.roster)
         for group_no, members in self.roster.items():
             for member in members:
-                if verbose_mode == True:
-                    print(f'{member.id} is in Group {group_no}')
+                self.logger.debug(f'{member.id} is in Group {group_no}')
                 self.roster[group_no].remove(member)
                 dest_group = random.randint(0,len(self.people) // self.size)
-                if verbose_mode == True:
-                    print(f'They should be moved to Group {dest_group}')
-                    print(f'This group has currently have members: {[p.id for p in self.roster[dest_group]]}. ')
+                self.logger.debug(f'They should be moved to Group {dest_group}')
+                self.logger.debug(f'This group has currently have members: {[p.id for p in self.roster[dest_group]]}. ')
                 self.roster[dest_group].append(member)
-                if verbose_mode == True:
-                    print(f'This group has currently now have members: {[p.id for p in self.roster[dest_group]]}. ')
+                self.logger.debug(f'This group has currently now have members: {[p.id for p in self.roster[dest_group]]}. ')
                 member.group_no = dest_group
 
                 swap_out = self.roster[dest_group][random.randint(0,len(self.roster[dest_group])-1)]
-                if verbose_mode == True:
-                    print(f'Group {dest_group} will remove {swap_out.id}. ')
+                self.logger.debug(f'Group {dest_group} will remove {swap_out.id}. ')
                 self.roster[dest_group].remove(swap_out)
                 self.roster[group_no].append(swap_out)
-                if verbose_mode == True:
-                    print(f'Group {dest_group} now have {[p.id for p in self.roster[dest_group]]}. \n\n')
+                self.logger.debug(f'Group {dest_group} now have {[p.id for p in self.roster[dest_group]]}. \n\n')
                 swap_out.group_no = dest_group
 
     def update(self, verbose_mode=False):
         '''
         Update opinion using majority Rule
         '''
-        # self.inflexible_prework()
+        self.inflexible_prework()
         for group_no, members in self.roster.items():
             total_opinion = 0
             for member in members:
@@ -71,10 +107,8 @@ class Group:
                 for member in members:
                     member.opinion = 0
         # Further update due to group concensus.
-        # self.inflexible()
-        # self.balance()
-
-
+        self.inflexible()
+        self.balance()
 
     def inflexible_prework(self):
         '''
@@ -85,8 +119,7 @@ class Group:
                 self.people[i].meta_opinion = 1
             elif self.people[i].personality == 2:
                 self.people[i].meta_opinion = 0
-                if verbose_mode == True:
-                    print(f'{self.people[i].id}: {self.people[i].meta_opinion}')
+                self.logger.debug(f'{self.people[i].id}: {self.people[i].meta_opinion}')
 
     def inflexible(self):
         '''
@@ -97,17 +130,12 @@ class Group:
                 self.people[i].opinion = 1
             elif self.people[i].meta_opinion == 0:
                 self.people[i].opinion = 0
-                if verbose_mode == True:
-                    print(f'   *{self.people[i].id}: {self.people[i].opinion}')
+                self.logger.debug(f'   *{self.people[i].id}: {self.people[i].opinion}')
             self.people[i].meta_opinion = None  # They will forget their deep believe until next round.
-
 
     def balance(self, verbose_mode=False):
         for i in range(len(self.people)):
             if self.people[i].personality == 3:
-                if verbose_mode == True:
-                    print('Before: {} - o:{}'.format(self.people[i].id, self.people[i].opinion))
+                self.logger.debug('Before: {} - o:{}'.format(self.people[i].id, self.people[i].opinion))
                 self.people[i].swap_opinion()
-                if verbose_mode == True:
-                    print('After: {} - o:{}'.format(self.people[i].id, self.people[i].opinion))
-        # print('')
+                self.logger.debug('After: {} - o:{}'.format(self.people[i].id, self.people[i].opinion))

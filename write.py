@@ -277,7 +277,7 @@ def WriteSummary(obs, filename):
     '''
     with open('{}-summary.txt'.format(filename), 'w') as f:
         contents = [' ========================================== \n\n',' ',' Agent Based Modelling: COVID-19 SEIP Model \n\n',' ',' ========================================== \n']
-        contents.append('\n\nThis simulation was performed on {}.\n\n'.format(datetime.datetime.now().strftime('%H:%M:%S, %d/ %m/ %Y (%z)')))
+        contents.append('\n\nThis simulation was performed on {}.\n\n'.format(datetime.datetime.now().strftime('%H:%M:%S, %d/ %m/ %Y')))
         contents.append('Simulation name: {}\n\n'.format(filename))
         contents.append('# Summary\n')
         contents.append('N: {} people\n'.format(len(obs.N)))
