@@ -231,15 +231,15 @@ class Mode02(Mode):
         self.return_prob = {'Some Places': 0.14}
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 2. ')
-        print('-------------------------\n')
-        print('Please set the parameters below. ')
-        print('\nPlease set travel probability below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 2. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set the parameters below. ')
+        self.logger.info('\nPlease set travel probability below. ')
         travel_prob_temp = input('p >>> ')
         self.travel_prob = super().set_correct_epi_para(travel_prob_temp, self.travel_prob)
-        print('\nPlease set new destination below. ')
-        print('(If none, please press enter)')
+        self.logger.info('\nPlease set new destination below. ')
+        self.logger.info('(If none, please press enter)')
         new_dest_name = None
         while new_dest_name != '':
             new_dest_name = input('>>> ')
@@ -248,17 +248,17 @@ class Mode02(Mode):
             beta_new_dest_temp = input('β >>> ')
             beta_new_dest = super().set_correct_epi_para(beta_new_dest_temp, 0.5)
             self.create_destination(new_dest_name, beta_new_dest)
-            print(f'{new_dest_name} created. ')
-        print('\nPlease set reward for healthy below. ')
+            self.logger.debug(f'{new_dest_name} created. ')
+        self.logger.info('Please set reward for healthy below. ')
         r_S_temp = input('rS >>> ')
         self.rS = super().set_correct_para(r_S_temp, self.rS)
-        print('\nPlease set reward for infection below. ')
+        self.logger.info('Please set reward for infection below. ')
         r_I_temp = input('rI >>> ')
         self.rI = super().set_correct_para(r_I_temp, self.rI)
         self.create_setting()
-        print('Setting applied to population. ')
+        self.logger.info('Setting applied to population. ')
         self.raise_flag()
-        print('\nMode 2 equipped. \n')
+        self.logger.info('Mode 2 equipped. ')
 
     def create_setting(self):
         '''
@@ -274,6 +274,7 @@ class Mode02(Mode):
         if new_dest_name == '':
             return
         self.overseasIsolation[new_dest_name] = beta
+        self.logger.debug(f'Created new overseas destination {new_dest_name} wih transmission rate {beta}. ')
 
     def make_decision(self, verbose=False):
         '''
@@ -282,13 +283,13 @@ class Mode02(Mode):
         for person in self.people:
             # If person is symptomatic, they cannot leave.
             if person.suceptible == 1 and person.exposed == 1:
+                self.logger.debug(f'{person.id} is symptomatic, they cannot travel overseas. ')
                 continue
             # The person needs to decide to go overseas by now.
             if person.overseas != None:
                 continue  # The person is in overseas already
             seed = random.randint(0, 1000) / 1000
-            if verbose:
-                print(f'\t{seed} : {self.travel_prob} => {person.id} {seed < self.travel_prob}')
+            self.logger.debug(f'Person {person.id}. Seed: {seed}. Probability to travel: {self.travel_prob}. (seed <  prob: {seed < self.travel_prob})')
             if seed >= self.travel_prob:
                 continue
 
@@ -300,8 +301,7 @@ class Mode02(Mode):
             # Make decision
             if U_I > U_S:
                 person.overseas = {destination: self.overseas[destination]}
-                if verbose:
-                    print(f'\t{person.id} decided travel to {list(person.overseas.keys())[0]}. ')
+                self.logger.debug(f'\t{person.id} decided travel to {list(person.overseas.keys())[0]}. ')
 
     def get_Mode02E1(self, i):
         '''
@@ -328,8 +328,7 @@ class Mode02(Mode):
             return False  # The person is not in overseas.
 
         if 'isolate' in self.people[i].travel_history[-1]:
-            if verbose:
-                print('\tPerson is quarantined. ')
+            self.logger.debug('\tPerson is quarantined overseas. ')
             return True
         else:
             return False
@@ -344,15 +343,13 @@ class Mode02(Mode):
             return False
 
         if type(self.people[i].travel_history[-1]) == str:
-            if verbose:
-                print('\tDebug: The person is in overseas. ')
+            self.logger.debug('\tDebug: The person is in overseas. ')
             return False
 
         days_back_in_local = 0
         for t in reversed(range(len(self.people[i].travel_history))):
             if t == 0:
-                if verbose:
-                    print('\tThe person has never travelled. ')
+                self.logger.debug('\tThe person has never been travelling. ')
                 return False
             elif type(self.people[i].travel_history[t]) == str:
                 break
@@ -361,8 +358,7 @@ class Mode02(Mode):
             days_back_in_local += 1
 
         if days_back_in_local > self.isolationPeriod:
-            if verbose:
-                print('\tPerson is quarantined. {} > {}'.format(days_back_in_local, self.isolationPeriod))
+            self.logger.debug(f'\tPerson is quarantined. {days_back_in_local} > {self.isolationPeriod}')
             return True
         else:
             return False
@@ -373,20 +369,18 @@ class Mode02(Mode):
         '''
         for person in self.people:
             if person.overseas == None:
-                if verbose:
-                    print(f'\tPerson {person.id} is not subject to overseas isolation (At local). ')
+                self.logger.debug(f'\tPerson {person.id} is not subject to overseas isolation (At local). ')
                 continue
             if list(person.overseas.keys())[0] + ':isolate' in person.travel_history[-1]:
-                if verbose:
-                    print(f'\tPerson {person.id} is isolated ovserseas. ')
+                self.logger.debug(f'\tPerson {person.id} is isolated ovserseas. ')
                 continue
             if list(person.overseas.keys())[0] + ':hospitalised' in person.travel_history[-1]:
-                if verbose:
-                    print(f'\tPerson {person.id} is hospitalised. ')
+                self.logger.debug(f'\tPerson {person.id} is hospitalised ovserseas. ')
                 continue
 
             seed = random.randint(0, 1000) / 1000
             if seed < self.return_prob[list(person.overseas.keys())[0]]:
+                self.logger.debug(f'Person {person.id} is returned from overseas. ({seed} < {self.return_prob[list(person.overseas.keys())[0]]})')
                 person.overseas = None
 
     def writeRecentTravelHistory(self, person, verbose=False):
@@ -404,16 +398,14 @@ class Mode02(Mode):
         ----
         Use this function if the person is known to be in overseas.
         '''
-        if verbose:
-            print(f'\t== Debugging: Recent travel history of {person.id} ==')
+        self.logger.debug(f'\t== Debugging: Recent travel history of {person.id} ==')
         recent_travel_history = []
         recent_destination = list(person.overseas.keys())[0]
         for i in reversed(range(len(person.travel_history))):
             if len(recent_travel_history) > 0 and recent_destination not in str(recent_travel_history[-1]):
                 break
             recent_travel_history.append(person.travel_history[i])
-        if verbose:
-            print(f'\t   {recent_travel_history}')
+        self.logger.debug(f'\t   {recent_travel_history}')
         return recent_travel_history
 
     def writeTravelHistory(self, verbose=False):
@@ -421,33 +413,27 @@ class Mode02(Mode):
         At each iteration, record where the person went.
         '''
         for person in self.people:
-            if verbose:
-                print(f'Writing person {person.id} travel history...')
+            self.logger.debug(f'Writing person {person.id} travel history...')
             if person.overseas == None:
-                if verbose:
-                    print(f'\t{person.id} remains at local. ')
+                self.logger.debug(f'\t{person.id} remains at local. ')
                 person.travel_history.append(0)
                 continue
 
             recent_travel_history = self.writeRecentTravelHistory(person, verbose)
             if len(recent_travel_history) > self.isolationPeriod:
-                if verbose:
-                    print(f'\t{person.id} is travelling in {list(person.overseas.keys())[0]}. ')
+                self.logger.debug(f'\t{person.id} is travelling in {list(person.overseas.keys())[0]}. ')
                 person.travel_history.append(list(person.overseas.keys())[0])
             else:
-                if verbose:
-                    print(f'\t{person.id} is quarantined in {list(person.overseas.keys())[0]}. ')
+                self.logger.debug(f'\t{person.id} is quarantined in {list(person.overseas.keys())[0]}. ')
                 person.travel_history.append(list(person.overseas.keys())[0] + ':isolate')
                 continue
 
             if person.suceptible == 1 and person.exposed == 1 and person.overseas != None:
-                if verbose:
-                    print(f'\t{person.id} has been infected in {list(person.overseas.keys())[0]}. ')
+                self.logger.debug(f'\t{person.id} has been infected in {list(person.overseas.keys())[0]}. ')
                 person.travel_history.append(list(person.overseas.keys())[0] + ':hospitalised')
 
         for person in self.people:
-            if verbose:
-                print(f'{person.id}:', person.travel_history)
+            self.logger.debug(f'{person.id}:', person.travel_history)
 
 
 '''
