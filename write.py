@@ -368,10 +368,10 @@ def WriteSummary(obs, filename):
                     contents.append('By: {}\n\n'.format(obs.modes[505].mode))
         if 2 in obs.modes:
             contents.append('\n# Overseas travel \n')
-            contents.append('  Location\tBeta\tIsolation\tReturn prob\n')
+            contents.append('  Location\tBeta\tIsolation\tReturn prob\t\n')
             contents.append('  --------\t----\t---------\t-----------\n')
             for loc, b in obs.modes[2].overseas.items():
-                contents.append(f'  {loc}\t{b}\t{obs.modes[2].overseasIsolation[loc]}\t{obs.modes[2].return_prob[loc]} ')
+                contents.append(f'  {loc}\t{b}\t{obs.modes[2].overseasIsolation[loc]}\t{obs.modes[2].return_prob[loc]} \n')
             contents.append(f'Isolation period: {obs.modes[2].isolationPeriod} \n')
             contents.append('\n## Local implementation \n')
             if obs.modes[2].localIsolation:
@@ -386,6 +386,24 @@ def WriteSummary(obs, filename):
             contents.append('  Location\tReturn prob\n')
             for loc, b in obs.modes[2].overseas.items():
                 contents.append(f'  {loc}\t{obs.modes[2].return_prob[loc]} ')
+
+        if any(m in obs.modes for m in [21, 22, 23, 24]):
+            contents.append('\n# Opinion Dynamics \n')
+            contents.append(f'\nGroup size: {obs.info_nwk.size}\n')
+            if 21 in obs.modes:
+                contents.append('Local majority rule in place. ')
+
+            if any(m in obs.modes for m in [22, 23, 24]):
+                contents.append('\n## Personality \n')
+                if 22 in obs.modes:
+                    contents.append('Stubbonly support vaccination')
+                    contents.append(f'\n\tProportion: {obs.modes[22].InflexProProportion}\n')
+                if 23 in obs.modes:
+                    contents.append('Stubbonly against vaccination')
+                    contents.append(f'\n\tProportion: {obs.modes[23].InflexAgProportion}\n')
+                if 24 in obs.modes:
+                    contents.append('Balancers in groups')
+                    contents.append(f'\n\tProportion: {obs.modes[24].BalancerProportion}\n')
 
         contents.append('\n\n# Notes\n')
         if 2 in obs.modes:
