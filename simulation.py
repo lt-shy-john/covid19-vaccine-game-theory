@@ -117,8 +117,8 @@ class Simulation:
             # Overseas travel
             if 2 in self.modes:
                 self.logger.debug('!!! Overseas travel alert !!!')
-                self.modes[2].returnOverseas(self.verbose_mode)
-                self.modes[2].make_decision(self.verbose_mode)
+                self.modes[2].returnOverseas()
+                self.modes[2].make_decision()
 
             # Intimacy game
             if 20 in self.modes:

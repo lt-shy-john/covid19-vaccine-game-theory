@@ -409,6 +409,10 @@ class Epidemic:
             for i in range(len(self.people)):
                 if self.people[i].overseas != None and 2 in self.mode:
                     self.overseas_infect(i)
+                elif self.people[i].overseas == None and 2 in self.mode:
+                    # Check if person is isolated back home.
+                    if self.mode[2].is_isolated_local(i):
+                        continue
             return
 
         # Creating customised infection parameter for each person.
@@ -455,7 +459,7 @@ class Epidemic:
                 continue
             elif self.people[i].overseas == None and 2 in self.mode:
                 # Check if person is isolated back home.
-                if self.mode[2].is_isolated_local(i, self.verbose_mode):
+                if self.mode[2].is_isolated_local(i):
                     continue
 
             '''
@@ -492,10 +496,10 @@ class Epidemic:
                 self.logger.debug(f'One of the contacts are removed. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].exposed == 1 or edge[1].exposed == 1:
-                self.logger.debug(f'One of the contacts are quarantined. Skip ({edge[0].id}, {edge[1].id}). ')
+                self.logger.debug(f'One of the contacts are hospitalised. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             self.logger.debug('Checked:')
-            self.logger.debug(f'  {edge[0].id}\t{edge[1].id}')
+            self.logger.debug(f'   {edge[0].id}\t{edge[1].id}')
             self.logger.debug(f'S: {edge[0].suceptible}\t{edge[1].suceptible}')
 
             # Infect (or not)
@@ -503,7 +507,9 @@ class Epidemic:
             if seed < self.infection:
                 edge[0].suceptible = 1
                 edge[1].suceptible = 1
-                self.logger.debug(f'{edge[0].id}-{edge[1].id} pair is infected.')
+                self.logger.debug(f'{edge[0].id}-{edge[1].id} pair is transmitted. ({seed} < {self.infection})')
+            else:
+                self.logger.debug(f'{edge[0].id}-{edge[1].id} pair is not transmitted. ({seed} >= {self.infection})')
 
     def overseas_infect(self, i):
         '''
@@ -516,17 +522,18 @@ class Epidemic:
             return
         self.logger.debug(f'\t{self.people[i].id} is in overseas... ')
         seed = random.randint(0,1000)/1000
-        self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}')
 
         if self.people[i].suceptible == 1:
-            self.logger.debug('(Infected*)')
+            self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]} (Infected*)')
         elif seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]:
-            self.logger.debug('(Infected)')
+            self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]} (Infected)')
             self.people[i].suceptible = 1
-        else: self.logger.debug()
+        else: self.logger.debug(f'{self.people[i].id} is not infected from overseas. ')
 
     def infection_clock(self, i):
+        self.logger.debug('Starting method Epidemic.infection_clock()...')
         if self.people[i].infection_clock > 14:
+            self.logger.debug(f'Person {self.people[i].id} has been infected for {self.people[i].infection_clock} days and will be hospitalised. ')
             self.people[i].exposed = 1
 
     def infected(self):
@@ -540,8 +547,10 @@ class Epidemic:
         for i in range(len(self.people)):
             if self.people[i].suceptible == 1 and self.people[i].removed == 0:
                 self.people[i].infection_clock += 1
+                self.logger.debug(f'{self.people[i].id} has been infected for {self.people[i].infection_clock} days. ')
             else:
                 self.people[i].infection_clock = 0
+                self.logger.debug(f'{self.people[i].id} infection history is reset. ')
 
             self.infection_clock(i)
 
@@ -630,8 +639,10 @@ class Epidemic:
             if seed < self.test_rate:
                 if self.people[i].suceptible == 1:
                     self.people[i].exposed = 1
+                    self.logger.debug(f'{self.people[i].id} has been tested COVID and hospitalised. ({seed} < {self.test_rate})')
                 self.people[i].test_history.append(1)
                 continue
+            self.logger.debug(f'{self.people[i].id} did not went to COVID testing. ({seed} >= {self.test_rate})')
             self.people[i].test_history.append(0)
 
     def __iter__(self):
