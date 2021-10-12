@@ -11,6 +11,7 @@ Select the following options
 12 Cost of vaccine []
 13 Accessibility to vaccine []
 14 Side effects of vaccine []
+15 Advanced vaccine options []
 20 Intimacy game []
 21 Local majority rule []
 22 Stubbon to take vaccine []
