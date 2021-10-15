@@ -162,7 +162,7 @@ class Simulation:
             epidemic.next(self.filename)
 
             if 2 in self.modes:
-                self.modes[2].writeTravelHistory(self.verbose_mode)
+                self.modes[2].writeTravelHistory()
 
         self.logger.info('\n=========== Result ============\n')
         self.logger.info('There are {} people infected.'.format(epidemic.I))

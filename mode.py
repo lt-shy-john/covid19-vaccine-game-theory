@@ -216,7 +216,7 @@ class Mode02(Mode):
 
     def __init__(self, people, main_beta, logger):
         super().__init__(people, 2, logger)
-        self.overseas = {'Some Places': 0.14}
+        self.overseas = {'Some Places': 0.02}
         self.travel_prob = 0.1
         self.rS = 1
         self.rI = 1
@@ -228,7 +228,7 @@ class Mode02(Mode):
         self.isolationPeriod = 14
 
         # Return parameters
-        self.return_prob = {'Some Places': 0.14}
+        self.return_prob = {'Some Places': 0.2}
 
     def __call__(self):
         self.logger.info('-------------------------')
@@ -276,10 +276,11 @@ class Mode02(Mode):
         self.overseasIsolation[new_dest_name] = beta
         self.logger.debug(f'Created new overseas destination {new_dest_name} wih transmission rate {beta}. ')
 
-    def make_decision(self, verbose=False):
+    def make_decision(self):
         '''
         Make decision based on circumstances in each time step.
         '''
+        self.logger.debug('Starting method Mode02.make_decision()... ')
         for person in self.people:
             # If person is symptomatic, they cannot leave.
             if person.suceptible == 1 and person.exposed == 1:
@@ -288,6 +289,16 @@ class Mode02(Mode):
             # The person needs to decide to go overseas by now.
             if person.overseas != None:
                 continue  # The person is in overseas already
+            # The person has just been back from overseas.
+            if person.overseas == None:
+                travel_history = person.travel_history
+                if len(travel_history) == 0:
+                    continue  # Catch where at t = 0, no travel history exists.
+                if travel_history[-1] != 0 or travel_history[-1] != ':isolate':
+                    # Most recent travel history has not been written, so last element comes from day before.
+                    self.logger.debug(f'{person.id} has just been back from overseas. Not thinking about travelling. ')
+
+            # Decide
             seed = random.randint(0, 1000) / 1000
             self.logger.debug(f'Person {person.id}. Seed: {seed}. Probability to travel: {self.travel_prob}. (seed <  prob: {seed < self.travel_prob})')
             if seed >= self.travel_prob:
@@ -302,6 +313,8 @@ class Mode02(Mode):
             if U_I > U_S:
                 person.overseas = {destination: self.overseas[destination]}
                 self.logger.debug(f'\t{person.id} decided travel to {list(person.overseas.keys())[0]}. ')
+            else:
+                self.logger.debug(f'\t{person.id} decided not travel to {list(person.overseas.keys())[0]}. ')
 
     def get_Mode02E1(self, i):
         '''
@@ -333,37 +346,40 @@ class Mode02(Mode):
         else:
             return False
 
-    def is_isolated_local(self, i, verbose=False):
+    def is_isolated_local(self, i):
         '''
         Isolation while back from overseas, unable to contact with disease.
         '''
+        self.logger.debug(f'Starting method Mode02.is_isolated_local() for person {self.people[i].id}...')
         if not self.localIsolation:
+            self.logger.debug('Local place does not require isolation upon return. ')
             return False
         if len(self.people[i].travel_history) < 1:
+            self.logger.debug('\tTravel history too short to be determined. ')
             return False
 
         if type(self.people[i].travel_history[-1]) == str:
-            self.logger.debug('\tDebug: The person is in overseas. ')
+            self.logger.debug('\tThe person is in overseas. ')
             return False
 
         days_back_in_local = 0
         for t in reversed(range(len(self.people[i].travel_history))):
             if t == 0:
-                self.logger.debug('\tThe person has never been travelling. ')
+                self.logger.debug('\tThe person has never been travelling, no local isolation required. ')
                 return False
             elif type(self.people[i].travel_history[t]) == str:
                 break
-            # if verbose:
-            #     print('\tDebug:', self.people[i].travel_history[i])
             days_back_in_local += 1
 
-        if days_back_in_local > self.isolationPeriod:
-            self.logger.debug(f'\tPerson is quarantined. {days_back_in_local} > {self.isolationPeriod}')
+        self.logger.debug(f'\tPerson is back since {days_back_in_local} days. ')
+        if days_back_in_local <= self.isolationPeriod:
+            self.logger.debug(f'\tPerson is quarantined locally. ({days_back_in_local} <= {self.isolationPeriod})')
             return True
         else:
+            self.logger.debug(f'\tPerson does not require to be quarantined locally anymore. ({days_back_in_local} > {self.isolationPeriod})')
             return False
 
-    def returnOverseas(self, verbose=False):
+    def returnOverseas(self):
         '''
         Come back from overseas. Option for 14 days isolation.
         '''
@@ -398,7 +414,7 @@ class Mode02(Mode):
         ----
         Use this function if the person is known to be in overseas.
         '''
-        self.logger.debug(f'\t== Debugging: Recent travel history of {person.id} ==')
+        self.logger.debug(f'\t== Recent travel history of {person.id} ==')
         recent_travel_history = []
         recent_destination = list(person.overseas.keys())[0]
         for i in reversed(range(len(person.travel_history))):
@@ -408,19 +424,24 @@ class Mode02(Mode):
         self.logger.debug(f'\t   {recent_travel_history}')
         return recent_travel_history
 
-    def writeTravelHistory(self, verbose=False):
+    def writeTravelHistory(self):
         '''
         At each iteration, record where the person went.
         '''
         for person in self.people:
             self.logger.debug(f'Writing person {person.id} travel history...')
-            if person.overseas == None:
+
+            if person.overseas == None and self.is_isolated_local(self.people.index(person)):
+                self.logger.debug(f'\t{person.id} is quarantined back in local. ')
+                person.travel_history.append(':isolate')
+                continue
+            elif person.overseas == None:
                 self.logger.debug(f'\t{person.id} remains at local. ')
                 person.travel_history.append(0)
                 continue
 
-            recent_travel_history = self.writeRecentTravelHistory(person, verbose)
-            if len(recent_travel_history) > self.isolationPeriod:
+            recent_travel_history = self.writeRecentTravelHistory(person)
+            if len(recent_travel_history) > self.isolationPeriod and person.overseas != None:
                 self.logger.debug(f'\t{person.id} is travelling in {list(person.overseas.keys())[0]}. ')
                 person.travel_history.append(list(person.overseas.keys())[0])
             else:
@@ -431,9 +452,6 @@ class Mode02(Mode):
             if person.suceptible == 1 and person.exposed == 1 and person.overseas != None:
                 self.logger.debug(f'\t{person.id} has been infected in {list(person.overseas.keys())[0]}. ')
                 person.travel_history.append(list(person.overseas.keys())[0] + ':hospitalised')
-
-        for person in self.people:
-            self.logger.debug(f'{person.id}:', person.travel_history)
 
 
 '''
@@ -819,40 +837,40 @@ class Mode15(Mode):
         self.vaccine_doses = None
 
     def __call__(self, vaccine_ls, alpha, beta, gamma, delta, phi):
-        print('-------------------------')
-        print('You are creating mode 15. ')
-        print('-------------------------\n')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 15. ')
+        self.logger.info('-------------------------\n')
         if vaccine_ls == []:
-            print('To initiate mode 15, you will need to create the vaccines available first. ')
-            print('Create new vaccine?')
+            self.logger.info('To initiate mode 15, you will need to create the vaccines available first. ')
+            self.logger.info('Create new vaccine?')
             cmd = input('[y/n]>>> ')
             if cmd == 'y':
                 self.create_vaccine_type(alpha, beta, gamma, delta, phi)
         else:
             self.raise_flag()
-            print('\nMode 15 equipped. \n')
+            self.logger.info('\nMode 15 equipped. \n')
 
     def create_vaccine_type(self, alpha, beta, gamma, delta, phi):
-        print('Please set new vaccine name below. ')
+        self.logger.info('Please set new vaccine name below. ')
         name = input('>>> ')
-        print('Please set vaccine dose number below. ')
+        self.logger.info('Please set vaccine dose number below. ')
         dose = input('>>> ')
         dose = super().set_correct_para(dose, 1, pos=True)
-        print('Please set vaccine adoption rate below. ')
+        self.logger.info('Please set vaccine adoption rate below. ')
         new_alpha_temp = input('>>> ')
         alpha = super().set_correct_epi_para(new_alpha_temp, alpha)
-        print('Please set vaccine type below. ')
+        self.logger.info('Please set vaccine type below. ')
         vaccine_type = input('>>> ')
         if int(vaccine_type) < 1 or int(vaccine_type > 3):
-            print('Invalid vaccine type, reverting to 1')
+            self.logger.info('Invalid vaccine type, reverting to 1')
             vaccine_type = 1
-        print('Please set vaccine cost number below. ')
+        self.logger.info('Please set vaccine cost number below. ')
         cost = input('>>> ')
         cost = super().set_correct_para(cost, 0, pos=True)
-        print('Please set vaccine efficacy number below. ')
+        self.logger.info('Please set vaccine efficacy number below. ')
         efficacy = input('>>> ')
         efficacy = super().set_correct_epi_para(efficacy, 1)
-        print('Please specify whether the vaccine stop transmissability/ reduce severity below. ')
+        self.logger.info('Please specify whether the vaccine stop transmissability/ reduce severity below. ')
         cmd = input('Please choose one option [1/2]: ')
         if cmd == '1':
             self.type = 1

@@ -690,7 +690,7 @@ for i in range(len(sys.argv)):
                 root.info("Invalid setting file name specified. ")
                 continue
             vaccine_available = read_settings(sys.argv[i+1])
-            [print(x.__dict__) for x in vaccine_available]
+            root.debug(f'Vaccine read from setting: {[x.__dict__ for x in vaccine_available]}')
         elif sys.argv[i] == '-verbose' or sys.argv[i] == '--v':
             verbose_mode = True # Legacy mode: Should be replaced by logging level
             logging_level = ['debug', 'info', 'warning', 'error', 'critical']
@@ -921,16 +921,18 @@ for i in range(len(sys.argv)):
                             root.debug('Express mode: Activating mode 22. ')
                             if sys.argv[k][:3] == '*p=':
                                 mode22_pro_config = sys.argv[k][3:]
+                                root.debug(f'Proportion of stubbonly support vaccination are {mode22_pro_config}. ')
                                 mode22.assign_personality(mode22_pro_config)
                             elif sys.argv[k][:3] == '*+=':
                                 mode22_pro_config = sys.argv[k][3:]
+                                root.debug(f'Proportion of pro-vaccine is {mode22_pro_config}. ')
                                 mode22.info_nwk.set_pro(mode22_pro_config)
                             elif sys.argv[k][:3] == '*-=':
                                 mode22_ag_config = sys.argv[k][3:]
+                                root.debug(f'Proportion of against vaccine is {mode22_ag_config}. ')
                                 mode22.info_nwk.set_ag(mode22_ag_config)
-                            if mode22.info_nwk.propro != None and mode22.info_nwk.agpro != None:
+                            if mode22.info_nwk.propro != None and mode22.info_nwk.agpro != None and mode22.InflexProProportion != None:
                                 mode22.info_nwk.set_opinion()
-                                mode22.set_personality()
                                 mode22.raise_flag()
                                 if mode22.flag == 'X':
                                     modes[22] = mode22
@@ -949,7 +951,7 @@ for i in range(len(sys.argv)):
                                 mode23.info_nwk.set_pro(mode23_pro_config)
                             elif sys.argv[k][:3] == '*-=':
                                 mode23_ag_config = sys.argv[k][3:]
-                                root.debug(f'Proportion of against vaccine is {mode23_pro_config}. ')
+                                root.debug(f'Proportion of against vaccine is {mode23_ag_config}. ')
                                 mode23.info_nwk.set_ag(mode23_ag_config)
                             if mode23.info_nwk.propro != None and mode23.info_nwk.agpro != None and mode23.InflexAgProportion != None:
                                 mode23.info_nwk.set_opinion()
