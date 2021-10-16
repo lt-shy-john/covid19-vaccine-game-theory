@@ -284,7 +284,7 @@ class Mode02(Mode):
         for person in self.people:
             # If person is symptomatic, they cannot leave.
             if person.suceptible == 1 and person.exposed == 1:
-                self.logger.debug(f'{person.id} is symptomatic, they cannot travel overseas. ')
+                self.logger.debug(f'\t{person.id} is symptomatic, they cannot travel overseas. ')
                 continue
             # The person needs to decide to go overseas by now.
             if person.overseas != None:
@@ -294,13 +294,14 @@ class Mode02(Mode):
                 travel_history = person.travel_history
                 if len(travel_history) == 0:
                     continue  # Catch where at t = 0, no travel history exists.
-                if travel_history[-1] != 0 or travel_history[-1] != ':isolate':
+                if travel_history[-1] == ':isolate':
                     # Most recent travel history has not been written, so last element comes from day before.
                     self.logger.debug(f'{person.id} has just been back from overseas. Not thinking about travelling. ')
+                    continue
 
             # Decide
             seed = random.randint(0, 1000) / 1000
-            self.logger.debug(f'Person {person.id}. Seed: {seed}. Probability to travel: {self.travel_prob}. (seed <  prob: {seed < self.travel_prob})')
+            self.logger.debug(f'\tPerson {person.id}. Seed: {seed}. Probability to travel: {self.travel_prob}. (seed <  prob: {seed < self.travel_prob})')
             if seed >= self.travel_prob:
                 continue
 
@@ -310,11 +311,12 @@ class Mode02(Mode):
             U_S = self.get_Mode02E1(self.people.index(person))
 
             # Make decision
+            self.logger.debug(f"\tTravel decision: U_I: {U_I} U_S: {U_S} U_I > U_S: {U_I > U_S}")
             if U_I > U_S:
                 person.overseas = {destination: self.overseas[destination]}
                 self.logger.debug(f'\t{person.id} decided travel to {list(person.overseas.keys())[0]}. ')
             else:
-                self.logger.debug(f'\t{person.id} decided not travel to {list(person.overseas.keys())[0]}. ')
+                self.logger.debug(f'\t{person.id} decided not travel. ')
 
     def get_Mode02E1(self, i):
         '''
@@ -341,7 +343,7 @@ class Mode02(Mode):
             return False  # The person is not in overseas.
 
         if 'isolate' in self.people[i].travel_history[-1]:
-            self.logger.debug('\tPerson is quarantined overseas. ')
+            self.logger.debug(f'\t{self.people[i].id} is quarantined overseas. ')
             return True
         else:
             return False
@@ -358,7 +360,7 @@ class Mode02(Mode):
             self.logger.debug('\tTravel history too short to be determined. ')
             return False
 
-        if type(self.people[i].travel_history[-1]) == str:
+        if self.people[i].overseas != None:
             self.logger.debug('\tThe person is in overseas. ')
             return False
 
@@ -367,7 +369,7 @@ class Mode02(Mode):
             if t == 0:
                 self.logger.debug('\tThe person has never been travelling, no local isolation required. ')
                 return False
-            elif type(self.people[i].travel_history[t]) == str:
+            elif type(self.people[i].travel_history[t]) == str and not self.people[i].travel_history[t] == ":isolate":
                 break
             days_back_in_local += 1
 
@@ -383,6 +385,7 @@ class Mode02(Mode):
         '''
         Come back from overseas. Option for 14 days isolation.
         '''
+        self.logger.debug('Starting method Mode02.returnOverseas()...')
         for person in self.people:
             if person.overseas == None:
                 self.logger.debug(f'\tPerson {person.id} is not subject to overseas isolation (At local). ')
@@ -396,7 +399,7 @@ class Mode02(Mode):
 
             seed = random.randint(0, 1000) / 1000
             if seed < self.return_prob[list(person.overseas.keys())[0]]:
-                self.logger.debug(f'Person {person.id} is returned from overseas. ({seed} < {self.return_prob[list(person.overseas.keys())[0]]})')
+                self.logger.debug(f'\tPerson {person.id} is returning from overseas. ({seed} < {self.return_prob[list(person.overseas.keys())[0]]})')
                 person.overseas = None
 
     def writeRecentTravelHistory(self, person, verbose=False):
@@ -445,8 +448,8 @@ class Mode02(Mode):
                 self.logger.debug(f'\t{person.id} is travelling in {list(person.overseas.keys())[0]}. ')
                 person.travel_history.append(list(person.overseas.keys())[0])
             else:
-                self.logger.debug(f'\t{person.id} is quarantined in {list(person.overseas.keys())[0]}. ')
                 person.travel_history.append(list(person.overseas.keys())[0] + ':isolate')
+                self.logger.debug(f'\t{person.id} is quarantined in {list(person.overseas.keys())[0]}. ')
                 continue
 
             if person.suceptible == 1 and person.exposed == 1 and person.overseas != None:

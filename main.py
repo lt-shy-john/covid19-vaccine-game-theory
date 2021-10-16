@@ -698,7 +698,7 @@ for i in range(len(sys.argv)):
 
             if type(sys.argv[i+1]) == str:
                 if sys.argv[i+1].lower() in logging_level:
-                    root.debug(sys.argv[i+1])
+                    root.debug("Logging level detected: " + sys.argv[i+1])
                     verbose_level = sys.argv[i+1]
                 else: verbose_level = 'info'
             else:
