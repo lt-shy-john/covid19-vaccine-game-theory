@@ -1,4 +1,5 @@
 from vaccine import Vaccine
+from contact import ContactNwk
 from person import Person
 
 import random
@@ -1939,9 +1940,11 @@ class Mode501(Mode):
 
 
 class Mode505(Mode):
-    def __init__(self, people, logger, contact_nwk=None):
+    def __init__(self, people, logger, contact_nwk):
         super().__init__(people, 505, logger)
-        self.contact_nwk = contact_nwk
+        if type(contact_nwk) == ContactNwk and type(contact_nwk.nwk_graph) == nx.Graph:
+            self.contact_nwk = contact_nwk
+        else: raise ValueError('Unable to read contact network. ')
         self.modes = ['Hub', 'Leaf']
         self.mode = None
 

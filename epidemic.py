@@ -193,13 +193,13 @@ class Epidemic:
             if self.people[i].vaccinated == 1:
                 self.people[i].compartment_history.append('V')
                 continue
-            elif (self.people[i].suceptible == 0 and self.people[i].vaccinated == 0):
+            elif self.people[i].suceptible == 0 and self.people[i].vaccinated == 0 and self.people[i].removed == 0:
                 self.people[i].compartment_history.append('S')
                 continue
-            elif (self.people[i].suceptible == 1 and self.people[i].exposed == 0):
+            elif self.people[i].suceptible == 1 and self.people[i].exposed == 0:
                 self.people[i].compartment_history.append('E')
                 continue
-            elif (self.people[i].suceptible == 1 and self.people[i].exposed == 1):
+            elif self.people[i].suceptible == 1 and self.people[i].exposed == 1:
                 self.people[i].compartment_history.append('I')
                 continue
             elif self.people[i].removed == 1:
@@ -442,6 +442,7 @@ class Epidemic:
 
             if 11 not in self.mode and self.people[i].vaccinated == 1:
                 self.logger.debug(f'{self.people[i].id} is vaccinated and will not be infected. ')
+                print(i)
                 continue
 
             seed = random.randint(0,1000)/1000
