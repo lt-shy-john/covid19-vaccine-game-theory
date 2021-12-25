@@ -74,7 +74,7 @@ class Person:
     def set_age(self):
         age = random.choices(np.linspace(0, 90, 10), weights = [14.5, 16.2, 15.5, 18.9, 14.1, 10.1, 7.4, 2.2, 1, 0.1], k = 1)[0]
         age += random.randint(0,9)
-        self.age = age
+        self.age = int(age)
 
     def set_gender(self):
         self.gender = random.choices([0, 1], weights = [5, 5], k = 1)[0]

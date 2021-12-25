@@ -9,7 +9,7 @@ import write
 class Epidemic:
 
     def __init__(self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, vaccine_ls,
-                 contact_nwk, verbose_mode, logger, modes=None, filename=None, start=True):
+                 contact_nwk, verbose_mode, logger, modes=[], filename=None, start=True):
         '''Initial elements
 
         Attributes
@@ -214,8 +214,7 @@ class Epidemic:
             if mode > 1 or mode < 0:
                 raise ValueError
         except ValueError:
-            self.logger.error('Mode must be either 1 or 0')
-            pass
+            self.logger.error('Mode must be either 1 or 0. Now killing the simulation and the pandemic. ')
         if mode == 1:
             self.epidemic = 1
             if 501 in self.mode:

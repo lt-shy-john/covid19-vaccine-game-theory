@@ -1,22 +1,18 @@
 import random
 import networkx as nx
 from matplotlib import pyplot as plt
-import logging
 
 from person import Person
-import customLogger
 
 class ContactNwk:
 
-    def __init__(self, people, verbose_mode, root):
+    def __init__(self, people, verbose_mode, logger):
         self.people = people
         self.group_no = None
         self.network = None  # Graph to show partner topology
         # From now network is defined by modes 50 - 59.
         self.nwk_graph = nx.Graph(self.network)
 
-        self.speed_mode = False
-        self.verbose_mode = verbose_mode
         self.update_rule = None
 
         # Probability to change bonds
@@ -25,7 +21,9 @@ class ContactNwk:
         self.assort = True
         self.PUpdate = 0.5 # For Contact.update_xulvi_brunet_sokolov()
 
-        self.logger = root
+        self.speed_mode = False
+        self.verbose_mode = verbose_mode
+        self.logger = logger
 
     def set_default_edge_list(self):
         '''
@@ -35,13 +33,14 @@ class ContactNwk:
         random.shuffle(temp_roster)
         self.network = list(zip(temp_roster[:len(temp_roster)//2],temp_roster[len(temp_roster)//2:]))
         if len(self.people) % 2 == 1:
-            self.network.append((self.people[-1], None))
+            # To prevent singleton, we pair the last odd-numbered node with another node.
+            self.network.append((self.people[-1], self.people[-2]))
 
     def show_nwk(self):
         pos = nx.random_layout(self.nwk_graph)
         labels = {}
         for node in self.nwk_graph.nodes:
-            if type(node) == person.Person:
+            if type(node) == Person:
                 labels[node] = node.id
         nx.draw(self.nwk_graph, pos=pos,with_labels=False)
         nx.draw_networkx_labels(self.nwk_graph,pos=pos,labels=labels,font_size=12)

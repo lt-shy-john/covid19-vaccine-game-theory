@@ -35,6 +35,24 @@ class Group:
             p_num = 1
             return p_num
 
+    def correct_epi_para(self, p):
+        '''
+        Convert epidemic parameters into floats.
+
+        Parameters
+        - p: Epidemic rate, positive decimal less than 1.
+        '''
+        try:
+            p_num = float(p)
+            if p_num < 0 or p_num > 1:
+                p_num = 0
+                print('Please check your inputs and change them in SETTING.')
+            return p_num
+        except ValueError:
+            p_num = 0
+            print('Please check your inputs and change them in SETTING.')
+            return p_num
+
     def set_population(self):
         '''
         Initially we assign group numbers according to their id.
@@ -52,10 +70,18 @@ class Group:
         return self.propro / (self.propro + self.agpro)
 
     def set_pro(self, propro_temp):
-        self.propro = self.correct_para(propro_temp)
+        if propro_temp >= 1:
+            self.propro = self.correct_para(propro_temp)
+        elif 0 <= propro_temp < 1:
+            self.logger.info("Treating input (Against vaccine) as decimal proportion. ")
+            self.propro = self.correct_epi_para(propro_temp) * 100
 
     def set_ag(self, ag_temp):
-        self.agpro = self.correct_para(ag_temp)
+        if ag_temp >= 1:
+            self.agpro = self.correct_para(ag_temp)
+        elif 0 <= ag_temp < 1:
+            self.logger.info("Treating input (Against vaccine) as decimal proportion. ")
+            self.agpro = self.correct_epi_para(ag_temp) * 100
 
     def set_opinion(self):
         for person in self.people:
@@ -66,7 +92,7 @@ class Group:
                 person.opinion = 0
             self.logger.debug(f'{person.id} has opinion of {person.opinion}. ')
 
-    def update_group(self, verbose_mode=False):
+    def update_group(self):
         '''
         Permutate everyone into another group.
         '''
@@ -89,7 +115,7 @@ class Group:
                 self.logger.debug(f'Group {dest_group} now have {[p.id for p in self.roster[dest_group]]}. \n\n')
                 swap_out.group_no = dest_group
 
-    def update(self, verbose_mode=False):
+    def update(self):
         '''
         Update opinion using majority Rule
         '''
@@ -98,8 +124,7 @@ class Group:
             total_opinion = 0
             for member in members:
                 total_opinion += member.opinion
-            if verbose_mode == True:
-                print(f'Group {group_no} has total opinion of {total_opinion}. ')
+            self.logger.debug(f'Group {group_no} has total opinion of {total_opinion}. ')
             if total_opinion > len(members)//2:
                 for member in members:
                     member.opinion = 1
@@ -117,6 +142,7 @@ class Group:
         for i in range(len(self.people)):
             if self.people[i].personality == 1:
                 self.people[i].meta_opinion = 1
+                self.logger.debug(f'{self.people[i].id}: {self.people[i].meta_opinion}')
             elif self.people[i].personality == 2:
                 self.people[i].meta_opinion = 0
                 self.logger.debug(f'{self.people[i].id}: {self.people[i].meta_opinion}')
@@ -133,7 +159,7 @@ class Group:
                 self.logger.debug(f'   *{self.people[i].id}: {self.people[i].opinion}')
             self.people[i].meta_opinion = None  # They will forget their deep believe until next round.
 
-    def balance(self, verbose_mode=False):
+    def balance(self):
         for i in range(len(self.people)):
             if self.people[i].personality == 3:
                 self.logger.debug('Before: {} - o:{}'.format(self.people[i].id, self.people[i].opinion))
