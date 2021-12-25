@@ -340,14 +340,32 @@ class TestEpidemic(TestCase):
 
         self.assertEqual(self.population[0].infection_clock, 0)
 
-    def test_recovery(self):
-        self.fail()
+    @mock.patch('random.randint', return_value=0)
+    def test_recovery(self, mock_random_randint):
+        self.population[0].suceptible = 1
+
+        self.epidemic.recovery()
+
+        self.assertEqual(self.population[0].suceptible, 0)
 
     def test_recovery_mode11(self):
         self.fail()
 
     def test_immune(self):
-        self.fail()
+        # Testing someone recover after certain days
+        print(f'Immune time is {self.epidemic.immune_time} days. ')
+
+        # Arrange
+        self.population[0].suceptible = 1
+        self.population[0].compartment_history = ['I'] * self.epidemic.immune_time
+        self.population[0].compartment_history.append('S')
+
+        # Act
+        self.epidemic.immune()
+
+        # Assert
+        self.assertEqual(self.population[0].suceptible, 0)
+        self.assertEqual(self.population[0].exposed, 0)
 
     def test_immune_mode10(self):
         self.fail()
@@ -355,8 +373,16 @@ class TestEpidemic(TestCase):
     def test_immune_mode15(self):
         self.fail()
 
-    def test_wear_off(self):
-        self.fail()
+    @mock.patch('random.randint', return_value=0)
+    def test_wear_off(self, mock_random_randint):
+        # Arrange
+        self.population[0].vaccinated = 1
+
+        # Act
+        self.epidemic.wear_off()
+
+        # Assert
+        self.assertEqual(self.population[0].vaccinated, 0)
 
     def test_wear_off_mode10(self):
         self.fail()
