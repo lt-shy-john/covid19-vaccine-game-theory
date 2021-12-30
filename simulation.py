@@ -82,17 +82,17 @@ class Simulation:
     def __call__(self, modes=None, start=True):
         FILENAME_STATES = ''
         self.logger.debug(f'Modes loading to Epidemic class: {self.modes}. ')
-        epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate,
+        self.epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate,
                             self.immune_time, self.vaccine_ls, self.contact_nwk, self.verbose_mode, self.logger,
                             self.modes, self.filename)
-        epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
-        epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
-        self.logger.debug(f'Modes loaded to Epidemic class: {epidemic.mode}. ')
-        self.logger.info('beta = {}, alpha = {}, gamma = {}, phi = {}, lambda = {}'.format(epidemic.infection, epidemic.vaccinated, epidemic.recover, epidemic.resus, epidemic.test_rate))
+        self.epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
+        self.epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
+        self.logger.debug(f'Modes loaded to Epidemic class: {self.epidemic.mode}. ')
+        self.logger.info('beta = {}, alpha = {}, gamma = {}, phi = {}, lambda = {}'.format(self.epidemic.infection, self.epidemic.vaccinated, self.epidemic.recover, self.epidemic.resus, self.epidemic.test_rate))
         self.logger.info('=========== t = 0 ============\n')
         self.logger.info('N = {}'.format(len(self.people)))
-        self.logger.info('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
-        epidemic.get_states()
+        self.logger.info('S = {}, I = {}, V = {}, R = {}'.format(self.epidemic.S, self.epidemic.I, self.epidemic.V, self.epidemic.R))
+        self.epidemic.get_states()
 
         # Contact network adj matrix
         if any(i in self.modes for i in [5, 51, 52, 53, 54]):
@@ -109,11 +109,11 @@ class Simulation:
             self.modes[20].set_perceived_infection(self.beta, self.verbose_mode)
 
         if self.filename != '':
-            write.WriteStates(epidemic, self.filename)
+            write.WriteStates(self.epidemic, self.filename)
         for t in range(self.T):
             self.logger.info('=========== t = {} ============\n'.format(t+1))
             self.logger.info('N = {}'.format(len(self.people)))
-            self.logger.info('S = {}, I = {}, V = {}, R = {}'.format(epidemic.S, epidemic.I, epidemic.V, epidemic.R))
+            self.logger.info('S = {}, I = {}, V = {}, R = {}'.format(self.epidemic.S, self.epidemic.I, self.epidemic.V, self.epidemic.R))
             # Overseas travel
             if 2 in self.modes:
                 self.logger.debug('!!! Overseas travel alert !!!')
@@ -159,14 +159,14 @@ class Simulation:
                 # Permutate members into groups
                 self.info_nwk.update_group(self.verbose_mode)
             # Epidemic network update
-            epidemic.next(self.filename)
+            self.epidemic.next(self.filename)
 
             if 2 in self.modes:
                 self.modes[2].writeTravelHistory()
 
         self.logger.info('\n=========== Result ============\n')
-        self.logger.info('There are {} people infected.'.format(epidemic.I))
-        self.logger.info('There are {} people vaccinated.'.format(epidemic.V))
+        self.logger.info('There are {} people infected.'.format(self.epidemic.I))
+        self.logger.info('There are {} people vaccinated.'.format(self.epidemic.V))
         print()
 
         # Return any data

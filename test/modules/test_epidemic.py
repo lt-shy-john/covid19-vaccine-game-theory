@@ -1,6 +1,7 @@
 import random
 
 from person import Person
+from group import Group
 from vaccine import Vaccine
 from contact import ContactNwk
 from epidemic import Epidemic
@@ -9,6 +10,7 @@ import customLogger
 from mode import Mode01
 from mode import Mode02
 from mode import Mode04
+from mode import Mode05
 from mode import Mode07
 from mode import Mode08
 from mode import Mode10
@@ -222,8 +224,44 @@ class TestEpidemic(TestCase):
         for person in self.population:
             self.assertEqual(len(person.vaccine_history), 1)
 
-    def test_vaccinate_mode15(self):
-        self.fail()
+    @mock.patch('random.randint', return_value=0)
+    @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
+    @mock.patch('mode.Mode15.take_multi_dose_vaccine')
+    @mock.patch('mode.Mode15.write_vaccine_history')
+    def test_vaccinate_mode15(self, mock_random_randint, mock_check_multi_dose_vaccine, mock_take_multi_dose_vaccine, mock_write_vaccine_history):
+        # Arrange
+        mode = {15: Mode15(self.population, self.logger)}
+        self.epidemic.load_modes(mode)
+
+        test_vaccine = Vaccine(efficacy=1, alpha=0.3)
+        mock_take_multi_dose_vaccine.return_value = test_vaccine
+
+        # Act
+        self.epidemic.vaccinate()
+
+    # @mock.patch('random.randint', return_value=0)
+    # @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
+    # @mock.patch('mode.Mode15.check_recent_vaccine', return_value=None)
+    # @mock.patch('mode.Mode15.check_next_vaccine')
+    # @mock.patch('mode.Mode15.take_multi_dose_vaccine')
+    def test_vaccinate_mode15_opinion(self):
+        # Arrange
+        test_info_nwk = Group(self.population, self.logger)
+        test_info_nwk.propro = 0.5
+        test_info_nwk.agpro = 0.5
+        test_info_nwk.set_opinion()
+
+        mode = {15: Mode15(self.population, self.logger), 21: Mode21(self.population, test_info_nwk, self.logger), 52: Mode52(self.population, self.logger, self.contact_nwk)}
+        self.epidemic.load_modes(mode)
+        self.epidemic.vaccine_ls = [Vaccine(name="Test", efficacy=1, alpha=0.3)]
+
+        self.epidemic.mode[21].set_personality()
+
+        # Act
+        self.epidemic.vaccinate()
+
+        # Assert
+        # self.fail()
 
     def test_vaccinate_mode20(self):
         self.fail()

@@ -1,7 +1,7 @@
 # Import libraries
 import sys
 import time
-import logging
+import re
 
 # Import class files
 from person import Person
@@ -18,6 +18,57 @@ Main code
 - cmd functions
 - main loop
 '''
+
+
+def parse_arg(args):
+    '''
+    Parse system arguments.
+    '''
+    if type(args) != list:
+        args = args.split()
+    cmd = {}
+
+    cmd['N'] = args[2]
+    cmd['T'] = args[3]
+    cmd['alpha'] = args[4]
+    cmd['beta'] = args[5]
+    cmd['gamma'] = args[6]
+    cmd['phi'] = args[7]
+    cmd['delta'] = args[8]
+
+    def subls_modes(ls):
+        for arg in ls:
+            if not re.match(r'--\d', arg) and '=' not in arg:
+                return
+            yield arg
+
+    def sub_ls_mode(ls):
+        if re.match(r'--\d', ls[0]):
+            ls = ls[1:]
+        for arg in ls:
+            if re.match(r'--\d', arg):
+                return
+            yield arg
+
+    for i in range(len(args)):
+        if args[i] == '--i':
+            cmd['--i'] = args[i + 1]
+        if args[i] == '-m':
+            cmd['modes'] = {}
+            modes_tmp = list(subls_modes(args[i + 1:]))
+            # print(modes_tmp)
+            for i in range(len(modes_tmp)):
+                if re.match(r'--\d', modes_tmp[i]):
+                    cmd['modes'][modes_tmp[i][2:]] = list(sub_ls_mode(modes_tmp[i:]))
+        if args[i] == '--v':
+            if args[i + 1] in ['debug', 'info', 'error']:
+                cmd['logger_level'] = args[i + 1]
+            else:
+                cmd['logger_level'] = '*'
+        if args[i] == 'run':
+            cmd['express'] = True
+
+    return cmd
 
 
 def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode):
@@ -320,10 +371,12 @@ def mode_settings(cmd, mode=None):
     if cmd == ['']:
         # If empty response, then leave prematurely.
         return mode
+    settings = parse_arg(cmd)
+    root.debug(settings)
     rv_modes = []
     if '-dp' in cmd:
         removal_idx = cmd.index('-dp')
-    print('Adding: ')
+    root.info('Adding: ')
     if '-dp' in cmd:
         root.debug(cmd[:removal_idx])
         root.debug('Removing')
@@ -338,7 +391,7 @@ def mode_settings(cmd, mode=None):
             try:
                 int(cmd[i])
             except ValueError:
-                print('Wrong data type for mode, please check your inputs.')
+                root.info('Wrong data type for mode, please check your inputs.')
                 continue
             if int(cmd[i]) == 1:
                 mode01()
@@ -504,15 +557,14 @@ def find_mode(code, mode_master_list):
 '''
 (Semi) Express Mode: Reading pre-formatted setting files
 '''
-def read_settings(filename, verbose=False):
+def read_settings(filename):
     '''
     Read and parse pre-filled settings file.
     '''
-    if verbose:
-        print("Reading filename")
+    root.debug("Reading filename")
     with open(filename, 'r') as settings_f:
         settings_text = settings_f.readlines()
-    print('Read successfully')
+    root.info('Read settings successfully')
 
     l1_flags = []
     l2_flags = []
@@ -531,6 +583,7 @@ def read_settings(filename, verbose=False):
         if parsed_line[0] == '##' and parsed_line[1] == 'Vaccine\n':
             vaccine_contents = settings_text[idx+1:idx+12]
             vaccines.append(parse_vaccine_setting(vaccine_contents))
+    root.debug(vaccines)
 
     return vaccines
 
@@ -674,6 +727,7 @@ Loads the settings prior to the run. Optional keyword 'run' to run the simulatio
 '''
 
 # Check if mode exists
+settings = parse_arg(sys.argv)
 for i in range(len(sys.argv)):
     try:
         if sys.argv[i] == '-immune_time':
@@ -698,7 +752,7 @@ for i in range(len(sys.argv)):
 
             if type(sys.argv[i+1]) == str:
                 if sys.argv[i+1].lower() in logging_level:
-                    root.debug("Logging level detected: " + sys.argv[i+1])
+                    root.info("Logging level detected: " + sys.argv[i+1])
                     verbose_level = sys.argv[i+1]
                 else: verbose_level = 'info'
             else:
@@ -1063,8 +1117,9 @@ for i in range(len(sys.argv)):
                 if sys.argv[j] == 'run':
                     break
                 # print(mode_flag, '*'+str(argv[j]))
-    except ValueError:
-        print('Invalid input. Check your arguments. ')
+    except ValueError as ve:
+        root.info('Invalid input. Check your arguments. ')
+        root.debug(ve)
         continue
     except IndexError:
         break
@@ -1080,6 +1135,7 @@ for i in range(len(sys.argv)):
         continue
     except IndexError:
         break
+root.debug(settings)
 
 
 if sys.argv[-1] == 'run':

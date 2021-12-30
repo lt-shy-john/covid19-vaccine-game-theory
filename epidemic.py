@@ -287,7 +287,7 @@ class Epidemic:
                 # Combination with other modes
                 if has_multiple_vaccine and any(m in self.mode for m in [21, 22, 23, 24]):
                     self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                    if 20 in self.mode:
+                    if 21 in self.mode:
                         self.logger.debug('Applying local group updates in vaccination. ')
                     else:
                         self.logger.debug('Applying personal opinions in vaccination. ')
@@ -608,25 +608,27 @@ class Epidemic:
                     seed = random.randint(0,100000)/100000
                     if self.people[i].vaccinated == 1 and seed < self.resus:
                         self.people[i].vaccinated = 0
+                        self.people[i].vaccine = None
         if 15 in self.mode:
             self.logger.debug('Applying advanced vaccine options in vaccine wear off. ')
             # Find recent vaccine taken
             for i in range(len(self.people)):
                 vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls, self.verbose_mode)
-                if self.verbose_mode:
-                    if vaccine_used != None:
-                        self.logger.debug(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
-                    else:
-                        self.logger.debug(f"No vaccine taken from {self.people[i].id}")
+                if vaccine_used != None:
+                    self.logger.debug(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
+                else:
+                    self.logger.debug(f"No vaccine taken from {self.people[i].id}")
                 seed = random.randint(0, 100000) / 100000
                 if self.people[i].vaccinated == 1 and seed < vaccine_used.phi_V:
                     self.logger.debug(f"Wear off for {self.people[i].id}: {seed}, {vaccine_used.phi_V}")
                     self.people[i].vaccinated = 0
+                    self.people[i].vaccine = None
             return
         for i in range(len(self.people)):
             seed = random.randint(0,100000)/100000
             if self.people[i].vaccinated == 1 and seed < self.resus:
                 self.people[i].vaccinated = 0
+                self.people[i].vaccine = None
 
     def testing(self):
         '''

@@ -60,6 +60,9 @@ class Person:
         self.age = None
         self.gender = None  # 0 means male, 1 means female
 
+        # Vaccine
+        self.vaccine = None
+
         self.compartment_history = []
         self.travel_history = []
         self.vaccine_history = []
