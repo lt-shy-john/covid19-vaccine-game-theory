@@ -35,7 +35,7 @@ import networkx as nx
 class TestEpidemic(TestCase):
     def setUp(self) -> None:
         N = 50
-        self.logger = customLogger.gen_logging('', False, None)
+        self.logger = customLogger.gen_logging('', None)
         self.population = [Person() for x in range(N)]
         self.contact_nwk = ContactNwk(self.population, False, self.logger)
         self.contact_nwk.set_default_edge_list()

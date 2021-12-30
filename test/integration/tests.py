@@ -12,7 +12,7 @@ class IntegrationTests(TestCase):
 
     def test_basic(self):
         argument = f"py {str(self.path.joinpath('main.py'))} 10 3 0 0.14 0.05 0 0.000005 --v -f basic run"
-        result = subprocess.run(argument.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = subprocess.run(argument.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         print(result.stdout)
 
         with open('basic-summary.txt', 'r') as f:
@@ -37,9 +37,8 @@ class IntegrationTests(TestCase):
         self.assertTrue('Test rate: 0.5' in summary)
 
     def test_write_summary_contains_vaccine(self):
-        # When import settings, make sure it is from the origin of the code and start with "/".
-        argument = f"py {str(self.path.joinpath('main.py'))} 10 2 0 0.14 0.05 0 0.000005 --i /test/integration/settings/vaccine_settings -m --15 *f=1 --v debug -f test_write_summary_contains_vaccine run"
-        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        argument = f"py {str(self.path.joinpath('main.py'))} 10 2 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings.txt -m --15 *f=1 --v debug -f test_write_summary_contains_vaccine run"
+        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
         print(result.stdout)
         # self.fail()
 
@@ -55,12 +54,15 @@ class IntegrationTests(TestCase):
         # [print(line) for line in summary]
 
         self.assertTrue('# Vaccine' in summary)
+        self.assertTrue('dose: 1' in summary)
+        self.assertTrue('dose: 2' in summary)
 
     def test_write_infected_degree(self):
         N = 50
         T = 200
-        argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i /test/integration/settings/vaccine_settings -m --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_write_infected_degree run"
-        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings.txt -m --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_write_infected_degree run"
+        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        print(result.stdout)
         with open('test_write_infected_degree-nwk-deg_S.csv') as degS:
             csv_S = csv.reader(degS)
             deg_S = []
@@ -74,5 +76,5 @@ class IntegrationTests(TestCase):
                 deg_I.append(row)
 
         for t in range(max(len(deg_S), len(deg_I))):
-            self.assertEqual(len(deg_S[t])-1 + len(deg_I[t])-1, N)
+            self.assertEqual(len(deg_S[t])-1 + len(deg_I[t])-1, N, f'Occured at t = {t}.')
         self.assertEqual(t, T)

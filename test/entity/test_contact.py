@@ -9,7 +9,7 @@ class TestContactNwk(TestCase):
     def setUp(self) -> None:
         N = 2
         self.population = [Person() for x in range(N)]
-        self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', False, None))
+        self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', None))
 
     def test_set_default_edge_list(self):
         self.contact_nwk.set_default_edge_list()
@@ -20,7 +20,7 @@ class TestContactNwk(TestCase):
         # Reset the before method
         N = 3
         self.population = [Person() for x in range(N)]
-        self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', False, None))
+        self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', None))
 
         self.contact_nwk.set_default_edge_list()
         self.assertNotEqual(self.contact_nwk.network, None)
@@ -51,7 +51,7 @@ class TestContactNwk(TestCase):
     def test_update_xulvi_brunet_sokolov_no_updates(self, mock_random_randint):
         N = 5
         self.population = [Person() for x in range(N)]
-        self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', False, None))
+        self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', None))
         self.contact_nwk.PUpdate = 0
 
         self.contact_nwk.set_default_edge_list()
@@ -71,7 +71,7 @@ class TestContactNwk(TestCase):
         def test_update_xulvi_brunet_sokolov_no_updates(self, mock_random_randint):
             N = 5
             self.population = [Person() for x in range(N)]
-            self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', False, None))
+            self.contact_nwk = ContactNwk(self.population, False, customLogger.gen_logging('', None))
             self.contact_nwk.PUpdate = 0
             self.contact_nwk.assort = True  # Test if assortative update then next step will see higher assortativity
 

@@ -2,6 +2,7 @@
 import sys
 import time
 import re
+import os
 
 # Import class files
 from person import Person
@@ -51,8 +52,16 @@ def parse_arg(args):
             yield arg
 
     for i in range(len(args)):
-        if args[i] == '--i':
-            cmd['--i'] = args[i + 1]
+        if args[i] == '-import' or args[i] == '--i':
+            if args[i + 1][0] == '-' or args[i + 1][0:2] == '--':
+                root.info("Invalid setting file name specified. ")
+            else:
+                # print(os.getcwd())  # To debug when file cannot be fetched.
+                cmd['import setting'] = args[i + 1]
+        if args[i] == '-test_rate':
+            cmd['test rate'] = args[i + 1]
+        if args[i] == '-immune_time':
+            cmd['immune time'] = args[i + 1]
         if args[i] == '-m':
             cmd['modes'] = {}
             modes_tmp = list(subls_modes(args[i + 1:]))
@@ -60,11 +69,16 @@ def parse_arg(args):
             for i in range(len(modes_tmp)):
                 if re.match(r'--\d', modes_tmp[i]):
                     cmd['modes'][modes_tmp[i][2:]] = list(sub_ls_mode(modes_tmp[i:]))
-        if args[i] == '--v':
+        if args[i] == '-verbose' or args[i] == '--v':
             if args[i + 1] in ['debug', 'info', 'error']:
                 cmd['logger_level'] = args[i + 1]
             else:
-                cmd['logger_level'] = '*'
+                cmd['logger_level'] = 'info'
+        if args[i] == '-f':
+            if args[i + 1] == 'run':
+                raise ValueError('Invalid file name: "run". ')
+            if not(args[i + 1][0] == '-' or args[i + 1][0:2] == '--'):
+                cmd['filename'] = args[i + 1]
         if args[i] == 'run':
             cmd['express'] = True
 
@@ -366,13 +380,23 @@ def set_mode(mode):
         cmd = input('Return to main menu? [y/n] ')
     return mode
 
-def mode_settings(cmd, mode=None):
+def mode_settings(cmd, logger, mode=None):
+    if type(cmd) == list:
+        logger.warning("Using legacy method to change modes, please check code to make sure settings are stored in dict form. ")
+        return legacy_mode_settings(cmd, mode)
+    elif type(cmd) == dict:
+        return change_mode(cmd, mode)
+
+
+def change_mode(cmd, mode):
+    pass
+
+
+def legacy_mode_settings(cmd, mode):
     cmd = cmd.split(' ')
     if cmd == ['']:
         # If empty response, then leave prematurely.
         return mode
-    settings = parse_arg(cmd)
-    root.debug(settings)
     rv_modes = []
     if '-dp' in cmd:
         removal_idx = cmd.index('-dp')
@@ -583,7 +607,7 @@ def read_settings(filename):
         if parsed_line[0] == '##' and parsed_line[1] == 'Vaccine\n':
             vaccine_contents = settings_text[idx+1:idx+12]
             vaccines.append(parse_vaccine_setting(vaccine_contents))
-    root.debug(vaccines)
+    root.debug('Custom vaccines created')
 
     return vaccines
 
@@ -600,9 +624,9 @@ def parse_vaccine_setting(contents):
             else:
                 param[k] = contents[i].split(':')[1].strip()
         except IndexError:
-            print(f'There are no param {k} specified.')
+            root.info(f'There are no param {k} specified.')
         except ValueError:
-            print(f'{k} has invalid parameters, changing to None. ')
+            root.info(f'{k} has invalid parameters, changing to None. ')
             param[k] = None
         i += 1
     return Vaccine(**param)
@@ -612,7 +636,7 @@ def export(filename):
     print('Coming soon')
 
 
-root = customLogger.gen_logging('', False, None)
+root = customLogger.gen_logging('', None)
 
 root.info('  ==========================================  \n\n')
 root.info('  Agent Based Modelling: COVID-19 SUEP Model  \n\n')
@@ -726,47 +750,42 @@ Express mode
 Loads the settings prior to the run. Optional keyword 'run' to run the simulation automatically.
 '''
 
-# Check if mode exists
 settings = parse_arg(sys.argv)
+if 'logger_level' in settings:
+    logging_level = ['debug', 'info', 'warning', 'error', 'critical']
+    if type(settings['logger_level']) == str:
+        if settings['logger_level'].lower() in logging_level:
+            root.info("Logging level detected: " + settings['logger_level'])
+            verbose_level = settings['logger_level']
+        else:
+            verbose_level = 'info'
+    else:
+        verbose_level = 'info'
+
+    # Write log to file is filename exists
+    if 'filename' in settings:
+        root = customLogger.gen_logging(settings['filename'], verbose_level)
+    else:
+        root = customLogger.gen_logging('', verbose_level)
+if 'immune time' in settings:
+    immune_time_temp = settings['immune time']
+    immune_time = set_correct_para(immune_time_temp, immune_time, pos=True)
+if 'test rate' in settings:
+    test_rate_temp = settings['test rate']
+    test_rate = set_correct_epi_para(test_rate_temp, test_rate)
+if 'import setting' in settings:
+    try:
+        vaccine_available = read_settings(settings['import setting'])
+        root.debug(f'Vaccine read from setting: {[x.__dict__ for x in vaccine_available]}')
+    except FileNotFoundError as fnfe:
+        root.error(fnfe)
+        root.error(f'Current directory: {os.getcwd()}')
+if 'modes' in settings:
+    pass
+
 for i in range(len(sys.argv)):
     try:
-        if sys.argv[i] == '-immune_time':
-            immune_time_temp = sys.argv[i+1]
-            immune_time = set_correct_para(immune_time_temp, immune_time, pos=True)
-        elif sys.argv[i] == '-test_rate':
-            test_rate_temp = sys.argv[i+1]
-            test_rate = set_correct_epi_para(test_rate_temp, test_rate)
-        elif sys.argv[i] == '-import' or sys.argv[i] == '--i':
-            if i == len(sys.argv)-1:
-                root.info("No setting file has been specified. ")
-                continue
-            if sys.argv[i+1][0] == '-' or not sys.argv[i+1][0].isalpha():
-                root.info("Invalid setting file name specified. ")
-                continue
-            vaccine_available = read_settings(sys.argv[i+1])
-            root.debug(f'Vaccine read from setting: {[x.__dict__ for x in vaccine_available]}')
-        elif sys.argv[i] == '-verbose' or sys.argv[i] == '--v':
-            verbose_mode = True # Legacy mode: Should be replaced by logging level
-            logging_level = ['debug', 'info', 'warning', 'error', 'critical']
-            filename = ''
-
-            if type(sys.argv[i+1]) == str:
-                if sys.argv[i+1].lower() in logging_level:
-                    root.info("Logging level detected: " + sys.argv[i+1])
-                    verbose_level = sys.argv[i+1]
-                else: verbose_level = 'info'
-            else:
-                verbose_level = 'info'
-
-            # Get filename
-            for j in range(i, len(sys.argv)):
-                if sys.argv[j] == '-f':
-                    if sys.argv[j + 1] == 'run':
-                        raise ValueError
-                    filename = sys.argv[j + 1]
-
-            root = customLogger.gen_logging(filename, verbose_mode, verbose_level)
-        elif sys.argv[i] == '-m':
+        if sys.argv[i] == '-m':
             for j in range(i+1,len(sys.argv)):
                 # Skip at other options
                 if sys.argv[j][:2] == '--':
@@ -1135,10 +1154,9 @@ for i in range(len(sys.argv)):
         continue
     except IndexError:
         break
-root.debug(settings)
 
 
-if sys.argv[-1] == 'run':
+if 'express' in settings and settings['express'] == True:
     root.info('===== Simulation Running =====')
     current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename,
                              alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI,

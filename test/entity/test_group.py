@@ -10,7 +10,7 @@ class TestGroup(TestCase):
     def setUp(self) -> None:
         N = 10
         self.population = [Person() for x in range(N)]
-        self.info_nwk = Group(self.population, customLogger.gen_logging('', False, None))
+        self.info_nwk = Group(self.population, customLogger.gen_logging('', None))
 
     def test_set_population(self):
         self.info_nwk.set_population()
@@ -122,7 +122,7 @@ class TestGroup(TestCase):
         # Regenerate population
         N = 12
         self.population = [Person() for x in range(N)]
-        self.info_nwk = Group(self.population, customLogger.gen_logging('', False, None))
+        self.info_nwk = Group(self.population, customLogger.gen_logging('', None))
 
         self.info_nwk.set_ag(50)
         self.info_nwk.set_pro(50)
@@ -173,7 +173,7 @@ class TestGroup(TestCase):
         # Regenerate population
         N = 2
         self.population = [Person() for x in range(N)]
-        self.info_nwk = Group(self.population, customLogger.gen_logging('', False, None))
+        self.info_nwk = Group(self.population, customLogger.gen_logging('', None))
 
         self.population[0].personality = 1
         self.population[1].personality = 2
@@ -192,7 +192,7 @@ class TestGroup(TestCase):
         # Regenerate population
         N = 3
         self.population = [Person() for x in range(N)]
-        self.info_nwk = Group(self.population, customLogger.gen_logging('', False, None))
+        self.info_nwk = Group(self.population, customLogger.gen_logging('',None))
 
         self.population[0].personality = 3
         self.population[0].opinion = 0
