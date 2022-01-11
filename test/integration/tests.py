@@ -78,3 +78,41 @@ class IntegrationTests(TestCase):
         for t in range(max(len(deg_S), len(deg_I))):
             self.assertEqual(len(deg_S[t])-1 + len(deg_I[t])-1, N, f'Occured at t = {t}.')
         self.assertEqual(t, T)
+
+
+    def test_write_vaccinated_cap(self):
+        N = 50
+        T = 200
+        argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings.txt -m --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_write_vaccinated_cap run"
+        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        # print(result.stdout)
+
+        alpha_settings = []
+        with open('settings/vaccine_settings.txt') as settings:
+            lines = settings.readlines()
+            for line in lines:
+                if line[:7] == 'alpha: ':
+                    alpha_settings.append(float(line[7:]))
+        cap = alpha_settings[0]
+
+        df = pd.read_csv('test_write_vaccinated_cap.csv',header=None,usecols=[2])
+
+
+    def test_read(self):
+        N = 50
+
+        alpha_settings = []
+        with open('settings/vaccine_settings.txt') as settings:
+            lines = settings.readlines()
+            for line in lines:
+                if line[:7] == 'alpha: ':
+                    alpha_settings.append(float(line[7:]))
+        cap = alpha_settings[0]
+
+        df_V = pd.read_csv('test_write_vaccinated_cap.csv',header=None,usecols=[2],names=['V'])
+
+        if df_V.query('V > @cap * @N').shape[0] > 0:
+            self.fail(df_V.query('V > @cap * @N'))
+
+
+
