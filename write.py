@@ -122,6 +122,8 @@ def WriteNetworkAvgDegree_I(graph_obj, filename):
     filename = filename+'-nwk-deg_I.csv'
     deg_I = {}
     for node in graph_obj.nodes():
+        if node.vaccinated == 1 or node.removed == 1:
+            continue
         if node.suceptible == 1:
             deg_I[node] = graph_obj.degree[node]
     content = [v for v in deg_I.values()]
@@ -148,7 +150,7 @@ def WriteNetworkAvgDegree_S(graph_obj, filename):
     filename = filename+'-nwk-deg_S.csv'
     deg_S = {}
     for node in graph_obj.nodes():
-        if node.suceptible == 0 and node.removed == 0:
+        if node.suceptible == 0 and node.vaccinated == 0 and node.removed == 0:
             deg_S[node] = graph_obj.degree[node]
     content = [v for v in deg_S.values()]
     try: content.append(sum(content)/len(content))

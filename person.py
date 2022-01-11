@@ -54,7 +54,7 @@ class Person:
 
         # Travelling overseas
         self.overseas = None
-        self.A = None  # Aware the pandemic has occured
+        self.A = None  # Aware the pandemic has occurred
 
         # Demographics
         self.age = None

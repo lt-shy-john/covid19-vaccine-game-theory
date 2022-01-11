@@ -374,13 +374,19 @@ class Epidemic:
         for i in range(len(self.people)):
             if self.people[i].suceptible != 1:
                 continue
-            seed = random.randint(0,1000)/1000
+            seed = random.randint(0,10000)/10000
             if any(m in self.mode for m in [7, 8]):
                 if seed < delta_pp[i]:
                     self.people[i].removed = 1
+                    self.people[i].suceptible = 0
+                    self.people[i].exposed = 0
+                    self.people[i].vaccinated = 0
 
             if seed < self.remove:
                 self.people[i].removed = 1
+                self.people[i].suceptible = 0
+                self.people[i].exposed = 0
+                self.people[i].vaccinated = 0
 
     def infect(self):
         '''
@@ -557,6 +563,8 @@ class Epidemic:
     def recovery(self):
         self.logger.debug('Starting method Epidemic.recovery()...')
         for i in range(len(self.people)):
+            if self.people[i].removed != 0:
+                continue
             seed = random.randint(0,100000)/100000
             if 11 in self.mode:
                 if seed < self.mode[11].gamma_V:
