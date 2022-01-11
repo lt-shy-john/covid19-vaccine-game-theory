@@ -977,10 +977,10 @@ for i in range(len(sys.argv)):
                         elif mode_flag == 21:
                             root.debug('Express mode: Activating mode 21. ')
                             if sys.argv[k][:3] == '*+=':
-                                mode21_pro_config = sys.argv[k][3:]
+                                mode21_pro_config = float(sys.argv[k][3:])
                                 mode21.info_nwk.set_pro(mode21_pro_config)
                             elif sys.argv[k][:3] == '*-=':
-                                mode21_ag_config = sys.argv[k][3:]
+                                mode21_ag_config = float(sys.argv[k][3:])
                                 mode21.info_nwk.set_ag(mode21_ag_config)
                             if mode21.info_nwk.propro != None and mode21.info_nwk.agpro != None:
                                 mode21.info_nwk.set_opinion()
@@ -993,15 +993,15 @@ for i in range(len(sys.argv)):
                         elif mode_flag == 22:
                             root.debug('Express mode: Activating mode 22. ')
                             if sys.argv[k][:3] == '*p=':
-                                mode22_pro_config = sys.argv[k][3:]
+                                mode22_pro_config = float(sys.argv[k][3:])
                                 root.debug(f'Proportion of stubbonly support vaccination are {mode22_pro_config}. ')
                                 mode22.assign_personality(mode22_pro_config)
                             elif sys.argv[k][:3] == '*+=':
-                                mode22_pro_config = sys.argv[k][3:]
+                                mode22_pro_config = float(sys.argv[k][3:])
                                 root.debug(f'Proportion of pro-vaccine is {mode22_pro_config}. ')
                                 mode22.info_nwk.set_pro(mode22_pro_config)
                             elif sys.argv[k][:3] == '*-=':
-                                mode22_ag_config = sys.argv[k][3:]
+                                mode22_ag_config = float(sys.argv[k][3:])
                                 root.debug(f'Proportion of against vaccine is {mode22_ag_config}. ')
                                 mode22.info_nwk.set_ag(mode22_ag_config)
                             if mode22.info_nwk.propro != None and mode22.info_nwk.agpro != None and mode22.InflexProProportion != None:
@@ -1014,16 +1014,16 @@ for i in range(len(sys.argv)):
                         elif mode_flag == 23:
                             root.debug('Express mode: Activating mode 23. ')
                             if sys.argv[k][:3] == '*p=':
-                                mode23_ag_config = sys.argv[k][3:]
+                                mode23_ag_config = float(sys.argv[k][3:])
                                 root.debug(f'Proportion of stubbonly against vaccination are {mode23_ag_config}. ')
                                 mode23.assign_personality(mode23_ag_config)
                                 root.debug('Assigned personality to the population. ')
                             elif sys.argv[k][:3] == '*+=':
-                                mode23_pro_config = sys.argv[k][3:]
+                                mode23_pro_config = float(sys.argv[k][3:])
                                 root.debug(f'Proportion of pro-vaccine is {mode23_pro_config}. ')
                                 mode23.info_nwk.set_pro(mode23_pro_config)
                             elif sys.argv[k][:3] == '*-=':
-                                mode23_ag_config = sys.argv[k][3:]
+                                mode23_ag_config = float(sys.argv[k][3:])
                                 root.debug(f'Proportion of against vaccine is {mode23_ag_config}. ')
                                 mode23.info_nwk.set_ag(mode23_ag_config)
                             if mode23.info_nwk.propro != None and mode23.info_nwk.agpro != None and mode23.InflexAgProportion != None:
@@ -1036,13 +1036,13 @@ for i in range(len(sys.argv)):
                         elif mode_flag == 24:
                             root.debug('Express mode: Activating mode 24. ')
                             if sys.argv[k][:3] == '*p=':
-                                mode24_pro_config = sys.argv[k][3:]
+                                mode24_pro_config = float(sys.argv[k][3:])
                                 mode24.assign_personality(mode24_pro_config)
                             elif sys.argv[k][:3] == '*+=':
-                                mode24_pro_config = sys.argv[k][3:]
+                                mode24_pro_config = float(sys.argv[k][3:])
                                 mode24.info_nwk.set_pro(mode24_pro_config)
                             elif sys.argv[k][:3] == '*-=':
-                                mode24_ag_config = sys.argv[k][3:]
+                                mode24_ag_config = float(sys.argv[k][3:])
                                 mode24.info_nwk.set_ag(mode24_ag_config)
                             if mode24.info_nwk.propro != None and mode24.info_nwk.agpro != None:
                                 mode24.info_nwk.set_opinion()
