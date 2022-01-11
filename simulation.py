@@ -144,7 +144,7 @@ class Simulation:
                 self.logger.debug('Opinion (before)')
                 for group_no, group in self.info_nwk.roster.items():
                     self.logger.debug(f'{group_no}: {[x.opinion for x in group]}')
-                self.info_nwk.update(self.verbose_mode)
+                self.info_nwk.update()
                 if any(i in self.modes for i in [22, 23]):
                     self.info_nwk.inflexible()
                 if 24 in self.modes:
@@ -157,7 +157,7 @@ class Simulation:
                 elif self.filename != '':
                     write.WriteOpinion(self, self.filename)
                 # Permutate members into groups
-                self.info_nwk.update_group(self.verbose_mode)
+                self.info_nwk.update_group()
             # Epidemic network update
             self.epidemic.next(self.filename)
 
