@@ -313,7 +313,7 @@ class Mode02(Mode):
 
             # Make decision
             self.logger.debug(f"\tTravel decision: U_I: {U_I} U_S: {U_S} U_I > U_S: {U_I > U_S}")
-            if U_I > U_S:
+            if U_I < U_S:
                 person.overseas = {destination: self.overseas[destination]}
                 self.logger.debug(f'\t{person.id} decided travel to {list(person.overseas.keys())[0]}. ')
             else:
@@ -994,7 +994,7 @@ class Mode15(Mode):
         else:
             self.people[i].vaccine_history.append(vaccine.brand)
 
-    def take_multi_dose_vaccine(self, i, vaccine_ls, verbose=False):
+    def take_multi_dose_vaccine(self, i, vaccine_ls):
         # If person first time, then return
         # Need to find from the person history (not compartment) as vaccines have efficacy.
         # V compartmemt implies immunity.
@@ -1020,8 +1020,7 @@ class Mode15(Mode):
                 return None
 
         # Check which vaccine is taken (and take the next booster)
-        if verbose:
-            print(f"Person {self.people[i].id} is seeking to take next dose of vaccine.")
+        self.logger.debug(f"Person {self.people[i].id} is seeking to take next dose of vaccine.")
         for t in range(len(self.people[i].vaccine_history)-1, -1, -1):
             if type(self.people[i].vaccine_history[t]) == str:
                 vaccine_brand = self.people[i].vaccine_history[t].split(":")[0]
