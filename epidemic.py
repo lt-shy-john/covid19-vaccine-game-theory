@@ -158,7 +158,15 @@ class Epidemic:
         self.infection_IV = beta_IV
         self.infection_RV = beta_RV
 
-
+    def get_V_states(self):
+        '''
+        Get number of people who are in V state. Not changing the attributes here unless in
+        '''
+        V = 0
+        for i in range(len(self.people)):
+            if self.people[i].vaccinated == 1:
+                V += 1
+        return V
 
     def get_states(self):
         '''
@@ -296,6 +304,12 @@ class Epidemic:
                     last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
                     next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
                     self.logger.debug(f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
+                    # Check if in cap
+                    if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
+                        self.logger.debug(f'Person {self.people[i].id} will take vaccine due to cap. ({self.get_V_states() } + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                        continue
+
+                    # Check opinion
                     if person.opinion == 1 and seed < next_vaccine.alpha_V:
                         self.logger.debug(f"{self.people[i].id} is willing to take vaccine. ")
                         self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
@@ -311,12 +325,23 @@ class Epidemic:
                         self.people[i].vaccine_history.append(0)
                 elif has_multiple_vaccine:
                     self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                    # Check if in cap
+                    if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
+                        self.logger.debug(f'Person {self.people[i].id} will take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                        continue
+
+                    # Take the vaccine dose
+                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
                     self.mode[15].write_vaccine_history(i, vaccine_taken)
                     vaccine_taken = None
                 else:
-                    self.logger.debug(f'Person did not take vaccine, {seed} >= {self.alpha_V}')
-                    self.people[i].vaccine_history.append(0)
+                    if seed < self.vaccinated and self.people[i].vaccinated == 0:
+                        self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
+                        self.people[i].vaccinated = 1
+                        self.people[i].vaccine_history.append(1)
+                    else:
+                        self.logger.debug(f'Person did not take vaccine, {seed} >= {self.vaccinated}')
+                        self.people[i].vaccine_history.append(0)
                 continue
             if 20 in self.mode:
                 self.logger.debug('Applying intimacy game in vaccination. ')
