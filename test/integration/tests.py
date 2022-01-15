@@ -95,21 +95,31 @@ class IntegrationTests(TestCase):
                     alpha_settings.append(float(line[7:]))
         cap = alpha_settings[0]
 
-        df = pd.read_csv('test_write_vaccinated_cap.csv',header=None,usecols=[2])
+        df_V = pd.read_csv('test_write_vaccinated_cap.csv',header=None,usecols=[2],names=['V'])
+
+        if df_V.query('V > @cap * @N').shape[0] > 0:
+            self.fail(df_V.query('V > @cap * @N'))
 
 
-    def test_read(self):
+    def test_write_vaccinated_cap_lg(self):
+        '''
+        First vaccine has lower adoption rate than second. The first one has set the cap to second.
+        '''
         N = 50
+        T = 200
+        argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings_02.txt -m --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_write_vaccinated_cap_lg run"
+        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        # print(result.stdout)
 
         alpha_settings = []
-        with open('settings/vaccine_settings.txt') as settings:
+        with open('settings/vaccine_settings_02.txt') as settings:
             lines = settings.readlines()
             for line in lines:
                 if line[:7] == 'alpha: ':
                     alpha_settings.append(float(line[7:]))
         cap = alpha_settings[0]
 
-        df_V = pd.read_csv('test_write_vaccinated_cap.csv',header=None,usecols=[2],names=['V'])
+        df_V = pd.read_csv('test_write_vaccinated_cap_lg.csv',header=None,usecols=[2],names=['V'])
 
         if df_V.query('V > @cap * @N').shape[0] > 0:
             self.fail(df_V.query('V > @cap * @N'))
