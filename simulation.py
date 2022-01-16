@@ -143,15 +143,16 @@ class Simulation:
                     self.info_nwk.inflexible_prework()
                 self.logger.debug('Opinion (before)')
                 for group_no, group in self.info_nwk.roster.items():
-                    self.logger.debug(f'{group_no}: {[x.opinion for x in group]}')
-                self.info_nwk.update()
+                    self.logger.debug(f'{group_no}: {[{x.id: x.opinion} for x in group]}')
+                if 21 in self.modes:
+                    self.info_nwk.update() # Mde 21 will activate opinion updates, others don't.
                 if any(i in self.modes for i in [22, 23]):
                     self.info_nwk.inflexible()
                 if 24 in self.modes:
                     self.info_nwk.balance(self.verbose_mode)
                 self.logger.debug('Opinion (after)')
                 for group_no, group in self.info_nwk.roster.items():
-                    self.logger.debug(f'{group_no}: {[x.opinion for x in group]}')
+                    self.logger.debug(f'{group_no}: {[{x.id: x.opinion} for x in group]}')
                 if any(i in self.modes for i in [22, 23, 24]) and self.filename != '':
                     write.WriteOpinionPersonality(self, self.filename)
                 elif self.filename != '':
