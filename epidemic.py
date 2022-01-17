@@ -325,6 +325,11 @@ class Epidemic:
                         self.people[i].vaccine_history.append(0)
                 elif has_multiple_vaccine:
                     self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
+                    seed = random.randint(0, 10000) / 10000
+                    last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
+                    next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
+                    self.logger.debug(
+                        f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
                     # Check if in cap
                     if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
                         self.logger.debug(f'Person {self.people[i].id} will take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')

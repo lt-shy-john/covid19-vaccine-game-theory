@@ -119,7 +119,6 @@ class Group:
         '''
         Update opinion using majority Rule
         '''
-        self.inflexible_prework()
         for group_no, members in self.roster.items():
             total_opinion = 0
             for member in members:
@@ -128,12 +127,11 @@ class Group:
             if total_opinion > len(members)//2:
                 for member in members:
                     member.opinion = 1
+                self.logger.debug(f'\tGroup {group_no}: {[{member.id: member.opinion} for member in members]}')
             else:
                 for member in members:
                     member.opinion = 0
-        # Further update due to group concensus.
-        self.inflexible()
-        self.balance()
+                self.logger.debug(f'\tGroup {group_no}: {[{member.id: member.opinion} for member in members]}')
 
     def inflexible_prework(self):
         '''
