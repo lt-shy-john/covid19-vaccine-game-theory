@@ -124,11 +124,3 @@ class IntegrationTests(TestCase):
         if df_V.query('V > @cap * @N').shape[0] > 0:
             self.fail(df_V.query('V > @cap * @N'))
 
-
-    def test_run_2022(self):
-        N = 50
-        T = 50
-        argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings.txt -m --23 *+=0.7 *-=0.3 *p=0.2 --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_run_2022 run"
-        print(argument)
-        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
-        # print(result.stdout)

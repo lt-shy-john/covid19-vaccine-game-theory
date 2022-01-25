@@ -1415,14 +1415,13 @@ class Mode23(Mode):
         self.logger.debug(f'Assigning stubbon to against vaccine personality. (p = {p})')
         count = 0
         for person in self.people:
-            if person.opinion == 0:
-                seed = random.randint(0, 1000) / 1000
-                self.logger.debug(f'Assigning personlity for {person.id}. Seed: {seed}, p = {p}. ')
-                if seed < p:
-                    person.personality = 2
-                    person.opinion = 0
-                    self.logger.debug(f'{person.id} is stubbonly against vaccine. ')
-                    count += 1
+            seed = random.randint(0, 1000) / 1000
+            self.logger.debug(f'Assigning personlity for {person.id}. Seed: {seed}, p = {p}. ')
+            if seed < p:
+                person.personality = 2
+                person.opinion = 0
+                self.logger.debug(f'{person.id} is stubbonly against vaccine. ')
+                count += 1
         self.logger.debug(f'{count} people are stubbonly against vaccine. ')
 
 

@@ -145,7 +145,7 @@ class Simulation:
                 for group_no, group in self.info_nwk.roster.items():
                     self.logger.debug(f'{group_no}: {[{x.id: x.opinion} for x in group]}')
                 if 21 in self.modes:
-                    self.info_nwk.update() # Mde 21 will activate opinion updates, others don't.
+                    self.info_nwk.update()
                 if any(i in self.modes for i in [22, 23]):
                     self.info_nwk.inflexible()
                 if 24 in self.modes:

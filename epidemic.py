@@ -313,7 +313,7 @@ class Epidemic:
                     if person.opinion == 1 and seed < next_vaccine.alpha_V:
                         self.logger.debug(f"{self.people[i].id} is willing to take vaccine. ")
                         self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                        vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                        vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
                         if vaccine_taken != None:
                             self.mode[15].write_vaccine_history(i, vaccine_taken)
                             vaccine_taken = None
