@@ -9,7 +9,7 @@ import write
 class Epidemic:
 
     def __init__(self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, vaccine_ls,
-                 contact_nwk, verbose_mode, logger, modes=None, filename=None, start=True):
+                 contact_nwk, verbose_mode, logger, modes=[], filename=None, start=True):
         '''Initial elements
 
         Attributes
@@ -158,7 +158,15 @@ class Epidemic:
         self.infection_IV = beta_IV
         self.infection_RV = beta_RV
 
-
+    def get_V_states(self):
+        '''
+        Get number of people who are in V state. Not changing the attributes here unless in
+        '''
+        V = 0
+        for i in range(len(self.people)):
+            if self.people[i].vaccinated == 1:
+                V += 1
+        return V
 
     def get_states(self):
         '''
@@ -193,13 +201,13 @@ class Epidemic:
             if self.people[i].vaccinated == 1:
                 self.people[i].compartment_history.append('V')
                 continue
-            elif (self.people[i].suceptible == 0 and self.people[i].vaccinated == 0):
+            elif self.people[i].suceptible == 0 and self.people[i].vaccinated == 0 and self.people[i].removed == 0:
                 self.people[i].compartment_history.append('S')
                 continue
-            elif (self.people[i].suceptible == 1 and self.people[i].exposed == 0):
+            elif self.people[i].suceptible == 1 and self.people[i].exposed == 0:
                 self.people[i].compartment_history.append('E')
                 continue
-            elif (self.people[i].suceptible == 1 and self.people[i].exposed == 1):
+            elif self.people[i].suceptible == 1 and self.people[i].exposed == 1:
                 self.people[i].compartment_history.append('I')
                 continue
             elif self.people[i].removed == 1:
@@ -214,8 +222,7 @@ class Epidemic:
             if mode > 1 or mode < 0:
                 raise ValueError
         except ValueError:
-            self.logger.error('Mode must be either 1 or 0')
-            pass
+            self.logger.error('Mode must be either 1 or 0. Now killing the simulation and the pandemic. ')
         if mode == 1:
             self.epidemic = 1
             if 501 in self.mode:
@@ -288,7 +295,7 @@ class Epidemic:
                 # Combination with other modes
                 if has_multiple_vaccine and any(m in self.mode for m in [21, 22, 23, 24]):
                     self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                    if 20 in self.mode:
+                    if 21 in self.mode:
                         self.logger.debug('Applying local group updates in vaccination. ')
                     else:
                         self.logger.debug('Applying personal opinions in vaccination. ')
@@ -297,10 +304,16 @@ class Epidemic:
                     last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
                     next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
                     self.logger.debug(f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
+                    # Check if in cap
+                    if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
+                        self.logger.debug(f'Person {self.people[i].id} will take vaccine due to cap. ({self.get_V_states() } + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                        continue
+
+                    # Check opinion
                     if person.opinion == 1 and seed < next_vaccine.alpha_V:
                         self.logger.debug(f"{self.people[i].id} is willing to take vaccine. ")
                         self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                        vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                        vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
                         if vaccine_taken != None:
                             self.mode[15].write_vaccine_history(i, vaccine_taken)
                             vaccine_taken = None
@@ -312,12 +325,28 @@ class Epidemic:
                         self.people[i].vaccine_history.append(0)
                 elif has_multiple_vaccine:
                     self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                    seed = random.randint(0, 10000) / 10000
+                    last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
+                    next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
+                    self.logger.debug(
+                        f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
+                    # Check if in cap
+                    if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
+                        self.logger.debug(f'Person {self.people[i].id} will take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                        continue
+
+                    # Take the vaccine dose
+                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
                     self.mode[15].write_vaccine_history(i, vaccine_taken)
                     vaccine_taken = None
                 else:
-                    self.logger.debug(f'Person did not take vaccine, {seed} >= {self.alpha_V}')
-                    self.people[i].vaccine_history.append(0)
+                    if seed < self.vaccinated and self.people[i].vaccinated == 0:
+                        self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
+                        self.people[i].vaccinated = 1
+                        self.people[i].vaccine_history.append(1)
+                    else:
+                        self.logger.debug(f'Person did not take vaccine, {seed} >= {self.vaccinated}')
+                        self.people[i].vaccine_history.append(0)
                 continue
             if 20 in self.mode:
                 self.logger.debug('Applying intimacy game in vaccination. ')
@@ -375,13 +404,19 @@ class Epidemic:
         for i in range(len(self.people)):
             if self.people[i].suceptible != 1:
                 continue
-            seed = random.randint(0,1000)/1000
+            seed = random.randint(0,10000)/10000
             if any(m in self.mode for m in [7, 8]):
                 if seed < delta_pp[i]:
                     self.people[i].removed = 1
+                    self.people[i].suceptible = 0
+                    self.people[i].exposed = 0
+                    self.people[i].vaccinated = 0
 
             if seed < self.remove:
                 self.people[i].removed = 1
+                self.people[i].suceptible = 0
+                self.people[i].exposed = 0
+                self.people[i].vaccinated = 0
 
     def infect(self):
         '''
@@ -443,6 +478,7 @@ class Epidemic:
 
             if 11 not in self.mode and self.people[i].vaccinated == 1:
                 self.logger.debug(f'{self.people[i].id} is vaccinated and will not be infected. ')
+                print(i)
                 continue
 
             seed = random.randint(0,1000)/1000
@@ -557,6 +593,8 @@ class Epidemic:
     def recovery(self):
         self.logger.debug('Starting method Epidemic.recovery()...')
         for i in range(len(self.people)):
+            if self.people[i].removed != 0:
+                continue
             seed = random.randint(0,100000)/100000
             if 11 in self.mode:
                 if seed < self.mode[11].gamma_V:
@@ -608,25 +646,27 @@ class Epidemic:
                     seed = random.randint(0,100000)/100000
                     if self.people[i].vaccinated == 1 and seed < self.resus:
                         self.people[i].vaccinated = 0
+                        self.people[i].vaccine = None
         if 15 in self.mode:
             self.logger.debug('Applying advanced vaccine options in vaccine wear off. ')
             # Find recent vaccine taken
             for i in range(len(self.people)):
                 vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls, self.verbose_mode)
-                if self.verbose_mode:
-                    if vaccine_used != None:
-                        self.logger.debug(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
-                    else:
-                        self.logger.debug(f"No vaccine taken from {self.people[i].id}")
+                if vaccine_used != None:
+                    self.logger.debug(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
+                else:
+                    self.logger.debug(f"No vaccine taken from {self.people[i].id}")
                 seed = random.randint(0, 100000) / 100000
                 if self.people[i].vaccinated == 1 and seed < vaccine_used.phi_V:
                     self.logger.debug(f"Wear off for {self.people[i].id}: {seed}, {vaccine_used.phi_V}")
                     self.people[i].vaccinated = 0
+                    self.people[i].vaccine = None
             return
         for i in range(len(self.people)):
             seed = random.randint(0,100000)/100000
             if self.people[i].vaccinated == 1 and seed < self.resus:
                 self.people[i].vaccinated = 0
+                self.people[i].vaccine = None
 
     def testing(self):
         '''

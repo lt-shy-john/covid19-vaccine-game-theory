@@ -12,3 +12,4 @@ class Vaccine:
         self.gamma_V = gamma
         self.delta_V = delta
         self.phi_V = phi
+        self.next = None # Next dose

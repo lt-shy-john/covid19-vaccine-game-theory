@@ -122,6 +122,8 @@ def WriteNetworkAvgDegree_I(graph_obj, filename):
     filename = filename+'-nwk-deg_I.csv'
     deg_I = {}
     for node in graph_obj.nodes():
+        if node.vaccinated == 1 or node.removed == 1:
+            continue
         if node.suceptible == 1:
             deg_I[node] = graph_obj.degree[node]
     content = [v for v in deg_I.values()]
@@ -148,7 +150,7 @@ def WriteNetworkAvgDegree_S(graph_obj, filename):
     filename = filename+'-nwk-deg_S.csv'
     deg_S = {}
     for node in graph_obj.nodes():
-        if node.suceptible == 0 and node.removed == 0:
+        if node.suceptible == 0 and node.vaccinated == 0 and node.removed == 0:
             deg_S[node] = graph_obj.degree[node]
     content = [v for v in deg_S.values()]
     try: content.append(sum(content)/len(content))
@@ -276,7 +278,7 @@ def WriteSummary(obs, filename):
         File name for export
     '''
     with open('{}-summary.txt'.format(filename), 'w') as f:
-        contents = [' ========================================== \n\n',' ',' Agent Based Modelling: COVID-19 SEIP Model \n\n',' ',' ========================================== \n']
+        contents = [' ========================================== \n\n',' ',' Agent Based Modelling: COVID-19 SEIP Model \n\n',' ','========================================== \n']
         contents.append('\n\nThis simulation was performed on {}.\n\n'.format(datetime.datetime.now().strftime('%H:%M:%S, %d/ %m/ %Y')))
         contents.append('Simulation name: {}\n\n'.format(filename))
         contents.append('# Summary\n')
@@ -330,6 +332,14 @@ def WriteSummary(obs, filename):
                 contents.append('N: {} people\n'.format(len(obs.N)))
                 contents.append('Value: {} \n'.format(obs.people[0].lambda_BR))
                 contents.append('P(V): {} \n'.format(obs.modes[4].P_Alpha[0]))
+        if 15 in obs.modes:
+            contents.append('\n# Vaccine \n')
+            contents.append('\nCustom vaccine parameters: \n\n')
+            for vaccine in obs.epidemic.vaccine_ls:
+                # Not to check type as it will show what went wrong. Let the epidemic class to handle this.
+                for k,v in vaccine.__dict__.items():
+                    contents.append(f'{k}: {v}\n')
+                contents.append('\n')
         if any(i in obs.modes for i in [5, 51, 52, 53, 54, 501, 505]):
             contents.append('\n# Network Topology \n')
             if 51 in obs.modes:

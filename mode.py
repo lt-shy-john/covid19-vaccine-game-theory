@@ -1,4 +1,5 @@
 from vaccine import Vaccine
+from contact import ContactNwk
 from person import Person
 
 import random
@@ -312,7 +313,7 @@ class Mode02(Mode):
 
             # Make decision
             self.logger.debug(f"\tTravel decision: U_I: {U_I} U_S: {U_S} U_I > U_S: {U_I > U_S}")
-            if U_I > U_S:
+            if U_I < U_S:
                 person.overseas = {destination: self.overseas[destination]}
                 self.logger.debug(f'\t{person.id} decided travel to {list(person.overseas.keys())[0]}. ')
             else:
@@ -993,7 +994,7 @@ class Mode15(Mode):
         else:
             self.people[i].vaccine_history.append(vaccine.brand)
 
-    def take_multi_dose_vaccine(self, i, vaccine_ls, verbose=False):
+    def take_multi_dose_vaccine(self, i, vaccine_ls):
         # If person first time, then return
         # Need to find from the person history (not compartment) as vaccines have efficacy.
         # V compartmemt implies immunity.
@@ -1019,8 +1020,7 @@ class Mode15(Mode):
                 return None
 
         # Check which vaccine is taken (and take the next booster)
-        if verbose:
-            print(f"Person {self.people[i].id} is seeking to take next dose of vaccine.")
+        self.logger.debug(f"Person {self.people[i].id} is seeking to take next dose of vaccine.")
         for t in range(len(self.people[i].vaccine_history)-1, -1, -1):
             if type(self.people[i].vaccine_history[t]) == str:
                 vaccine_brand = self.people[i].vaccine_history[t].split(":")[0]
@@ -1415,14 +1415,13 @@ class Mode23(Mode):
         self.logger.debug(f'Assigning stubbon to against vaccine personality. (p = {p})')
         count = 0
         for person in self.people:
-            if person.opinion == 0:
-                seed = random.randint(0, 1000) / 1000
-                self.logger.debug(f'Assigning personlity for {person.id}. Seed: {seed}, p = {p}. ')
-                if seed < p:
-                    person.personality = 2
-                    person.opinion = 0
-                    self.logger.debug(f'{person.id} is stubbonly against vaccine. ')
-                    count += 1
+            seed = random.randint(0, 1000) / 1000
+            self.logger.debug(f'Assigning personlity for {person.id}. Seed: {seed}, p = {p}. ')
+            if seed < p:
+                person.personality = 2
+                person.opinion = 0
+                self.logger.debug(f'{person.id} is stubbonly against vaccine. ')
+                count += 1
         self.logger.debug(f'{count} people are stubbonly against vaccine. ')
 
 
@@ -1939,9 +1938,11 @@ class Mode501(Mode):
 
 
 class Mode505(Mode):
-    def __init__(self, people, logger, contact_nwk=None):
+    def __init__(self, people, logger, contact_nwk):
         super().__init__(people, 505, logger)
-        self.contact_nwk = contact_nwk
+        if type(contact_nwk) == ContactNwk and type(contact_nwk.nwk_graph) == nx.Graph:
+            self.contact_nwk = contact_nwk
+        else: raise ValueError('Unable to read contact network. ')
         self.modes = ['Hub', 'Leaf']
         self.mode = None
 

@@ -18,7 +18,7 @@ class LevelFormatter(logging.Formatter):
         return super(LevelFormatter, self).format(record)
 
 
-def gen_logging(filename, verbose=False, verbose_flag = None):
+def gen_logging(filename, verbose_flag = 'info'):
 
     root = logging.getLogger(__name__)
 
@@ -26,25 +26,24 @@ def gen_logging(filename, verbose=False, verbose_flag = None):
         log_f = logging.FileHandler(filename + ".log")
     ch = logging.StreamHandler(sys.stdout)
 
-    if verbose:
-        if verbose_flag.lower() == 'debug':
-            root.setLevel(logging.DEBUG)
-            ch.setLevel(logging.DEBUG)
-        elif verbose_flag.lower() == 'info':
-            root.setLevel(logging.INFO)
-            ch.setLevel(logging.INFO)
-        elif verbose_flag.lower() == 'warning':
-            root.setLevel(logging.WARNING)
-            ch.setLevel(logging.WARNING)
-        elif verbose_flag.lower() == 'error':
-            root.setLevel(logging.ERROR)
-            ch.setLevel(logging.ERROR)
-        elif verbose_flag.lower() == 'critical':
-            root.setLevel(logging.CRITICAL)
-            ch.setLevel(logging.CRITICAL)
-        else:
-            root.setLevel(logging.INFO)
-            ch.setLevel(logging.INFO)
+    if verbose_flag not in ['debug', 'info', 'warning', 'error', 'critical']:
+        verbose_flag = 'info'
+
+    if verbose_flag.lower() == 'debug':
+        root.setLevel(logging.DEBUG)
+        ch.setLevel(logging.DEBUG)
+    elif verbose_flag.lower() == 'info':
+        root.setLevel(logging.INFO)
+        ch.setLevel(logging.INFO)
+    elif verbose_flag.lower() == 'warning':
+        root.setLevel(logging.WARNING)
+        ch.setLevel(logging.WARNING)
+    elif verbose_flag.lower() == 'error':
+        root.setLevel(logging.ERROR)
+        ch.setLevel(logging.ERROR)
+    elif verbose_flag.lower() == 'critical':
+        root.setLevel(logging.CRITICAL)
+        ch.setLevel(logging.CRITICAL)
 
     formatter = LevelFormatter(fmt="[%(asctime)s] %(levelname)s: %(message)s", level_fmts={logging.INFO: "%(message)s"})
 
