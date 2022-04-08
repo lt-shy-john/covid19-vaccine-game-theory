@@ -1110,13 +1110,17 @@ for i in range(len(sys.argv)):
                                 try:
                                     if int(mode_505) == 1:
                                         mode_tmp = 'Hub'
+                                        root.debug('Set initial infection by hub. ')
                                     elif int(mode_505) == 0:
                                         mode_tmp = 'Leaf'
+                                        root.debug('Set initial infection by leaf. ')
                                 except ValueError:
                                     if mode_505.lower() == 'hub':
                                         mode_tmp = 'Hub'
+                                        root.debug('Set initial infection by hub. ')
                                     elif mode_505.lower() == 'leaf':
                                         mode_tmp = 'Leaf'
+                                        root.debug('Set initial infection by leaf. ')
                             mode505.raise_flag()
                             if mode505.flag == 'X':
                                 modes[505] = mode505
@@ -1124,7 +1128,7 @@ for i in range(len(sys.argv)):
                             else:
                                 mode.pop(505)
                         else:
-                            print('Warning: Mode not detected. ')
+                            root.debug('Warning: Mode not detected. ')
 
 
                         # elif mode_flag == 999:
