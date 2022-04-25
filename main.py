@@ -613,6 +613,19 @@ def read_settings(filename):
 
 
 def parse_vaccine_setting(contents):
+    '''
+    Parse vaccine settings from
+
+    Parameters
+    ----------
+    contents: list
+        Contents from the input file (Parsed as list already).
+
+    Returns
+    -------
+    Vaccine(**param): Vaccine
+        A vaccine object.
+    '''
     param = {'name': None, 'dose': None, 'days': None, 'vaccine_type': None, 'cost': None, 'efficacy': None, 'alpha': None, 'beta': None, 'gamma': None, 'delta': None, 'phi': None}
     i = 0
     for k, v in param.items():

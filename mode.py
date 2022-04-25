@@ -831,6 +831,21 @@ class Mode11(Mode):
 
 
 '''
+12: Vaccine cost/ supply
+'''
+
+
+class Mode12(Mode):
+    def __init__(self, people, logger):
+        super().__init__(people, 12, logger)
+
+
+    def __call__(self):
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 12. ')
+        self.logger.info('-------------------------\n')
+
+'''
 15: Advanced vaccine options
 '''
 

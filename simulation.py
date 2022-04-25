@@ -114,6 +114,10 @@ class Simulation:
             self.logger.info('=========== t = {} ============\n'.format(t+1))
             self.logger.info('N = {}'.format(len(self.people)))
             self.logger.info('S = {}, I = {}, V = {}, R = {}'.format(self.epidemic.S, self.epidemic.I, self.epidemic.V, self.epidemic.R))
+            # Pre-run checking (Vaccine count)
+            if any(i in self.modes for i in [12, 15]):
+                self.epidemic.generate_vaccine_stock_record()  # For stock and supply modelling
+                self.epidemic.generate_vaccine_dose_count_record()   # For individual vaccine cap
             # Overseas travel
             if 2 in self.modes:
                 self.logger.debug('!!! Overseas travel alert !!!')
@@ -127,14 +131,17 @@ class Simulation:
 
             # Contact network update
             if any(i in self.modes for i in [5, 51, 52, 53, 54]):
-                pass # Have to comment out adj matrix functionality as it produces a large file.
-                # if self.filename != '':
-                #     path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
-                #     if self.verbose_mode:
-                #         print('Adding a new adjacency matrix into ' + path + '.')
-                #     if os.path.exists(path):
-                #         A = nx.convert_matrix.to_numpy_array(self.contact_nwk.nwk_graph)
-                #         np.savetxt(path + "\\" + self.filename + '-contact_nwk' + "adj_matrix_" + str(t).zfill(self.T%10) + '.txt', A, fmt="%d")
+                if len(self.people) <= 5:
+                    if self.filename != '':
+                        path = os.path.abspath(os.getcwd()) + "\\" + self.filename + '-contact_nwk'
+                        if self.verbose_mode:
+                            print('Adding a new adjacency matrix into ' + path + '.')
+                        if os.path.exists(path):
+                            A = nx.convert_matrix.to_numpy_array(self.contact_nwk.nwk_graph)
+                            np.savetxt(path + "\\" + self.filename + '-contact_nwk' + "adj_matrix_" + str(t).zfill(
+                                self.T % 10) + '.txt', A, fmt="%d")
+                else: self.logger.info('Contact adjacency metrix not generated with large population. (Maximum 5 people)')
+
 
 
             # Info network update

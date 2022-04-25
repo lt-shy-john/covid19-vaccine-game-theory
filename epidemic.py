@@ -26,6 +26,8 @@ class Epidemic:
         self.people = people
         self.contact_nwk = contact_nwk
         self.vaccine_ls = vaccine_ls
+        self.vaccine_stocktake = []
+        self.current_vaccine_dose_count = {}
         self.filename = filename
         self.mode = {}  # Dict of modes loaded. Values are mode objects
 
@@ -213,6 +215,42 @@ class Epidemic:
             elif self.people[i].removed == 1:
                 self.people[i].compartment_history.append('R')
                 continue
+
+    def generate_vaccine_dose_count_record(self):
+        '''
+        At start of day, either create the current_vaccine_dose_count or restart the counts.
+        '''
+        self.logger.debug('Restarting (empty) vaccine does count dictionary. ')
+        self.current_vaccine_dose_count = {vaccine.brand + ":" + vaccine.dose: 0 for vaccine in self.vaccine_ls}
+
+    def vaccine_dose_taken(self, vaccine_taken):
+        '''
+
+        Parameters
+        ----------
+        vaccine_taken: Vaccine
+            The vaccine taken by the person
+        '''
+        self.current_vaccine_dose_count[vaccine_taken.brand + ":" + vaccine_taken.dose] += 1
+
+
+    def generate_vaccine_stock_record(self):
+        '''
+        Add a new dictionary for the vaccine_stocktake.
+        '''
+        self.logger.debug('Appending (empty) vaccine stocktake list. ')
+        self.vaccine_stocktake.append({vaccine.brand: 0 for vaccine in self.vaccine_ls})
+
+    def vaccine_stock_taken(self, vaccine_taken):
+        '''
+        Update if a person take a vaccine on a particular day, by brand.
+
+        Parameters
+        ----------
+        vaccine_taken: Vaccine
+            The vaccine taken by the person
+        '''
+        self.vaccine_stocktake[-1][vaccine_taken.brand] += 1
 
     def set_epidemic(self, mode):
         '''
