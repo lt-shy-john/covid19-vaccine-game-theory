@@ -221,7 +221,7 @@ class Epidemic:
         At start of day, either create the current_vaccine_dose_count or restart the counts.
         '''
         self.logger.debug('Restarting (empty) vaccine does count dictionary. ')
-        self.current_vaccine_dose_count = {vaccine.brand + ":" + vaccine.dose: 0 for vaccine in self.vaccine_ls}
+        self.current_vaccine_dose_count = {vaccine.brand + ":" + str(vaccine.dose): 0 for vaccine in self.vaccine_ls}
 
     def vaccine_dose_taken(self, vaccine_taken):
         '''
@@ -231,7 +231,7 @@ class Epidemic:
         vaccine_taken: Vaccine
             The vaccine taken by the person
         '''
-        self.current_vaccine_dose_count[vaccine_taken.brand + ":" + vaccine_taken.dose] += 1
+        self.current_vaccine_dose_count[vaccine_taken.brand + ":" + str(vaccine_taken.dose)] += 1
 
 
     def generate_vaccine_stock_record(self):
@@ -315,6 +315,11 @@ class Epidemic:
     def vaccinate(self):
         self.logger.debug('Starting method Epidemic.vaccine()...')
         for i in range(len(self.people)):
+            # If already taken vaccine
+            if self.people[i].vaccinated == 1:
+                self.logger.debug(f'Person {self.people[i].id} has already taken vaccine. ')
+                continue
+
             seed = random.randint(0,10000)/10000
             self.logger.debug(f'Seed for person {self.people[i].id}: {seed}')
             if 4 in self.mode:
@@ -344,7 +349,7 @@ class Epidemic:
                     self.logger.debug(f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
                     # Check if in cap
                     if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
-                        self.logger.debug(f'Person {self.people[i].id} will take vaccine due to cap. ({self.get_V_states() } + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                        self.logger.debug(f'Person {self.people[i].id} will not take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')
                         continue
 
                     # Check opinion
@@ -353,8 +358,11 @@ class Epidemic:
                         self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
                         vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
                         if vaccine_taken != None:
-                            self.mode[15].write_vaccine_history(i, vaccine_taken)
-                            vaccine_taken = None
+                            self.vaccine_stock_taken(vaccine_taken)
+                            self.vaccine_dose_taken(vaccine_taken)
+                            self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')
+                        self.mode[15].write_vaccine_history(i, vaccine_taken)
+                        vaccine_taken = None
                     else:
                         if self.people[i].opinion == 0:
                             self.logger.debug(f'Person does not want to take vaccine, {seed} >= {next_vaccine.alpha_V}')
@@ -366,15 +374,21 @@ class Epidemic:
                     seed = random.randint(0, 10000) / 10000
                     last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
                     next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
+                    if next_vaccine == None:
+                        continue
                     self.logger.debug(
                         f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
                     # Check if in cap
                     if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
-                        self.logger.debug(f'Person {self.people[i].id} will take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                        self.logger.debug(f'Person {self.people[i].id} will not take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')
                         continue
 
                     # Take the vaccine dose
                     vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
+                    if vaccine_taken != None:
+                        self.vaccine_stock_taken(vaccine_taken)
+                        self.vaccine_dose_taken(vaccine_taken)
+                        self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')
                     self.mode[15].write_vaccine_history(i, vaccine_taken)
                     vaccine_taken = None
                 else:
@@ -689,7 +703,7 @@ class Epidemic:
             self.logger.debug('Applying advanced vaccine options in vaccine wear off. ')
             # Find recent vaccine taken
             for i in range(len(self.people)):
-                vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls, self.verbose_mode)
+                vaccine_used = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
                 if vaccine_used != None:
                     self.logger.debug(f"Recent vaccine for {self.people[i].id}: {vaccine_used.brand}:{vaccine_used.dose}, Efficacy: {vaccine_used.efficacy}, Wear-off rate: {vaccine_used.phi_V}")
                 else:
@@ -705,6 +719,7 @@ class Epidemic:
             if self.people[i].vaccinated == 1 and seed < self.resus:
                 self.people[i].vaccinated = 0
                 self.people[i].vaccine = None
+                self.logger.debug(f"Wear off for {self.people[i].id}: {seed}, {self.resus}")
 
     def testing(self):
         '''

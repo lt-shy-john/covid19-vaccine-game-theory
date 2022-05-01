@@ -942,7 +942,7 @@ class Mode15(Mode):
                 latest = vaccine.dose
         return latest
 
-    def check_recent_vaccine(self, i, vaccine_ls, verbose=False):
+    def check_recent_vaccine(self, i, vaccine_ls):
         '''
         Check the last vaccine taken of a person.
 
@@ -968,33 +968,36 @@ class Mode15(Mode):
         if vaccine_used == None:
             self.logger.debug("\t Checked: No vaccination history. ")
             return None
-        # Choosing which vaccine to take
+        # Choosing which vaccine (object) taken
         for vaccine in vaccine_ls:
             parsed_vaccine_used = vaccine_used.split(":")
             parsed_vaccine_used_brand = parsed_vaccine_used[0]
             parsed_vaccine_used_dose = int(parsed_vaccine_used[1])
-            latest_vaccine_used = self.check_latest_dose(vaccine_ls, parsed_vaccine_used_brand)
+            latest_vaccine = self.check_latest_dose(vaccine_ls, parsed_vaccine_used_brand)
 
             if parsed_vaccine_used_brand == vaccine.brand:
                 self.logger.debug(f"\tFound vaccine {vaccine.brand}...")
-                if latest_vaccine_used == parsed_vaccine_used_dose and parsed_vaccine_used_dose == vaccine.dose:
-                    self.logger.debug(f"\tTaking last booster again (Excpected: {latest_vaccine_used}, Actual: {vaccine.dose}).")
+                if latest_vaccine == parsed_vaccine_used_dose and parsed_vaccine_used_dose == vaccine.dose:
+                    self.logger.debug(f"\tTaking last booster again (Excpected: {latest_vaccine}, Actual: {vaccine.dose}).")
                     vaccine_used = vaccine
                     return vaccine_used
-                elif vaccine.dose > parsed_vaccine_used_dose and latest_vaccine_used >= parsed_vaccine_used_dose:
-                    self.logger.debug(f"\tTaking {vaccine.dose}-th booster.")
+                elif vaccine.dose >= parsed_vaccine_used_dose and latest_vaccine >= parsed_vaccine_used_dose:
+                    self.logger.debug(f"\tCurrently taking {vaccine.dose}-th booster.")
                     vaccine_used = vaccine
                     return vaccine_used
         return None
 
     def check_next_vaccine(self, i, vaccine_ls, last_vaccine_taken):
+        self.logger.debug(last_vaccine_taken)
         if last_vaccine_taken == None:
             for vaccine in vaccine_ls:
                 if vaccine.dose == 1:
                     self.logger.debug(f'Found first vaccine for {self.people[i].id}: {vaccine.brand}:{vaccine.dose}. ')
                 return vaccine
+        self.logger.debug(f'**{last_vaccine_taken.brand}:{last_vaccine_taken.dose}, {type(last_vaccine_taken.dose)}')
         for vaccine in vaccine_ls:
-            if (vaccine.dose + 1) == last_vaccine_taken.dose:
+            self.logger.debug(f'{vaccine.brand}:{vaccine.dose}, {type(vaccine.dose)}')
+            if (last_vaccine_taken.dose + 1) == vaccine.dose:
                 self.logger.debug(f'Found next vaccine for {self.people[i].id}: {vaccine.brand}:{vaccine.dose}. ')
                 return vaccine
         self.logger.debug(f'No vaccines required for {self.people[i].id}. ')

@@ -18,7 +18,7 @@ days: 28
 vaccine-type:
 cost: 0
 efficacy: 0.9
-alpha: 0.95
+alpha: 0.1
 beta:
 gamma:
 delta:

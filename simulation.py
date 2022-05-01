@@ -110,6 +110,7 @@ class Simulation:
 
         if self.filename != '':
             write.WriteStates(self.epidemic, self.filename)
+            write.writeVaccineDoseDailyCount_header(self, self.filename)
         for t in range(self.T):
             self.logger.info('=========== t = {} ============\n'.format(t+1))
             self.logger.info('N = {}'.format(len(self.people)))
@@ -169,8 +170,11 @@ class Simulation:
             # Epidemic network update
             self.epidemic.next(self.filename)
 
+            # After the updates: Write files
             if 2 in self.modes:
                 self.modes[2].writeTravelHistory()
+            if any(i in self.modes for i in [12, 15]):
+                write.writeVaccineDoseDailyCount(self, self.filename)
 
         self.logger.info('\n=========== Result ============\n')
         self.logger.info('There are {} people infected.'.format(self.epidemic.I))
@@ -187,9 +191,12 @@ class Simulation:
             if 2 in self.modes:
                 write.writeTravelHistory(self, self.filename)
                 self.logger.info('Travel history exported in \'{}-travel.csv\''.format(self.filename))
-            if self.alpha > 0 or 15 in self.modes:
+            if self.alpha > 0 or any(i in self.modes for i in [12, 15]):
                 write.writeVaccinePassport(self, self.filename)
                 self.logger.info('Vaccine history exported in \'{}-vaccination.csv\''.format(self.filename))
+                write.writeVaccineDailyCount(self, self.filename)
+                self.logger.info('Vaccine daily stocktake exported in \'{}-vaccine_usage.csv\''.format(self.filename))
+                self.logger.info('Vaccine daily dose usage exported in \'{}-vaccine_dose_usage.csv\''.format(self.filename))
             if any(i in self.modes for i in [22, 23, 24]):
                 self.logger.info('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
             elif 21 in self.modes:

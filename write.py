@@ -52,6 +52,59 @@ def writeVaccinePassport(obs, filename):
             writer.writerow(obs.people[i].vaccine_history)
 
 
+def writeVaccineDailyCount(obs, filename):
+    '''
+    Output daily vaccine usage, by brand
+
+    Parameters
+    ----------
+    obs: Simulation
+        Accepts Simulation object
+    filename: str
+        File name for export
+    '''
+    filename = str(filename) + '-vaccine_usage.csv'
+    with open(filename, 'w', newline='', encoding='utf8') as f:
+        writer = csv.DictWriter(f, obs.epidemic.vaccine_stocktake[0].keys())
+        writer.writeheader()
+        for record in obs.epidemic.vaccine_stocktake:
+            writer.writerow(record)
+
+
+def writeVaccineDoseDailyCount_header(obs, filename):
+    '''
+    Write the header for Write.writeVaccineDoseDailyCount()
+
+    Parameters
+    ----------
+    obs: Simulation
+        Accepts Simulation object
+    filename: str
+        File name for export
+    '''
+    filename = str(filename) + '-vaccine_dose_usage.csv'
+    with open(filename, 'a', newline='', encoding='utf8') as f:
+        writer = csv.writer(f)
+        writer.writerow([vaccine.brand + ':' + str(vaccine.dose) for vaccine in obs.epidemic.vaccine_ls])
+
+
+def writeVaccineDoseDailyCount(obs, filename):
+    '''
+    Output daily vaccine dose usage (Call this per day)
+
+    Parameters
+    ----------
+    obs: Simulation
+        Accepts Simulation object
+    filename: str
+        File name for export
+    '''
+    filename = str(filename) + '-vaccine_dose_usage.csv'
+    with open(filename, 'a', newline='', encoding='utf8') as f:
+        writer = csv.DictWriter(f, obs.epidemic.current_vaccine_dose_count.keys())
+        writer.writerow(obs.epidemic.current_vaccine_dose_count)
+
+
 def WriteOpinion(obs, filename):
     '''
         Write everyone's opinion and infected state into a .csv file.
