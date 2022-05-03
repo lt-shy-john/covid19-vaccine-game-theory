@@ -6,7 +6,7 @@ days: 28
 vaccine-type:
 cost: 0
 efficacy: 0.5
-alpha: 0.95
+alpha: 0.5
 beta: 0
 gamma: 0
 delta: 0
@@ -18,10 +18,10 @@ days: 28
 vaccine-type:
 cost: 0
 efficacy: 0.9
-alpha: 0.95
+alpha: 0.1
 beta:
 gamma:
 delta:
-phi: 1
+phi: 0
 ## Vaccine supply
-file: vaccine_supply.csv
+file: vaccine_cap.csv

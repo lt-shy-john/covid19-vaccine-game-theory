@@ -1,5 +1,7 @@
 import random
 
+import pandas as pd
+
 from person import Person
 from group import Group
 from vaccine import Vaccine
@@ -40,7 +42,8 @@ class TestEpidemic(TestCase):
         self.contact_nwk = ContactNwk(self.population, False, self.logger)
         self.contact_nwk.set_default_edge_list()
         self.contact_nwk.nwk_graph = nx.Graph(self.contact_nwk.network)
-        self.epidemic = Epidemic(0, 0.14, 0.05, 0.000005, 0.000005, self.population, 0.5, 20, {}, self.contact_nwk, False, self.logger)
+        self.epidemic = Epidemic(0, 0.14, 0.05, 0.000005, 0.000005, self.population, 0.5, 20, {}, self.contact_nwk,
+                                 False, self.logger)
 
     def test_get_states(self):
         self.epidemic.get_states()
@@ -351,6 +354,15 @@ class TestEpidemic(TestCase):
         # Assert
         print(self.epidemic.vaccine_stocktake)
         self.assertEqual(self.epidemic.vaccine_stocktake[0][vaccine_name], 1)
+
+    def test_generate_vaccine_dose_quota_records(self):
+        self.fail()
+
+    def test_vaccine_dose_record(self):
+        self.fail()
+
+    def test_vaccine_dose_flag(self):
+        self.fail()
 
     def test_vaccinate_mode20(self):
         self.fail()

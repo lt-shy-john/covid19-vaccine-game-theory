@@ -131,7 +131,7 @@ class IntegrationTests(TestCase):
         T = 200
         argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings_02.txt -m --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_write_vaccinated_cap_lg run"
         result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
-        # print(result.stdout)
+        print(result.stdout)
 
         alpha_settings = []
         with open('settings/vaccine_settings_02.txt') as settings:
@@ -154,7 +154,7 @@ class IntegrationTests(TestCase):
         T = 200
         argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings_03.txt -m --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_write_vaccinated_cap_gl run"
         result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
-        # print(result.stdout)
+        print(result.stdout)
 
         alpha_settings = []
         with open('settings/vaccine_settings_03.txt') as settings:
@@ -168,3 +168,13 @@ class IntegrationTests(TestCase):
 
         if df_V.query('V > @cap * @N').shape[0] > 0:
             self.fail(df_V.query('V > @cap * @N'))
+
+    def test_vaccine_supply(self):
+        '''
+        Vaccine supply cap.
+        '''
+        N = 50
+        T = 200
+        argument = f"py {str(self.path.joinpath('main.py'))} {N} {T} 0 0.14 0.05 0 0.000005 --i settings/vaccine_settings_cap_01.txt -m --52 *m=3 *p=0.1 *a=1 --501 *Ii=4 --505 *m=1 --15 *f=1 --v debug -f test_vaccine_supply run"
+        result = subprocess.run(argument, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
+        print(result.stdout)

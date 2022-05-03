@@ -9,7 +9,7 @@ import write
 class Epidemic:
 
     def __init__(self, vaccinated, infection, recover, resus, remove, people, test_rate, immune_time, vaccine_ls,
-                 contact_nwk, verbose_mode, logger, modes=[], filename=None, start=True):
+                 contact_nwk, verbose_mode, logger, modes=[], filename=None, vaccine_cap_filename=None, start=True):
         '''Initial elements
 
         Attributes
@@ -21,13 +21,23 @@ class Epidemic:
         people - People
             Agents for simulation
             :param logger:
+
+        Parameters
+        ----------
+        vaccine_cap_filename
         '''
         self.epidemic = 0   # Whether an epidemic occured or not.
         self.people = people
         self.contact_nwk = contact_nwk
         self.vaccine_ls = vaccine_ls
+        self.vaccine_cap_filename = vaccine_cap_filename
         self.vaccine_stocktake = []
         self.current_vaccine_dose_count = {}
+        self.vaccine_dose_quota = {}
+        self.vaccine_daily_quota = {}
+        self.vaccine_supply_generator = None
+        if vaccine_cap_filename != None:
+            self.generate_vaccine_supply_cap()
         self.filename = filename
         self.mode = {}  # Dict of modes loaded. Values are mode objects
 
@@ -139,6 +149,8 @@ class Epidemic:
                         # write.WriteNodeBetweeness_I(self.contact_nwk.nwk_graph, filename)
                         # write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
+                if any(m in self.mode for m in [12, 15]):
+                    self.generate_vaccine_dose_quota_records(len(self.people), self.vaccine_ls)
 
 
         except ValueError:
@@ -252,6 +264,84 @@ class Epidemic:
         '''
         self.vaccine_stocktake[-1][vaccine_taken.brand] += 1
 
+    def generate_vaccine_dose_quota_records(self, N, vaccine_ls):
+        '''
+        Generate Epidemic.vaccine_dose_quota_records().
+
+        Parameters
+        ----------
+        N: int
+            Population
+        vaccine_ls: list
+            List of available vaccines.
+        '''
+        self.vaccine_dose_quota = {vaccine.brand+":"+str(vaccine.dose): vaccine.alpha_V * N for vaccine in vaccine_ls}
+
+    def vaccine_dose_record(self, vaccine_taken):
+        '''
+        Remove quota when a vaccine dose is taken
+
+        Parameters
+        ----------
+        vaccine_taken: Vaccine
+            The vaccine taken by the person
+        '''
+        self.vaccine_dose_quota[vaccine_taken.brand+":"+str(vaccine_taken.dose)] -= 1
+
+    def vaccine_dose_flag(self, vaccine_taken):
+        '''
+        Determine if can take vaccine booster dose before quota (Defined by dose adoption rate).
+
+        Parameters
+        ----------
+        vaccine_taken: Vaccine
+            The vaccine taken by the person
+
+        Return
+        ------
+        True (Can take) or false (Over quota)
+        '''
+        if self.vaccine_dose_quota[vaccine_taken.brand+":"+str(vaccine_taken.dose)] > 0:
+            return True
+        else:
+            return False
+
+    def generate_vaccine_supply_cap(self):
+        '''
+        Create an iterator from supply cap specification.
+        '''
+
+        import pandas as pd # If other places imports pandas then delete this.
+        df_vaccine_supply = pd.read_csv(self.vaccine_cap_filename)
+
+        self.vaccine_supply_generator = df_vaccine_supply.iterrows()
+
+    def get_vaccine_supply_cap(self):
+        '''
+        Check if person can take vaccine due to supply.
+
+        Returns
+        -------
+        The vaccine cap as specified or 0 if the file has insufficient rows.
+        '''
+        try:
+            self.vaccine_daily_quota = next(self.vaccine_supply_generator)[1].to_dict()
+            self.logger.debug(f'Current vaccine supply: {self.vaccine_daily_quota}')
+        except StopIteration:
+            self.vaccine_daily_quota = {vaccine.brand: 0 for vaccine in self.vaccine_ls}
+            self.logger.debug(f'Current vaccine supply: {self.vaccine_daily_quota}')
+
+    def vaccine_supply_record(self, vaccine_taken):
+        '''
+        Remove quota when a vaccine dose is taken
+
+        Parameters
+        ----------
+        vaccine_taken: Vaccine
+            The vaccine taken by the person
+        '''
+        self.vaccine_daily_quota[vaccine_taken.brand] -= 1
+
     def set_epidemic(self, mode):
         '''
         Set either the environment to be disease-free or not.
@@ -348,8 +438,11 @@ class Epidemic:
                     next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
                     self.logger.debug(f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
                     # Check if in cap
-                    if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
-                        self.logger.debug(f'Person {self.people[i].id} will not take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                    if len(self.vaccine_daily_quota) > 0 and self.vaccine_daily_quota[next_vaccine.brand] == 0:
+                        self.logger.debug(f'{next_vaccine.brand} is out of stock. ')
+                        continue
+                    if not self.vaccine_dose_flag(next_vaccine):
+                        self.logger.debug(f'Person {self.people[i].id} will not take vaccine {next_vaccine.brand} dose {next_vaccine.dose} due to cap. ')
                         continue
 
                     # Check opinion
@@ -360,6 +453,8 @@ class Epidemic:
                         if vaccine_taken != None:
                             self.vaccine_stock_taken(vaccine_taken)
                             self.vaccine_dose_taken(vaccine_taken)
+                            self.vaccine_dose_record(vaccine_taken)
+                            self.vaccine_supply_record(vaccine_taken)
                             self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')
                         self.mode[15].write_vaccine_history(i, vaccine_taken)
                         vaccine_taken = None
@@ -379,8 +474,12 @@ class Epidemic:
                     self.logger.debug(
                         f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
                     # Check if in cap
-                    if self.get_V_states() + 1 > next_vaccine.alpha_V * len(self.people):
-                        self.logger.debug(f'Person {self.people[i].id} will not take vaccine due to cap. ({self.get_V_states()} + 1 > {next_vaccine.alpha_V * len(self.people)})')
+                    if len(self.vaccine_daily_quota) > 0 and self.vaccine_daily_quota[next_vaccine.brand] == 0:
+                        self.logger.debug(f'{next_vaccine.brand} is out of stock. ')
+                        continue
+                    if not self.vaccine_dose_flag(next_vaccine):
+                        self.logger.debug(
+                            f'Person {self.people[i].id} will not take vaccine {next_vaccine.brand} dose {next_vaccine.dose} due to cap. ')
                         continue
 
                     # Take the vaccine dose
@@ -388,6 +487,9 @@ class Epidemic:
                     if vaccine_taken != None:
                         self.vaccine_stock_taken(vaccine_taken)
                         self.vaccine_dose_taken(vaccine_taken)
+                        self.vaccine_dose_record(vaccine_taken)
+                        if len(self.vaccine_daily_quota) > 0:
+                            self.vaccine_supply_record(vaccine_taken)
                         self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')
                     self.mode[15].write_vaccine_history(i, vaccine_taken)
                     vaccine_taken = None

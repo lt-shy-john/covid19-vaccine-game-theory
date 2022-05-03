@@ -6,21 +6,21 @@ from contact import ContactNwk
 import customLogger
 import write
 
-import random
 import os
 import networkx as nx
-import logging
 
 
 class Simulation:
     def __init__(self, N, T, people, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename, alpha_V, alpha_T,
                  beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2,
-                 beta_II2, beta_RI2, beta_VI2, tau, immune_time, vaccine_ls, verbose_mode, verbose_level, root,
+                 beta_II2, beta_RI2, beta_VI2, tau, immune_time, vaccine_ls, vaccine_cap_filename, verbose_mode, root, verbose_level,
                  groups_of=3):
         self.N = N
         self.groups_of = groups_of
         self.people = people   # List of people objects
         self.vaccine_ls = vaccine_ls
+        self.vaccine_cap_filename = vaccine_cap_filename
+        self.get_vaccine_supply_cap = None
         self.contact_nwk = contact_nwk
         self.info_nwk = info_nwk
         self.groups = None
@@ -69,7 +69,8 @@ class Simulation:
         self.modes = {}
 
     def load_modes(self,modes):
-        '''Load mode objects into epidemic class, as defined in the main code.
+        '''
+        Load mode objects into epidemic class, as defined in the main code.
 
         parameters
         ----------
@@ -83,8 +84,8 @@ class Simulation:
         FILENAME_STATES = ''
         self.logger.debug(f'Modes loading to Epidemic class: {self.modes}. ')
         self.epidemic = Epidemic(self.alpha, self.beta, self.gamma, self.phi, self.delta, self.people, self.test_rate,
-                            self.immune_time, self.vaccine_ls, self.contact_nwk, self.verbose_mode, self.logger,
-                            self.modes, self.filename)
+                                 self.immune_time, self.vaccine_ls, self.contact_nwk, self.verbose_mode, self.logger,
+                                 self.modes, self.filename, self.vaccine_cap_filename)
         self.epidemic.set_other_alpha_param(self.alpha_V, self.alpha_T)
         self.epidemic.set_other_beta_param(self.beta_SS, self.beta_II, self.beta_RR, self.beta_VV, self.beta_IR, self.beta_SR, self.beta_SV, self.beta_PI, self.beta_IV, self.beta_RV, self.beta_SI2, self.beta_II2, self.beta_RI2, self.beta_VI2)
         self.logger.debug(f'Modes loaded to Epidemic class: {self.epidemic.mode}. ')
@@ -110,7 +111,7 @@ class Simulation:
 
         if self.filename != '':
             write.WriteStates(self.epidemic, self.filename)
-            write.writeVaccineDoseDailyCount_header(self, self.filename)
+            # write.writeVaccineDoseDailyCount_header(self, self.filename)
         for t in range(self.T):
             self.logger.info('=========== t = {} ============\n'.format(t+1))
             self.logger.info('N = {}'.format(len(self.people)))
@@ -119,6 +120,9 @@ class Simulation:
             if any(i in self.modes for i in [12, 15]):
                 self.epidemic.generate_vaccine_stock_record()  # For stock and supply modelling
                 self.epidemic.generate_vaccine_dose_count_record()   # For individual vaccine cap
+                if self.vaccine_cap_filename is not None:
+                    self.logger.debug(self.vaccine_cap_filename)
+                    self.epidemic.get_vaccine_supply_cap()   # For vaccine brand cap
             # Overseas travel
             if 2 in self.modes:
                 self.logger.debug('!!! Overseas travel alert !!!')

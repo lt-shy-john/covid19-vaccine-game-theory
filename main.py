@@ -601,20 +601,25 @@ def read_settings(filename):
 
 
     vaccines = []
-    # Parse vaccine creation
+    vaccine_daily_cap_filename = None
+    # Parse vaccine creation/ vaccine supply cap
     for idx in l2_flags:
         parsed_line = settings_text[idx].split(' ')
         if parsed_line[0] == '##' and parsed_line[1] == 'Vaccine\n':
             vaccine_contents = settings_text[idx+1:idx+12]
             vaccines.append(parse_vaccine_setting(vaccine_contents))
+        root.debug(parsed_line)
+        if len(parsed_line) == 3 and parsed_line[0] == '##' and parsed_line[1] == 'Vaccine' and parsed_line[2].lower() == 'supply\n':
+            contents = settings_text[idx+1].split(' ')
+            vaccine_daily_cap_filename = parse_vaccine_supply(contents)
     root.debug('Custom vaccines created')
 
-    return vaccines
+    return vaccines, vaccine_daily_cap_filename
 
 
 def parse_vaccine_setting(contents):
     '''
-    Parse vaccine settings from
+    Parse vaccine settings from imported contents
 
     Parameters
     ----------
@@ -645,8 +650,25 @@ def parse_vaccine_setting(contents):
     return Vaccine(**param)
 
 
+def parse_vaccine_supply(contents):
+    '''
+    Parse filename of daily vaccine supply cap. Epidemic class will open the file.
+
+    Parameters
+    ----------
+    contents: list
+        Contents from the input file (Parsed as list already).
+
+    Returns
+    -------
+    vaccine_daily_cap_filename: str
+        File path to extract vaccine daily supply cap.
+    '''
+    if contents[0] == 'file:':
+        return contents[1]
+
 def export(filename):
-    print('Coming soon')
+    root.info('Coming soon')
 
 
 root = customLogger.gen_logging('', None)
@@ -788,8 +810,10 @@ if 'test rate' in settings:
     test_rate = set_correct_epi_para(test_rate_temp, test_rate)
 if 'import setting' in settings:
     try:
-        vaccine_available = read_settings(settings['import setting'])
+        vaccine_available, vaccine_cap_filename = read_settings(settings['import setting'])
         root.debug(f'Vaccine read from setting: {[x.__dict__ for x in vaccine_available]}')
+        if vaccine_cap_filename != None:
+            root.debug(f'Fetched vaccine daily cap filename: {vaccine_cap_filename}. ')
     except FileNotFoundError as fnfe:
         root.error(fnfe)
         root.error(f'Current directory: {os.getcwd()}')
@@ -1178,7 +1202,7 @@ if 'express' in settings and settings['express'] == True:
     current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename,
                              alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI,
                              beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time,
-                             vaccine_available, verbose_mode, 'info', root)
+                             vaccine_available, vaccine_cap_filename, verbose_mode, root, 'info')
     # Load modes
     current_run.load_modes(modes)
     if len(modes) > 0:
@@ -1213,7 +1237,7 @@ while True:
         current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta,
                                  filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR,
                                  beta_SV, beta_PI, beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate,
-                                 immune_time, vaccine_available, verbose_mode, 'info', root)
+                                 immune_time, vaccine_available, vaccine_cap_filename, verbose_mode, root, 'info')
         # Load modes
         current_run.load_modes(modes)
         if len(modes) > 0:
