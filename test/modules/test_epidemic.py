@@ -356,13 +356,113 @@ class TestEpidemic(TestCase):
         self.assertEqual(self.epidemic.vaccine_stocktake[0][vaccine_name], 1)
 
     def test_generate_vaccine_dose_quota_records(self):
-        self.fail()
+        # Arrange
+        N = len(self.population)
+        vaccine_name = "Test"
+        self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3)]
+
+        # Act
+        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+
+        # Assert
+        self.assertEqual(len(self.epidemic.vaccine_dose_quota), 1)
+        self.assertEqual(self.epidemic.vaccine_dose_quota[vaccine_name + ":1"], N * self.epidemic.vaccine_ls[0].alpha_V)
+
+    def test_generate_vaccine_dose_quota_records_multiple_doses(self):
+        # Arrange
+        N = len(self.population)
+        vaccine_name = "Test"
+        self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3),
+                                    Vaccine(name=vaccine_name, dose=2, efficacy=1, alpha=0.8)]
+
+        # Act
+        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+
+        # Assert
+        print(self.epidemic.vaccine_dose_quota)
+        self.assertEqual(len(self.epidemic.vaccine_dose_quota), 2)
+        self.assertEqual(self.epidemic.vaccine_dose_quota[vaccine_name + ":1"], N * self.epidemic.vaccine_ls[0].alpha_V)
+        self.assertEqual(self.epidemic.vaccine_dose_quota[vaccine_name + ":2"],
+                         N * self.epidemic.vaccine_ls[0].alpha_V * self.epidemic.vaccine_ls[1].alpha_V)
+
+    def test_generate_vaccine_dose_quota_records_multiple_vaccine(self):
+        # Arrange
+        N = len(self.population)
+        vaccine_name_01 = "Test_01"
+        vaccine_name_02 = "Test_02"
+        self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name_01, dose=1, efficacy=1, alpha=0.3),
+                                    Vaccine(name=vaccine_name_02, dose=1, efficacy=1, alpha=0.8)]
+
+        # Act
+        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+
+        # Assert
+        print(self.epidemic.vaccine_dose_quota)
+        self.assertEqual(len(self.epidemic.vaccine_dose_quota), 2)
+        self.assertEqual(self.epidemic.vaccine_dose_quota[vaccine_name_01 + ":1"],
+                         N * self.epidemic.vaccine_ls[0].alpha_V)
+        self.assertEqual(self.epidemic.vaccine_dose_quota[vaccine_name_02 + ":1"],
+                         N * self.epidemic.vaccine_ls[1].alpha_V)
+
+    def test_update_multi_dose_quota(self):
+        # Arrange
+        vaccine_name = "Test_01"
+        vaccine_name_alt = "Test_02"
+        self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3),
+                                    Vaccine(name=vaccine_name, dose=2, efficacy=1, alpha=0.8),
+                                    Vaccine(name=vaccine_name_alt, dose=1, efficacy=1, alpha=0.8)]
+
+        # Act
+        mul_factor_01 = self.epidemic.update_multi_dose_quota(self.epidemic.vaccine_ls[1])
+        mul_factor_02 = self.epidemic.update_multi_dose_quota(self.epidemic.vaccine_ls[2])
+
+        # Assert
+        self.assertEqual(mul_factor_01, self.epidemic.vaccine_ls[0].alpha_V * self.epidemic.vaccine_ls[1].alpha_V)
+        self.assertEqual(mul_factor_02, self.epidemic.vaccine_ls[2].alpha_V)
 
     def test_vaccine_dose_record(self):
-        self.fail()
+        # Arrange
+        N = len(self.population)
+        vaccine_name = "Test"
+        self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3)]
+        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
 
-    def test_vaccine_dose_flag(self):
-        self.fail()
+        # Act
+        self.epidemic.vaccine_dose_record(self.epidemic.vaccine_ls[0])
+
+        # Assert
+        self.assertEqual(self.epidemic.vaccine_dose_quota[self.epidemic.vaccine_ls[0].brand+":"+str(self.epidemic.vaccine_ls[0].dose)], N * self.epidemic.vaccine_ls[0].alpha_V - 1)
+
+    def test_vaccine_dose_flag_true(self):
+        # Arrange
+        N = len(self.population)
+        vaccine_name = "Test_01"
+        vaccine_name_alt = "Test_02"
+        self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3),
+                                    Vaccine(name=vaccine_name, dose=2, efficacy=1, alpha=0.8),
+                                    Vaccine(name=vaccine_name_alt, dose=1, efficacy=1, alpha=0.8)]
+        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+
+        # Act
+        flag = self.epidemic.vaccine_dose_flag(self.epidemic.vaccine_ls[1])
+
+        # Assert
+        self.assertEqual(flag, True)
+
+    def test_vaccine_dose_flag_false(self):
+        # Arrange
+        N = len(self.population)
+        vaccine_name = "Test_01"
+        vaccine_name_alt = "Test_02"
+        self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3)]
+        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+        self.epidemic.vaccine_dose_quota[self.epidemic.vaccine_ls[0].brand+":"+str(self.epidemic.vaccine_ls[0].dose)] = 0
+
+        # Act
+        flag = self.epidemic.vaccine_dose_flag(self.epidemic.vaccine_ls[0])
+
+        # Assert
+        self.assertEqual(flag, False)
 
     def test_vaccinate_mode20(self):
         self.fail()

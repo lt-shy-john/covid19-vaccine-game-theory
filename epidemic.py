@@ -275,7 +275,26 @@ class Epidemic:
         vaccine_ls: list
             List of available vaccines.
         '''
-        self.vaccine_dose_quota = {vaccine.brand+":"+str(vaccine.dose): vaccine.alpha_V * N for vaccine in vaccine_ls}
+        self.vaccine_dose_quota = {vaccine.brand+":"+str(vaccine.dose): self.update_multi_dose_quota(vaccine) * N for vaccine in vaccine_ls}
+
+    def update_multi_dose_quota(self, vaccine):
+        '''
+        If there are any new doses detected in the line, then shall multiply the quota from previous doses.
+
+        Parameters
+        ----------
+        vaccine: Vaccine
+            Vaccine that needs to have its quote updated.
+
+        Examples
+        --------
+        update_multi_dose_quota(self, vaccine_3) => quota[vaccine_3] * vaccine_2.alpha * vaccine_1.alpha
+        '''
+        if vaccine.dose == 1:
+            return vaccine.alpha_V
+        for other in self.vaccine_ls:
+            if other.brand == vaccine.brand and other.dose == vaccine.dose - 1:
+                return vaccine.alpha_V * self.update_multi_dose_quota(other)
 
     def vaccine_dose_record(self, vaccine_taken):
         '''
@@ -436,6 +455,8 @@ class Epidemic:
                     seed = random.randint(0, 10000) / 10000
                     last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
                     next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
+                    if next_vaccine == None:
+                        continue
                     self.logger.debug(f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
                     # Check if in cap
                     if len(self.vaccine_daily_quota) > 0 and self.vaccine_daily_quota[next_vaccine.brand] == 0:

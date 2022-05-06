@@ -111,7 +111,7 @@ class Simulation:
 
         if self.filename != '':
             write.WriteStates(self.epidemic, self.filename)
-            # write.writeVaccineDoseDailyCount_header(self, self.filename)
+            write.writeVaccineDoseDailyCount_header(self, self.filename)
         for t in range(self.T):
             self.logger.info('=========== t = {} ============\n'.format(t+1))
             self.logger.info('N = {}'.format(len(self.people)))
