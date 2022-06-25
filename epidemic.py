@@ -347,7 +347,7 @@ class Epidemic:
             self.vaccine_daily_quota = next(self.vaccine_supply_generator)[1].to_dict()
             self.logger.debug(f'Current vaccine supply: {self.vaccine_daily_quota}')
         except StopIteration:
-            self.logger.debug('No vaccine supply details, will set to 0. Please create a vaccine supply csv for all simulation times. ')
+            self.logger.warning('No vaccine supply details, will set to 0. ')
             self.vaccine_daily_quota = {vaccine.brand: 0 for vaccine in self.vaccine_ls}
             self.logger.debug(f'Current vaccine supply: {self.vaccine_daily_quota}')
 
