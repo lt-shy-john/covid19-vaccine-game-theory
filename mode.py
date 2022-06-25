@@ -217,8 +217,8 @@ class Mode02(Mode):
 
     def __init__(self, people, main_beta, logger):
         super().__init__(people, 2, logger)
-        self.overseas = {'Some Places': 0.02}
-        self.travel_prob = 0.1
+        self.overseas = {'Some Places': 0.14}
+        self.travel_prob = 0.00012
         self.rS = 1
         self.rI = 1
         self.beta = main_beta
@@ -229,7 +229,7 @@ class Mode02(Mode):
         self.isolationPeriod = 14
 
         # Return parameters
-        self.return_prob = {'Some Places': 0.2}
+        self.return_prob = {'Some Places': 0.0001}
 
     def __call__(self):
         self.logger.info('-------------------------')
@@ -250,6 +250,9 @@ class Mode02(Mode):
             beta_new_dest = super().set_correct_epi_para(beta_new_dest_temp, 0.5)
             self.create_destination(new_dest_name, beta_new_dest)
             self.logger.debug(f'{new_dest_name} created. ')
+        self.logger.info('Please set outward travel probability. ')
+        travel_prob_temp = input('P(T) >>> ')
+        self.travel_prob = super().set_correct_epi_para(travel_prob_temp, self.travel_prob)
         self.logger.info('Please set reward for healthy below. ')
         r_S_temp = input('rS >>> ')
         self.rS = super().set_correct_para(r_S_temp, self.rS)
