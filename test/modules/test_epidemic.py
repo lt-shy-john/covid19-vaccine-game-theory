@@ -211,6 +211,35 @@ class TestEpidemic(TestCase):
         # Assert
         self.assertEqual(self.population[0].vaccinated, 1)
 
+    def test_vaccinate_clock(self):
+        # Arrange
+        self.population[0].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.population[1].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+        self.population[2].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Sample', 0, 0, 0, 0, 0, 0, 0]
+        self.population[3].vaccine_history = [0, 'Sample', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        # Act
+        result_0 = self.epidemic.vaccine_clock(0)
+        result_1 = self.epidemic.vaccine_clock(1)
+        result_2 = self.epidemic.vaccine_clock(2)
+        result_3 = self.epidemic.vaccine_clock(3)
+
+        # Assert
+        self.assertEqual(result_0, False)
+        self.assertEqual(result_1, True)
+        self.assertEqual(result_2, True)
+        self.assertEqual(result_3, False)
+
+    def test_vaccinate_clock_within_14_days(self):
+        # Arrange
+        self.population[0].vaccine_history = [0, 0, 0, 0, 0, 0]
+
+        # Act
+        result_0 = self.epidemic.vaccine_clock(0)
+
+        # Assert
+        self.assertEqual(result_0, False)
+
     def test_vaccinate_mode04(self):
         # Arrange
         # Load mode

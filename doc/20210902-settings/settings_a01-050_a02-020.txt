@@ -1,0 +1,27 @@
+# Vaccines
+## Vaccine
+Name: Sample-vaccine-1
+dose: 1
+days: 28
+vaccine-type:
+cost: 0
+efficacy: 0.5
+alpha: 0.5
+beta: 0
+gamma: 0
+delta: 0
+phi: 0.09
+## Vaccine
+Name: Sample-vaccine-1
+dose: 2
+days: 28
+vaccine-type:
+cost: 0
+efficacy: 0.9
+alpha: 0.2
+beta:
+gamma:
+delta:
+phi: 0
+## Vaccine supply
+file: vaccine_supply.csv

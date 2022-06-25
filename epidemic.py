@@ -558,6 +558,21 @@ class Epidemic:
                 self.people[i].vaccine_history.append(0)
 
 
+    def vaccine_clock(self, i):
+        '''
+        Trace the person's vaccination history and advise
+
+        Returns
+        -------
+        True if vaccine was taken within 14 days, else false.
+        '''
+        self.logger.debug(f'Starting method Epidemic.vaccine_clock() for person {i}...')
+        for t in range(len(self.people[i].vaccine_history)-1, max(len(self.people[i].vaccine_history)-15, 0), -1):
+            if self.people[i].vaccine_history[t] != 0:
+                return True
+        return False
+
+
     def removed(self):
         '''
         A person is removed from population.
@@ -650,11 +665,9 @@ class Epidemic:
             if self.people[i].removed == 1 :
                 self.logger.debug(f'{self.people[i].id} is removed and will not be infected. ')
                 continue  # Skip
-
-            if 11 not in self.mode and self.people[i].vaccinated == 1:
+            if 11 not in self.mode and self.people[i].vaccinated == 1 and not self.vaccine_clock(i):
                 self.logger.debug(f'{self.people[i].id} is vaccinated and will not be infected. ')
-                print(i)
-                continue
+                continue  # Skip
 
             seed = random.randint(0,1000)/1000
             '''
@@ -694,13 +707,13 @@ class Epidemic:
                 self.logger.debug(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             # The following will not apply if mode 11 has been activated, skips this condition.
-            if (edge[0].vaccinated == 1 and edge[1].vaccinated == 1) and 11 not in self.mode:
+            if (edge[0].vaccinated == 1 and edge[1].vaccinated == 1) and 11 not in self.mode and not self.vaccine_clock(edge[1].id):
                 self.logger.debug(f'Both ends are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            elif edge[0].vaccinated == 1 and 11 not in self.mode:
+            elif edge[0].vaccinated == 1 and 11 not in self.mode and not self.vaccine_clock(edge[1].id):
                 self.logger.debug(f'{edge[0].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            elif edge[1].vaccinated == 1 and 11 not in self.mode:
+            elif edge[1].vaccinated == 1 and 11 not in self.mode and not self.vaccine_clock(edge[1].id):
                 self.logger.debug(f'{edge[1].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].removed == 1 or edge[1].removed == 1:
@@ -727,7 +740,7 @@ class Epidemic:
         People infect from overseas.
         '''
 
-        self.logger.debug('Starting method Epidemic.overseas_infect()...')
+        self.logger.debug(f'Starting method Epidemic.overseas_infect() for person {i}...')
         if self.mode[2].is_isolated_overseas(i,self.verbose_mode):
             self.logger.debug(f'\t{self.people[i].id} is in overseas. (Isolated)')
             return
@@ -736,13 +749,15 @@ class Epidemic:
 
         if self.people[i].suceptible == 1:
             self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]} (Infected*)')
+        elif 11 not in self.mode and self.people[i].vaccinated == 1 and not self.vaccine_clock(i):
+            self.logger.debug(f'\t{self.people[i].id} is protected by vaccine while overseas. ')
         elif seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]:
             self.logger.debug(f'\t{seed}, β: {self.people[i].overseas[list(self.people[i].overseas.keys())[0]]}, {seed < self.people[i].overseas[list(self.people[i].overseas.keys())[0]]} (Infected)')
             self.people[i].suceptible = 1
         else: self.logger.debug(f'{self.people[i].id} is not infected from overseas. ')
 
     def infection_clock(self, i):
-        self.logger.debug('Starting method Epidemic.infection_clock()...')
+        self.logger.debug(f'Starting method Epidemic.infection_clock() for person {i}...')
         if self.people[i].infection_clock > 14:
             self.logger.debug(f'Person {self.people[i].id} has been infected for {self.people[i].infection_clock} days and will be hospitalised. ')
             self.people[i].exposed = 1
