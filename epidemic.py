@@ -347,6 +347,7 @@ class Epidemic:
             self.vaccine_daily_quota = next(self.vaccine_supply_generator)[1].to_dict()
             self.logger.debug(f'Current vaccine supply: {self.vaccine_daily_quota}')
         except StopIteration:
+            self.logger.debug('No vaccine supply details, will set to 0. Please create a vaccine supply csv for all simulation times. ')
             self.vaccine_daily_quota = {vaccine.brand: 0 for vaccine in self.vaccine_ls}
             self.logger.debug(f'Current vaccine supply: {self.vaccine_daily_quota}')
 
@@ -475,7 +476,8 @@ class Epidemic:
                             self.vaccine_stock_taken(vaccine_taken)
                             self.vaccine_dose_taken(vaccine_taken)
                             self.vaccine_dose_record(vaccine_taken)
-                            self.vaccine_supply_record(vaccine_taken)
+                            if self.vaccine_cap_filename is not None:
+                                self.vaccine_supply_record(vaccine_taken)
                             self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')
                         self.mode[15].write_vaccine_history(i, vaccine_taken)
                         vaccine_taken = None
