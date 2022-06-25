@@ -707,13 +707,13 @@ class Epidemic:
                 self.logger.debug(f'Both ends are not infected. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             # The following will not apply if mode 11 has been activated, skips this condition.
-            if (edge[0].vaccinated == 1 and edge[1].vaccinated == 1) and 11 not in self.mode and not self.vaccine_clock(edge[1].id):
+            if (edge[0].vaccinated == 1 and edge[1].vaccinated == 1) and 11 not in self.mode and not self.vaccine_clock(self.people.index(edge[1])):
                 self.logger.debug(f'Both ends are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            elif edge[0].vaccinated == 1 and 11 not in self.mode and not self.vaccine_clock(edge[1].id):
+            elif edge[0].vaccinated == 1 and 11 not in self.mode and not self.vaccine_clock(self.people.index(edge[1])):
                 self.logger.debug(f'{edge[0].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
-            elif edge[1].vaccinated == 1 and 11 not in self.mode and not self.vaccine_clock(edge[1].id):
+            elif edge[1].vaccinated == 1 and 11 not in self.mode and not self.vaccine_clock(self.people.index(edge[1])):
                 self.logger.debug(f'{edge[1].id} are vaccinated. Skip ({edge[0].id}, {edge[1].id}). ')
                 continue
             if edge[0].removed == 1 or edge[1].removed == 1:
