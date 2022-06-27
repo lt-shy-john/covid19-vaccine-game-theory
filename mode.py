@@ -1076,6 +1076,7 @@ class Mode15(Mode):
             # Find next dose
             if vaccine_brand == vaccine.brand and vaccine_dose + 1 == vaccine.dose:
                 vaccine_used = vaccine
+                break
         if vaccine_used == None:
             return None
         # Check when the vaccine is taken (and if it is the time to take the second dose)
@@ -1087,11 +1088,11 @@ class Mode15(Mode):
 
         # Take the (next) vaccine
         seed = random.randint(0, 10000) / 10000
-        if seed < vaccine.alpha_V:
+        if seed < vaccine_used.alpha_V:
             # Efficacy
             seed_e = random.randint(0, 10000) / 10000
-            if seed_e < vaccine.efficacy:
-                self.logger.debug(f'{self.people[i].id} has taken vaccine with efficacy {vaccine.efficacy} and wear-off rate {vaccine.phi_V}.')
+            if seed_e < vaccine_used.efficacy:
+                self.logger.debug(f'{self.people[i].id} has taken vaccine {vaccine_used.brand} dose {vaccine_used.dose} with efficacy {vaccine_used.efficacy} and wear-off rate {vaccine_used.phi_V}.')
                 self.people[i].vaccinated = 1
             return vaccine
 
