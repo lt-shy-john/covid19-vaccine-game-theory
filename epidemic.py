@@ -150,7 +150,7 @@ class Epidemic:
                         # write.WriteNodeBetweeness_S(self.contact_nwk.nwk_graph, filename)
                         write.WriteNetworkAssortativity(self.contact_nwk.nwk_graph, filename)
                 if any(m in self.mode for m in [12, 15]):
-                    self.generate_vaccine_dose_quota_records(len(self.people), self.vaccine_ls)
+                    self.generate_vaccine_dose_quota_records(len(self.people))
 
 
         except ValueError:
