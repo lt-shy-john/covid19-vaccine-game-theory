@@ -264,7 +264,7 @@ class Epidemic:
         '''
         self.vaccine_stocktake[-1][vaccine_taken.brand] += 1
 
-    def generate_vaccine_dose_quota_records(self, N, vaccine_ls):
+    def generate_vaccine_dose_quota_records(self, N):
         '''
         Generate Epidemic.vaccine_dose_quota_records().
 
@@ -275,7 +275,7 @@ class Epidemic:
         vaccine_ls: list
             List of available vaccines.
         '''
-        self.vaccine_dose_quota = {vaccine.brand+":"+str(vaccine.dose): self.update_multi_dose_quota(vaccine) * N for vaccine in vaccine_ls}
+        self.vaccine_dose_quota = {vaccine.brand+":"+str(vaccine.dose): self.update_multi_dose_quota(vaccine) * N for vaccine in self.vaccine_ls}
 
     def update_multi_dose_quota(self, vaccine):
         '''
@@ -508,9 +508,10 @@ class Epidemic:
                     # Take the vaccine dose
                     vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
                     if vaccine_taken != None:
-                        self.vaccine_stock_taken(vaccine_taken)
-                        self.vaccine_dose_taken(vaccine_taken)
-                        self.vaccine_dose_record(vaccine_taken)
+                        if len(self.vaccine_stocktake) > 0 and len(self.current_vaccine_dose_count) > 0:
+                            self.vaccine_stock_taken(vaccine_taken)
+                            self.vaccine_dose_taken(vaccine_taken)
+                            self.vaccine_dose_record(vaccine_taken)
                         if len(self.vaccine_daily_quota) > 0:
                             self.vaccine_supply_record(vaccine_taken)
                         self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')

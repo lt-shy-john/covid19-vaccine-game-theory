@@ -918,6 +918,10 @@ class Mode15(Mode):
         ---------
         vaccine_ls: list
             List of vaccines from main code
+
+        returns
+        -------
+        True if multiple vaccines (or doses) are considered.
         '''
 
         vaccine_dose_count = {}
@@ -991,6 +995,22 @@ class Mode15(Mode):
         return None
 
     def check_next_vaccine(self, i, vaccine_ls, last_vaccine_taken):
+        '''
+
+        Parameters
+        ----------
+        i: int
+            Index number in population list.
+        vaccine_ls: list of Vaccine
+            List of vaccines available.
+        last_vaccine_taken: Vaccine
+            Last vaccine taken.
+
+        Returns
+        -------
+        vaccine: Vaccine
+            The vaccine to-be taken, if there is one.
+        '''
         self.logger.debug(last_vaccine_taken)
         if last_vaccine_taken == None:
             for vaccine in vaccine_ls:

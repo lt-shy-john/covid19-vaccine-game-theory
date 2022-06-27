@@ -271,6 +271,55 @@ class TestEpidemic(TestCase):
         # Act
         self.epidemic.vaccinate()
 
+    @mock.patch('random.randint', return_value=0)
+    @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
+    @mock.patch('mode.Mode15.check_recent_vaccine')
+    @mock.patch('mode.Mode15.check_next_vaccine')
+    @mock.patch('mode.Mode15.take_multi_dose_vaccine')
+    @mock.patch('mode.Mode15.write_vaccine_history')
+    def test_vaccinate_mode15_two_doses(self, mock_random_randint, mock_check_multi_dose_vaccine, mock_check_recent_vaccine, mock_check_next_vaccine, mock_take_multi_dose_vaccine,
+                              mock_write_vaccine_history):
+        # Arrange
+        self.epidemic.vaccine_ls = [Vaccine(name="Test_01", dose=1, efficacy=0, alpha=0.3),
+                                    Vaccine(name="Test_01", dose=2, efficacy=0, alpha=0.3)]
+        mode = {15: Mode15(self.population, self.logger)}
+        self.epidemic.load_modes(mode)
+
+        mock_check_recent_vaccine.return_value = self.epidemic.vaccine_ls[0]
+        mock_check_next_vaccine.return_value = self.epidemic.vaccine_ls[1]
+        mock_take_multi_dose_vaccine.return_value = self.epidemic.vaccine_ls[0]
+
+        self.epidemic.generate_vaccine_dose_count_record()
+        self.epidemic.generate_vaccine_dose_quota_records(len(self.population))
+        # Act
+        self.epidemic.vaccinate()
+
+    @mock.patch('random.randint', return_value=0)
+    @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
+    @mock.patch('mode.Mode15.write_vaccine_history')
+    def test_vaccinate_mode15_three_doses(self, mock_random_randint, mock_check_multi_dose_vaccine,
+                                        mock_write_vaccine_history):
+        # Arrange
+        self.epidemic.vaccine_ls = [Vaccine(name="Test_01", dose=1, efficacy=0, alpha=0.3),
+                                    Vaccine(name="Test_01", dose=2, efficacy=0, alpha=0.3),
+                                    Vaccine(name="Test_01", dose=3, efficacy=0, alpha=0.3)]
+        self.population[0].vaccine_history = [0, 0, 'Test_01:1', 0, 0, 0, 0, 0]
+        self.population[1].vaccine_history = [0, 0, 'Test_01:1', 'Test_01:2', 0, 0, 0, 0]
+        for i in range(2, 50):
+            self.population[i].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0]
+
+        mode = {15: Mode15(self.population, self.logger)}
+        self.epidemic.load_modes(mode)
+
+        self.epidemic.generate_vaccine_dose_count_record()
+        self.epidemic.generate_vaccine_dose_quota_records(len(self.population))
+        # Act
+        self.epidemic.vaccinate()
+
+        # Assert
+        print(self.population[0].vaccinated)
+        print(self.population[0].vaccine_history)
+
     # @mock.patch('random.randint', return_value=0)
     # @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
     # @mock.patch('mode.Mode15.check_recent_vaccine', return_value=None)
