@@ -1094,7 +1094,8 @@ class Mode15(Mode):
             if seed_e < vaccine_used.efficacy:
                 self.logger.debug(f'{self.people[i].id} has taken vaccine {vaccine_used.brand} dose {vaccine_used.dose} with efficacy {vaccine_used.efficacy} and wear-off rate {vaccine_used.phi_V}.')
                 self.people[i].vaccinated = 1
-            return vaccine
+                return vaccine_used
+        return None
 
 
 '''
