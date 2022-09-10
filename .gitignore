@@ -4,5 +4,10 @@
 /test/*/__pycache__/**
 /test/__pycache__/**
 /venv/
-overseas_travel_driver.py
+
 .coverage
+
+overseas_travel_driver.py
+run_*.py
+
+*.txt

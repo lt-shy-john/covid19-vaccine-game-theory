@@ -98,12 +98,11 @@ This simulation can be customised by setting different modes. You may set them v
 * 23 Stubbon to against vaccine
 * 24 Contrary to social groups
 * 31 Medication incorporated
-* 41 Moral hazard of social distancing
-* 42 Moral hazard of treatment
-* 51: Erdos-Renyi topology
-* 52: Scale free network
-* 53: Small world topology
-* 54: Lattice network
+* 43 Advanced immunity period settings
+* 51 Erdos-Renyi topology
+* 52 Scale free network
+* 53 Small world topology
+* 54 Lattice network
 
 You should see the following:
 
