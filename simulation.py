@@ -68,7 +68,7 @@ class Simulation:
         self.filename = filename
         self.modes = {}
 
-    def load_modes(self,modes):
+    def load_modes(self, modes):
         '''
         Load mode objects into epidemic class, as defined in the main code.
 

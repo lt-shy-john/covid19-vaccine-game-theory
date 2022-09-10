@@ -46,6 +46,7 @@ class TestEpidemic(TestCase):
                                  False, self.logger)
 
     def test_get_states(self):
+        # Act
         self.epidemic.get_states()
 
         # Assert
@@ -141,15 +142,24 @@ class TestEpidemic(TestCase):
     '''
     The following is an integration test
     '''
-    # def test_start_epidemic_mode505(self):
-    #     # Arrange
-    #     # Load mode
-    #     mode = {505: Mode505(self.population, self.logger, None)}
-    #     self.epidemic.load_modes(mode)
-    #
-    #     # Assert ValueError should be raised
-    #     with self.assertRaises(ValueError):
-    #         self.epidemic.start_epidemic()
+    def test_start_epidemic_mode505(self):
+        # Arrange
+        # Load mode
+        mode = {505: Mode505(self.population, self.logger, self.contact_nwk)}
+        for node in self.contact_nwk.nwk_graph:
+            self.assertTrue(type(node) == Person)
+        self.epidemic.load_modes(mode)
+
+        # Act
+        self.epidemic.start_epidemic()
+
+        # Assert
+        for person in self.population:
+            if person.suceptible == 1:
+                return
+
+        # If none of the population is infected then the test is failed.
+        self.fail()
 
     @mock.patch('mode.Mode505.set_infection')
     def test_start_epidemic_mode505_501(self, mock_505_set_infection):
@@ -174,6 +184,7 @@ class TestEpidemic(TestCase):
         self.epidemic.kill_epidemic()
 
         # Assert
+        # If anyone is infected, then the epdemic is not ended. Thus test failed.
         for person in self.population:
             if person.suceptible == 1:
                 self.fail()
@@ -440,7 +451,7 @@ class TestEpidemic(TestCase):
         self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3)]
 
         # Act
-        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+        self.epidemic.generate_vaccine_dose_quota_records(N)
 
         # Assert
         self.assertEqual(len(self.epidemic.vaccine_dose_quota), 1)
@@ -454,7 +465,7 @@ class TestEpidemic(TestCase):
                                     Vaccine(name=vaccine_name, dose=2, efficacy=1, alpha=0.8)]
 
         # Act
-        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+        self.epidemic.generate_vaccine_dose_quota_records(N)
 
         # Assert
         print(self.epidemic.vaccine_dose_quota)
@@ -472,7 +483,7 @@ class TestEpidemic(TestCase):
                                     Vaccine(name=vaccine_name_02, dose=1, efficacy=1, alpha=0.8)]
 
         # Act
-        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+        self.epidemic.generate_vaccine_dose_quota_records(N)
 
         # Assert
         print(self.epidemic.vaccine_dose_quota)
