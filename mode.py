@@ -9,8 +9,9 @@ import numpy as np
 
 
 class Mode:
-    def __init__(self, people, code, logger):
+    def __init__(self, people, code, name, logger):
         self.code = code
+        self.name = name
         # Flag to alert setting has been loaded.
         self.flag = ' '  # If loaded then has value 'X'.
         # Population objects
@@ -119,7 +120,7 @@ class Mode01(Mode):
     '''
 
     def __init__(self, people, logger, betas=[0.5, 0.5]):
-        super().__init__(people, 1, logger)
+        super().__init__(people, 1, 'Living in city/ rural', logger)
         self.weight = [4, 6]
         self.betas = betas
 
@@ -216,7 +217,7 @@ class Mode02(Mode):
     '''
 
     def __init__(self, people, main_beta, logger):
-        super().__init__(people, 2, logger)
+        super().__init__(people, 2, 'Travel from overseas', logger)
         self.overseas = {'Some Places': 0.14}
         self.travel_prob = 0.00012
         self.rS = 1
@@ -468,7 +469,7 @@ class Mode02(Mode):
 
 class Mode04(Mode):
     def __init__(self, people, alpha, logger):
-        super().__init__(people, 4, logger)
+        super().__init__(people, 4, 'Bounded rationality of vaccine', logger)
         self.alpha = alpha
         self.P_Alpha = []
 
@@ -525,7 +526,7 @@ class Mode04(Mode):
 
 class Mode05(Mode):
     def __init__(self, people, g, logger):
-        super().__init__(people, 5, logger)
+        super().__init__(people, 5, 'Edit contact network', logger)
         self.g = g  # Import from ContactNwk object. Graph of social network
         self.data = None  # User requests to change social network topology
 
@@ -602,7 +603,7 @@ class Mode07(Mode):
     '''
 
     def __init__(self, people, beta, delta, logger):
-        super().__init__(people, 7, logger)
+        super().__init__(people, 7, 'Age distribution', logger)
         self.beta_age = [beta for x in range(10)]
         self.delta_age = [delta for x in range(10)]
 
@@ -696,7 +697,7 @@ class Mode08(Mode):
     '''
 
     def __init__(self, people, beta, delta, logger):
-        super().__init__(people, 8, logger)
+        super().__init__(people, 8, 'Gender population', logger)
         self.beta_gender = [beta for x in range(2)]
         self.delta_gender = [delta for x in range(2)]
 
@@ -740,7 +741,7 @@ class Mode08(Mode):
 
 class Mode10(Mode):
     def __init__(self, people, phi, beta, logger):
-        super().__init__(people, 10, logger)
+        super().__init__(people, 10, 'Type of vaccine (One-off/ Seasonal/ Chemoprophylaxis)', logger)
         self.types = ['One-off', 'Seasonal', 'Chemoprophylaxis']
         self.type = None
 
@@ -780,7 +781,7 @@ class Mode10(Mode):
 
 class Mode11(Mode):
     def __init__(self, people, logger):
-        super().__init__(people, 11, logger)
+        super().__init__(people, 11, 'Stop transmissability/ reduce severity', logger)
         self.types = ['Stop transmissability', 'Reduce severity']
         self.type = None
 
@@ -840,7 +841,7 @@ class Mode11(Mode):
 
 class Mode12(Mode):
     def __init__(self, people, logger):
-        super().__init__(people, 12, logger)
+        super().__init__(people, 12, 'Vaccine cost/ supply', logger)
 
 
     def __call__(self):
@@ -855,7 +856,7 @@ class Mode12(Mode):
 
 class Mode15(Mode):
     def __init__(self, people, logger):
-        super().__init__(people, 15, logger)
+        super().__init__(people, 15, 'Advanced vaccine options', logger)
         self.vaccine_doses = None
 
     def __call__(self, vaccine_ls, alpha, beta, gamma, delta, phi):
@@ -1105,7 +1106,7 @@ class Mode15(Mode):
 
 class Mode20(Mode):
     def __init__(self, people, contact_nwk, beta, logger):
-        super().__init__(people, 20, logger)
+        super().__init__(people, 20, 'Intimacy game', logger)
         self.contact_nwk = contact_nwk
         self.beta = beta
         self.local_infection_p = np.ones(len(self.people))  # The proportion, not number of cases.
@@ -1348,7 +1349,7 @@ class Mode20(Mode):
 
 class Mode21(Mode):
     def __init__(self, people, info_nwk, logger):
-        super().__init__(people, 21, logger)
+        super().__init__(people, 21, 'Local Majority Rule', logger)
         self.info_nwk = info_nwk
 
     def __call__(self):
@@ -1380,7 +1381,7 @@ class Mode21(Mode):
 
 class Mode22(Mode):
     def __init__(self, people, info_nwk, logger):
-        super().__init__(people, 22, logger)
+        super().__init__(people, 22, 'Stubbon to take vaccine', logger)
         self.info_nwk = info_nwk
         self.InflexProProportion = None
 
@@ -1422,7 +1423,7 @@ class Mode22(Mode):
 
 class Mode23(Mode):
     def __init__(self, people, info_nwk, logger):
-        super().__init__(people, 23, logger)
+        super().__init__(people, 23, 'Stubbon to against vaccine', logger)
         self.info_nwk = info_nwk
         self.InflexAgProportion = None
 
@@ -1475,7 +1476,7 @@ class Mode23(Mode):
 
 class Mode24(Mode):
     def __init__(self, people, info_nwk, logger):
-        super().__init__(people, 24, logger)
+        super().__init__(people, 24, 'Contrary to social groups', logger)
         self.info_nwk = info_nwk
         self.BalancerProportion = None
 
@@ -1515,7 +1516,7 @@ class Mode24(Mode):
 
 class Mode31(Mode):
     def __init__(self, people, logger):
-        super().__init__(people, 31, logger)
+        super().__init__(people, 31, 'Medication incorporated', logger)
 
     def __call__(self):
         print('-------------------------')
@@ -1531,7 +1532,7 @@ class Mode31(Mode):
 
 class Mode51(Mode):
     def __init__(self, people, contact_nwk, logger):
-        super().__init__(people, 51, logger)
+        super().__init__(people, 51, 'Erdos-Renyi topology', logger)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.p = 0.1  # Pairing probability
@@ -1624,13 +1625,13 @@ class Mode51(Mode):
 
 
 '''
-52: Preferential attachment.
+52: Preferential attachment
 '''
 
 
 class Mode52(Mode):
     def __init__(self, people, logger, contact_nwk=None):
-        super().__init__(people, 52, logger)
+        super().__init__(people, 52, 'Preferential attachment', logger)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.m = 1  # No. of new edges linked
@@ -1731,7 +1732,7 @@ class Mode52(Mode):
 
 class Mode53(Mode):
     def __init__(self, people, logger, contact_nwk=None):
-        super().__init__(people, 53, logger)
+        super().__init__(people, 53, 'Small world network', logger)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.k = 1  # k neighbours are joined
@@ -1849,7 +1850,7 @@ class Mode53(Mode):
 
 class Mode54(Mode):
     def __init__(self, people, logger, contact_nwk=None):
-        super().__init__(people, 54, logger)
+        super().__init__(people, 54, 'Lattice network', logger)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
         self.m = 1  # Nunber of rows
@@ -1954,7 +1955,7 @@ class Mode54(Mode):
 
 class Mode501(Mode):
     def __init__(self, people, logger, contact_nwk=None):
-        super().__init__(people, 501, logger)
+        super().__init__(people, 501, 'Initial infection by number', logger)
         self.contact_nwk = contact_nwk
         self.init_infection = 4
 
@@ -1982,7 +1983,7 @@ class Mode501(Mode):
 
 class Mode505(Mode):
     def __init__(self, people, logger, contact_nwk):
-        super().__init__(people, 505, logger)
+        super().__init__(people, 505, 'Initial infection by degree', logger)
         if type(contact_nwk) == ContactNwk and type(contact_nwk.nwk_graph) == nx.Graph:
             self.contact_nwk = contact_nwk
         else: raise ValueError('Unable to read contact network. ')
