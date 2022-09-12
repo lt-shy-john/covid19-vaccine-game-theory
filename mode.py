@@ -1534,7 +1534,17 @@ class Mode43(Mode):
         super().__init__(people, 43, 'Advanced immunity period settings', logger)
         self.instructions = {'I': 0, 'V': 0, '2V': 180}  # Hard coded atm, which means if taken two vaccines then impose immune time for 180 days.
 
-    def count_vaccine_taken(self, i):
+    def correct_instructions_format(self):
+        '''
+        Correct the format to 'nVmI' where n and m are integers. So that Mode43.is_immuned() can read easily.
+
+        Also '1V' -> 'V' or '1I' -> 'I'.
+
+        'default is 'V' but no need to change.
+        '''
+        pass
+
+    def count_vaccine_taken(self, i, brand=None):
         '''
         Count the number of vaccines taken for person i
 
@@ -1542,6 +1552,8 @@ class Mode43(Mode):
         ----------
         i: int
             Person ID (In the self.population list)
+        brand: str
+            Brand of interest
 
         Returns
         -------
@@ -1554,6 +1566,8 @@ class Mode43(Mode):
             if self.people[i].vaccine_history[t] != 0:
                 vaccine_taken += 1
             t += 1
+
+        return vaccine_taken
 
     def count_infected_times(self, i):
         '''
@@ -1573,12 +1587,48 @@ class Mode43(Mode):
         infected_times = 0
 
         # Day 0
-        
+        if self.people[i].compartment_history[t] == 'E':
+            infected_times += 1
+        t += 1
 
         # From next day
         while t < len(self.people[i].compartment_history):
-            if self.people[i].compartment_history[t] == 'E' and not self.people[i].compartment_history[t] == 'I':
-                pass
+            if self.people[i].compartment_history[t] == 'E' and (self.people[i].compartment_history[t-1] == 'S' or self.people[i].compartment_history[t-1] == 'V'):
+                infected_times += 1
+            elif self.people[i].compartment_history[t] == 'R':
+                break
+            t += 1
+
+        return infected_times
+
+    def is_immuned(self, i):
+        '''
+        Check if the person immuned based on Mode43.instructions.
+
+        Parameters
+        ----------
+        i: int
+            Person ID (In the self.population list)
+
+        Returns
+        -------
+        immuned: bool
+            If the person is immuned from transmission.
+        '''
+
+        # Check how many vaccines taken and how many times been infected
+        vaccine_taken = self.count_vaccine_taken(i)
+        infected_times = self.count_infected_times(i)
+
+        # Lookup to Mode43.instructions
+        # ================================================
+        #
+        # If person has taken one vaccine and no prior infection, check 'V' or default
+        # If person has taken two vaccines and no prior infection, check '2V' (If only '2VnI' exists, then no immunity)
+        # If person has been infected, check 'I'
+        # If person has been infected and instruction says '2V1I', nothing happens.
+        #
+        # ================================================
 
 '''
 51: Erdos-Renyi topology
