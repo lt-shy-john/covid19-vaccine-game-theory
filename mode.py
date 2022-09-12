@@ -1526,6 +1526,61 @@ class Mode31(Mode):
 
 
 '''
+43: Advanced immunity period settings
+'''
+
+class Mode43(Mode):
+    def __init__(self, people, logger):
+        super().__init__(people, 43, 'Advanced immunity period settings', logger)
+        self.instructions = {'I': 0, 'V': 0, '2V': 180}  # Hard coded atm, which means if taken two vaccines then impose immune time for 180 days.
+
+    def count_vaccine_taken(self, i):
+        '''
+        Count the number of vaccines taken for person i
+
+        Parameters
+        ----------
+        i: int
+            Person ID (In the self.population list)
+
+        Returns
+        -------
+        vaccine_taken: int
+            Number of vaccines taken at count
+        '''
+        t = 0
+        vaccine_taken = 0
+        while t < len(self.people[i].vaccine_history):
+            if self.people[i].vaccine_history[t] != 0:
+                vaccine_taken += 1
+            t += 1
+
+    def count_infected_times(self, i):
+        '''
+        Count the number of times being infected taken for person i
+
+        Parameters
+        ----------
+        i: int
+            Person ID (In the self.population list)
+
+        Returns
+        -------
+        infected_times: int
+            Number of infection at count
+        '''
+        t = 0
+        infected_times = 0
+
+        # Day 0
+        
+
+        # From next day
+        while t < len(self.people[i].compartment_history):
+            if self.people[i].compartment_history[t] == 'E' and not self.people[i].compartment_history[t] == 'I':
+                pass
+
+'''
 51: Erdos-Renyi topology
 '''
 
