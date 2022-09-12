@@ -554,18 +554,43 @@ class TestEpidemic(TestCase):
         self.assertEqual(flag, False)
 
     def test_vaccinate_mode20(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_vaccinate_mode21(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_vaccinate_mode22(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_vaccinate_mode23(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_vaccinate_mode24(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     @mock.patch('random.randint', return_value = 0)
