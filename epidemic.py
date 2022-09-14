@@ -611,12 +611,19 @@ class Epidemic:
                 self.people[i].exposed = 0
                 self.people[i].vaccinated = 0
 
+
     def infect(self):
         '''
         Mechanism of infection.
         '''
 
         self.logger.debug('Starting method Epidemic.infect()...')
+        # Check whether immuned (Mode 43)
+        if 43 in self.mode:
+            for i in range(len(self.people)):
+                if self.mode[43].is_immuned(i):
+                    self.people[i].suceptible = 0
+
         # Intimacy game
         if 20 in self.mode:
             self.logger.debug('Applying intimacy game in infection. ')
@@ -627,7 +634,6 @@ class Epidemic:
                 if seed < threshold:
                     self.people[i].suceptible = 1
                     continue
-
 
         # Network contact controlled by Epidemic.social_contact()
         if any(m in self.mode for m in [51, 52, 53, 53]):
