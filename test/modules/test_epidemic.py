@@ -553,45 +553,71 @@ class TestEpidemic(TestCase):
         # Assert
         self.assertEqual(flag, False)
 
-    def test_vaccinate_mode20(self):
+    @mock.patch('random.randint', return_value=0)
+    @mock.patch('mode.Mode20.FDProb', return_value=0.5)
+    def test_vaccinate_mode20(self, mock_random_randint, mock_mode20_FDProb):
         # Arrange
+        beta = 0.14
+        self.epidemic.mode = {20: Mode20(self.population, self.contact_nwk, beta, self.logger)}
 
         # Act
+        self.epidemic.vaccinate()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            self.assertEqual(self.population[i].vaccinated, 1)
 
-    def test_vaccinate_mode21(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_vaccinate_mode21(self, mock_random_randint):
         # Arrange
+        info_nwk = Group(self.population, self.logger)
+        self.epidemic.mode = {21: Mode21(self.population, info_nwk, self.logger)}
+        self.epidemic.alpha_V = 0.14
+
+        # Assumed after an opinion update
+        for i in [0, 1, 5, 6, 8, 10]:
+            self.population[i].opinion = 1
+
+        for i in [0, 1, 5, 6, 8, 10]:
+            self.assertEqual(self.epidemic.people[i].opinion, 1)
 
         # Act
+        self.epidemic.vaccinate()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if i in [0, 1, 5, 6, 8, 10]:
+                self.assertEqual(self.population[i].vaccinated, 1, f'Id: {i} (Pro)')
+            else:
+                self.assertEqual(self.population[i].vaccinated, 0, f'Id: {i} (Against)')
 
-    def test_vaccinate_mode22(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_vaccinate_mode22_23_24(self, mock_random_randint):
+        '''
+        The main aim to test that it behaves as when mode 21 is activated only.
+        '''
+
         # Arrange
+        info_nwk = Group(self.population, self.logger)
+        self.epidemic.mode = {21: Mode21(self.population, info_nwk, self.logger), 22: Mode22(self.population, info_nwk, self.logger)}
+        self.epidemic.alpha_V = 0.14
+
+        # Assumed after an opinion update
+        for i in [0, 1, 5, 6, 8, 10]:
+            self.population[i].opinion = 1
+
+        for i in [0, 1, 5, 6, 8, 10]:
+            self.assertEqual(self.epidemic.people[i].opinion, 1)
 
         # Act
+        self.epidemic.vaccinate()
 
         # Assert
-        self.fail()
-
-    def test_vaccinate_mode23(self):
-        # Arrange
-
-        # Act
-
-        # Assert
-        self.fail()
-
-    def test_vaccinate_mode24(self):
-        # Arrange
-
-        # Act
-
-        # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if i in [0, 1, 5, 6, 8, 10]:
+                self.assertEqual(self.population[i].vaccinated, 1, f'Id: {i} (Pro)')
+            else:
+                self.assertEqual(self.population[i].vaccinated, 0, f'Id: {i} (Against)')
 
     @mock.patch('random.randint', return_value = 0)
     def test_removed(self, mock_random_randint):
@@ -609,6 +635,11 @@ class TestEpidemic(TestCase):
         self.fail()
 
     def test_overseas_infect(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     @mock.patch('random.randint', return_value=0)
@@ -636,24 +667,59 @@ class TestEpidemic(TestCase):
                 self.assertEqual(person.suceptible, 1)
 
     def test_infect_mode01(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_infect_mode07(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_infect_mode08(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_infect_mode11(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_infect_mode20(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_infect_nwk(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_infect_nwk_with_overseas_travel(self):
+        # Arrange
+
+        # Act
+
+        # Assert
         self.fail()
 
     def test_infection_clock(self):
