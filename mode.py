@@ -1523,6 +1523,7 @@ class Mode31(Mode):
         print('You are creating mode 31. ')
         print('-------------------------\n')
         self.raise_flag()
+        print('\nMode 31 equipped. \n')
 
 
 '''
@@ -1533,6 +1534,27 @@ class Mode43(Mode):
     def __init__(self, people, logger):
         super().__init__(people, 43, 'Advanced immunity period settings', logger)
         self.instructions = {'I': 0, 'V': 0, '2V': 180}  # Hard coded atm, which means if taken two vaccines then impose immune time for 180 days.
+
+    def __call__(self):
+        print('-------------------------')
+        print('You are creating mode 43. ')
+        print('-------------------------\n')
+
+        # Loop all possible instructions
+        cmd = ''
+        while cmd != '':
+            tmp_instructions = input('Enter instructions:')
+            tmp_immunity_period = input('Enter immunity period:')
+
+            # Check format and append
+            self.instructions[self.correct_instructions_format(tmp_instructions)] = self.correct_para(tmp_immunity_period, pos=True)
+
+            cmd = input('Continue? [y/n]')
+            if cmd == '' or cmd.lower() == 'n':
+                break
+
+        self.raise_flag()
+        print('\nMode 43 equipped. \n')
 
     def correct_instructions_format(self):
         '''
@@ -1552,7 +1574,7 @@ class Mode43(Mode):
         ----------
         i: int
             Person ID (In the self.population list)
-        brand: str
+        brand: str or list
             Brand of interest
 
         Returns
@@ -1601,7 +1623,7 @@ class Mode43(Mode):
 
         return infected_times
 
-    def is_immuned(self, i):
+    def get_immune_time(self, i):
         '''
         Check if the person immuned based on Mode43.instructions.
 
@@ -1612,7 +1634,7 @@ class Mode43(Mode):
 
         Returns
         -------
-        immuned: bool
+        immune_time: int
             If the person is immuned from transmission.
         '''
 

@@ -10,6 +10,7 @@ from group import Group
 from vaccine import Vaccine
 from simulation import Simulation
 import mode
+from utility import Parser
 from contact import ContactNwk
 import customLogger
 
@@ -19,70 +20,6 @@ Main code
 - cmd functions
 - main loop
 '''
-
-
-def parse_arg(args):
-    '''
-    Parse system arguments.
-    '''
-    if type(args) != list:
-        args = args.split()
-    cmd = {}
-
-    cmd['N'] = args[2]
-    cmd['T'] = args[3]
-    cmd['alpha'] = args[4]
-    cmd['beta'] = args[5]
-    cmd['gamma'] = args[6]
-    cmd['phi'] = args[7]
-    cmd['delta'] = args[8]
-
-    def subls_modes(ls):
-        for arg in ls:
-            if not re.match(r'--\d', arg) and '=' not in arg:
-                return
-            yield arg
-
-    def sub_ls_mode(ls):
-        if re.match(r'--\d', ls[0]):
-            ls = ls[1:]
-        for arg in ls:
-            if re.match(r'--\d', arg):
-                return
-            yield arg
-
-    for i in range(len(args)):
-        if args[i] == '-import' or args[i] == '--i':
-            if args[i + 1][0] == '-' or args[i + 1][0:2] == '--':
-                root.info("Invalid setting file name specified. ")
-            else:
-                # print(os.getcwd())  # To debug when file cannot be fetched.
-                cmd['import setting'] = args[i + 1]
-        if args[i] == '-test_rate':
-            cmd['test rate'] = args[i + 1]
-        if args[i] == '-immune_time':
-            cmd['immune time'] = args[i + 1]
-        if args[i] == '-m':
-            cmd['modes'] = {}
-            modes_tmp = list(subls_modes(args[i + 1:]))
-            # print(modes_tmp)
-            for i in range(len(modes_tmp)):
-                if re.match(r'--\d', modes_tmp[i]):
-                    cmd['modes'][modes_tmp[i][2:]] = list(sub_ls_mode(modes_tmp[i:]))
-        if args[i] == '-verbose' or args[i] == '--v':
-            if args[i + 1] in ['debug', 'info', 'error']:
-                cmd['logger_level'] = args[i + 1]
-            else:
-                cmd['logger_level'] = 'info'
-        if args[i] == '-f':
-            if args[i + 1] == 'run':
-                raise ValueError('Invalid file name: "run". ')
-            if not(args[i + 1][0] == '-' or args[i + 1][0:2] == '--'):
-                cmd['filename'] = args[i + 1]
-        if args[i] == 'run':
-            cmd['express'] = True
-
-    return cmd
 
 
 def setting(N, T, alpha, beta, gamma, phi, delta, alpha_V, alpha_T, phi_V, phi_T, test_rate, immune_time, group_size, verbose_mode):
@@ -742,6 +679,7 @@ population = Person.make_population(N)
 contact_nwk = ContactNwk(population, verbose_mode, root)
 info_nwk = Group(population, root, group_size)
 vaccine_available = [Vaccine('Default', 1, 28, None, 0, 0.99, alpha, beta, gamma, delta, phi)]
+vaccine_cap_filename = None
 filename = ''  # Default file name to export (.csv). Change when use prompt 'export' cmd.
 
 mode_master_list = []
@@ -784,7 +722,7 @@ Express mode
 Loads the settings prior to the run. Optional keyword 'run' to run the simulation automatically.
 '''
 
-settings = parse_arg(sys.argv)
+settings = Parser.parse_arg(sys.argv)
 if 'logger_level' in settings:
     logging_level = ['debug', 'info', 'warning', 'error', 'critical']
     if type(settings['logger_level']) == str:
