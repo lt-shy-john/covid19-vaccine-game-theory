@@ -40,6 +40,28 @@ class TestMode43(TestCase):
         for i in range(len(self.population)):
             self.assertEqual(results[i], sum(self.population[i].vaccine_history))
 
+    def test_count_vaccine_taken_brand(self):
+        '''
+        Test when instructions specifically looks for a particular brand.
+        '''
+        # Arrange
+        self.population[0].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.population[1].vaccine_history = [0, 0, 0, 0, 'Sample:1', 0, 'Sample:2', 0, 0, 0]
+        self.population[2].vaccine_history = [0, 0, 0, 0, 'Sample:1', 0, 0, 0, 0, 0]
+        self.population[3].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.population[4].vaccine_history = ['Sample:1', 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        results = []
+        expected = [0, 2, 1, 0, 1]
+
+        # Act
+        for i in range(len(self.population)):
+            results.append(self.mode[43].count_vaccine_taken(i))
+
+        # Assert
+        for i in range(len(self.population)):
+            self.assertEqual(results[i], expected[i])
+
     def test_count_infected_times(self):
         # Arrange
         self.population[0].compartment_history = ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S']
@@ -63,7 +85,18 @@ class TestMode43(TestCase):
         for i in range(len(self.population)):
             self.assertEqual(actual[i], expected[i])
 
-    def test_is_immuned(self):
+    def test_get_immune_time(self):
+        # Arrange
+
+        # Act
+
+        # Assert
+        self.fail()
+
+    def test_get_immune_time_vaccine_brand(self):
+        '''
+        Test when instructions specifically looks for a particular brand.
+        '''
         # Arrange
 
         # Act

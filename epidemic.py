@@ -813,7 +813,10 @@ class Epidemic:
         if self.immune_time == 0:
             return
         for i in range(len(self.people)):
-            recent = self.people[i].compartment_history[-self.immune_time:]
+            if 43 in self.mode:
+                recent = self.people[i].compartment_history[-self.mode[43].get_immune_time(i):]
+            else:
+                recent = self.people[i].compartment_history[-self.immune_time:]
             for j in range(len(recent)-1):
                 if len(recent) < 2:
                     continue
