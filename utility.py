@@ -4,13 +4,12 @@ import customLogger
 
 class Parser:
 
-    def __init__(self):
-        self.logger = customLogger.gen_logging('', 'info')
-
     def parse_arg(args):
         '''
         Parse system arguments.
         '''
+        logger = customLogger.gen_logging('', 'info')
+
         if type(args) != list:
             args = args.split()
         cmd = {}
@@ -41,7 +40,7 @@ class Parser:
         for i in range(len(args)):
             if args[i] == '-import' or args[i] == '--i':
                 if args[i + 1][0] == '-' or args[i + 1][0:2] == '--':
-                    self.logger.info("Invalid setting file name specified. ")
+                    logger.info("Invalid setting file name specified. ")
                 else:
                     # print(os.getcwd())  # To debug when file cannot be fetched.
                     cmd['import setting'] = args[i + 1]
