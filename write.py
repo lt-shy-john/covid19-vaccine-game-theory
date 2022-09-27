@@ -352,6 +352,13 @@ def WriteSummary(obs, filename):
         contents.append('Tau: {}\n'.format(obs.test_rate))
         contents.append('Immune time: {} days \n'.format(obs.immune_time))
         contents.append('Test rate: {} \n'.format(obs.test_rate))
+        if 43 in obs.modes:
+            contents.append('## Reinfection/ immunity time\n')
+            contents.append('This simulation overwrites reinfection mechanism. \n\n')
+            contents.append(' Rule  Immunity time \n')
+            contents.append(' ----  ------------- \n')
+            for k, v in obs.modes[43].instructions.items():
+                contents.append(f' {k}    {v} \n')
         if any(i in obs.modes for i in [7, 8]):
             contents.append('\n# Demographics \n')
             if 7 in obs.modes:
@@ -472,9 +479,13 @@ def WriteSummary(obs, filename):
         if 2 in obs.modes:
             contents.append('* Reward for travel: rI\n')
             contents.append('* Reward for not to travel: rS\n')
+        if 43 in obs.modes:
+            contents.append('* Default immunity time rule maybe listed as "0", when overwritten by this mode. ')
+            contents.append('* Immunity time decided by number of vaccines taken, then number of prior infections. \n')
+            contents.append('  For example, a person taken 2 doses and infected once may follow rule "2V" if "2V1I" does not exist. \n')
 
         contents.append('\n## COVID-19 Information\n')
-        contents.append('Please see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7270519/ for compartment. The actual compartment model is described in https://github.com/lt-shy-john/covid19-vaccine-game-theory/blob/main/report/report.pdf. ')
+        contents.append('Please see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7270519/ for compartment. The actual compartment model is described in https://github.com/lt-shy-john/covid19-vaccine-game-theory/blob/main/report/report.pdf. \n')
         if any(i in obs.modes for i in [1, 7, 8, 10, 11, 14]):
             contents.append('* Epidemic parameter controlled by optional modes. Consult the relevant modes for more information. \n')
         f.writelines(contents)

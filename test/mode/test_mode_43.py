@@ -13,14 +13,14 @@ class TestMode43(TestCase):
 
     def test_correct_instructions_format(self):
         # Arrange
-        self.mode[43].instructions = {'V': 0, '1I': 0, '2V': 0, '2V1I':0, '2I2V': 0}
+        self.mode[43].instructions = {'V': 0, '1I': 0, '2V': 0, 'V3': 0, '2V1I':0, '2I1V': 0}
 
         # Act
         self.mode[43].correct_instructions_format()
 
         # Assert
         for k in self.mode[43].instructions.keys():
-            self.assertTrue(k in ['V', 'I', '2V', '2V1I', '2I2V'])
+            self.assertTrue(k in ['V', 'I', '2V', '3V', '2V1I', '1V2I'], k)
 
     def test_count_vaccine_taken(self):
         # Arrange
@@ -87,8 +87,31 @@ class TestMode43(TestCase):
 
     def test_get_immune_time(self):
         # Arrange
+        self.mode[43].instructions = {'V': 0, '1I': 0, '2V': 0, 'V3': 0, '2V1I':0, '2I1V': 0}  # todo: Add the instructions
+
+        self.population[0].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.population[1].vaccine_history = [0, 0, 0, 0, 1, 0, 1, 0, 0, 0]
+        self.population[2].vaccine_history = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+        self.population[3].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.population[4].vaccine_history = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        self.population[0].compartment_history = ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
+                                                  'S']
+        self.population[1].compartment_history = ['E', 'E', 'I', 'I', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
+                                                  'S']
+        self.population[2].compartment_history = ['S', 'E', 'E', 'I', 'S', 'E', 'I', 'I', 'S', 'S', 'S', 'S', 'S', 'S',
+                                                  'S']
+        self.population[3].compartment_history = ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
+                                                  'E']
+        self.population[4].compartment_history = ['E', 'I', 'S', 'E', 'I', 'S', 'E', 'S', 'S', 'E', 'S', 'S', 'S', 'S',
+                                                  'S']
+
+        results = []
+        expected = []
 
         # Act
+        for i in range(len(self.population)):
+            results.append(self.mode[43].get_immune_time(i))
 
         # Assert
         self.fail()
@@ -98,8 +121,31 @@ class TestMode43(TestCase):
         Test when instructions specifically looks for a particular brand.
         '''
         # Arrange
+        self.mode[43].instructions = {} # todo: Copy the instructions from above
+
+        self.population[0].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.population[1].vaccine_history = [0, 0, 0, 0, 'Sample:1', 0, 'Sample:2', 0, 0, 0]
+        self.population[2].vaccine_history = [0, 0, 0, 0, 'Sample:1', 0, 0, 0, 0, 0]
+        self.population[3].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.population[4].vaccine_history = ['Sample:1', 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        self.population[0].compartment_history = ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
+                                                  'S']
+        self.population[1].compartment_history = ['E', 'E', 'I', 'I', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
+                                                  'S']
+        self.population[2].compartment_history = ['S', 'E', 'E', 'I', 'S', 'E', 'I', 'I', 'S', 'S', 'S', 'S', 'S', 'S',
+                                                  'S']
+        self.population[3].compartment_history = ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E',
+                                                  'E']
+        self.population[4].compartment_history = ['E', 'I', 'S', 'E', 'I', 'S', 'E', 'S', 'S', 'E', 'S', 'S', 'S', 'S',
+                                                  'S']
+
+        results = []
+        expected = []
 
         # Act
+        for i in range(len(self.population)):
+            results.append(self.mode[43].get_immune_time(i))
 
         # Assert
         self.fail()

@@ -618,11 +618,6 @@ class Epidemic:
         '''
 
         self.logger.debug('Starting method Epidemic.infect()...')
-        # Check whether immuned (Mode 43)
-        if 43 in self.mode:
-            for i in range(len(self.people)):
-                if self.mode[43].is_immuned(i):
-                    self.people[i].suceptible = 0
 
         # Intimacy game
         if 20 in self.mode:
@@ -814,16 +809,21 @@ class Epidemic:
             return
         for i in range(len(self.people)):
             if 43 in self.mode:
-                recent = self.people[i].compartment_history[-self.mode[43].get_immune_time(i):]
+                try:
+                    recent = self.people[i].compartment_history[-self.mode[43].get_immune_time(i):] if self.mode[43].get_immune_time(i) > 0 else []
+                except TypeError:
+                    # This is when Mode43().get_immune_time() refers to default instructions.
+                    recent = self.people[i].compartment_history[-self.immune_time:] if self.immune_time > 0 else []
             else:
-                recent = self.people[i].compartment_history[-self.immune_time:]
-            for j in range(len(recent)-1):
+                recent = self.people[i].compartment_history[-self.immune_time:] if self.immune_time > 0 else []
+            for t in range(len(recent)-1):
                 if len(recent) < 2:
-                    continue
-                if recent[j] == 'I' and recent[j+1] == 'S':
+                    break
+                if recent[t] == 'I' and recent[t+1] == 'S':
+                    # When someone was recovered during this period, then they will not be infected again (during this period)
                     self.people[i].suceptible = 0
                     self.people[i].exposed = 0
-                    continue
+                    break
 
     def wear_off(self):
         '''

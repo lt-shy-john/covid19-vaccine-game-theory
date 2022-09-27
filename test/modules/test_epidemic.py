@@ -1,7 +1,5 @@
 import random
 
-import pandas as pd
-
 from person import Person
 from group import Group
 from vaccine import Vaccine
@@ -23,6 +21,7 @@ from mode import Mode21
 from mode import Mode22
 from mode import Mode23
 from mode import Mode24
+from mode import Mode43
 from mode import Mode51
 from mode import Mode52
 from mode import Mode53
@@ -268,16 +267,18 @@ class TestEpidemic(TestCase):
             self.assertEqual(len(person.vaccine_history), 1)
 
     @mock.patch('random.randint', return_value=0)
+    @mock.patch('epidemic.Epidemic.vaccine_dose_flag')
+    @mock.patch('mode.Mode15.check_next_vaccine')
     @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
     @mock.patch('mode.Mode15.take_multi_dose_vaccine')
     @mock.patch('mode.Mode15.write_vaccine_history')
-    def test_vaccinate_mode15(self, mock_random_randint, mock_check_multi_dose_vaccine, mock_take_multi_dose_vaccine, mock_write_vaccine_history):
+    def test_vaccinate_mode15(self, mock_random_randint, mock_epidemic_vaccine_dose_flag, mock_check_next_vaccine, mock_check_multi_dose_vaccine, mock_take_multi_dose_vaccine, mock_write_vaccine_history):
         # Arrange
         mode = {15: Mode15(self.population, self.logger)}
         self.epidemic.load_modes(mode)
 
-        test_vaccine = Vaccine(efficacy=1, alpha=0.3)
-        mock_take_multi_dose_vaccine.return_value = test_vaccine
+        test_vaccine = Vaccine(name="Sample", efficacy=1, alpha=0.3)
+        mock_check_next_vaccine.return_value = test_vaccine
 
         # Act
         self.epidemic.vaccinate()
@@ -644,6 +645,7 @@ class TestEpidemic(TestCase):
 
     @mock.patch('random.randint', return_value=0)
     def test_infect(self, mock_random_randint):
+        # Arrange
         for person in self.population:
             if person.id == 20:
                 person.vaccinated = 1
@@ -654,8 +656,10 @@ class TestEpidemic(TestCase):
                 continue
             person.suceptible = 0
 
+        # Act
         self.epidemic.infect()
 
+        # Assert
         for person in self.population:
             if person.id == 20:
                 self.assertEqual(person.suceptible, 0)
@@ -670,6 +674,7 @@ class TestEpidemic(TestCase):
         # Arrange
 
         # Act
+        self.epidemic.infect()
 
         # Assert
         self.fail()
@@ -678,6 +683,7 @@ class TestEpidemic(TestCase):
         # Arrange
 
         # Act
+        self.epidemic.infect()
 
         # Assert
         self.fail()
@@ -686,6 +692,7 @@ class TestEpidemic(TestCase):
         # Arrange
 
         # Act
+        self.epidemic.infect()
 
         # Assert
         self.fail()
@@ -694,6 +701,7 @@ class TestEpidemic(TestCase):
         # Arrange
 
         # Act
+        self.epidemic.infect()
 
         # Assert
         self.fail()
@@ -702,6 +710,7 @@ class TestEpidemic(TestCase):
         # Arrange
 
         # Act
+        self.epidemic.infect()
 
         # Assert
         self.fail()
@@ -710,6 +719,7 @@ class TestEpidemic(TestCase):
         # Arrange
 
         # Act
+        self.epidemic.infect()
 
         # Assert
         self.fail()
@@ -718,6 +728,7 @@ class TestEpidemic(TestCase):
         # Arrange
 
         # Act
+        self.epidemic.infect()
 
         # Assert
         self.fail()
@@ -761,10 +772,13 @@ class TestEpidemic(TestCase):
 
     @mock.patch('random.randint', return_value=0)
     def test_recovery(self, mock_random_randint):
+        # Arrange
         self.population[0].suceptible = 1
 
+        # Act
         self.epidemic.recovery()
 
+        # Assert
         self.assertEqual(self.population[0].suceptible, 0)
 
     def test_recovery_mode11(self):
@@ -786,11 +800,58 @@ class TestEpidemic(TestCase):
         self.assertEqual(self.population[0].suceptible, 0)
         self.assertEqual(self.population[0].exposed, 0)
 
+    def test_immune_time_0(self):
+        # Test when there is no immunity time
+        # Arrange
+        self.epidemic.immune_time = 0
+
+        for i in range(len(self.population)):
+            # Sample recent list: ['S', 'S', 'E', 'E', 'I', 'S', 'S', 'S', 'S', 'S']
+            self.population[i].compartment_history = ['S'] * 2 + ['E'] * 2 + ['I'] + ['S'] * 5
+            # Suppose everyone got passed on the disease,
+            # this is to test whether it will be immuned based on the mechanics.
+            self.population[i].suceptible = 1
+
+        # Act
+        self.epidemic.immune()
+
+        # Assert
+        for i in range(len(self.population)):
+            self.assertEqual(self.population[i].suceptible, 1)
+
     def test_immune_mode10(self):
         self.fail()
 
     def test_immune_mode15(self):
         self.fail()
+
+    def test_immune_mode43(self):
+        # Arrange
+        self.epidemic.mode[43] = Mode43(self.population, self.logger, {'0': 0, 'I': 0, 'V': 0, '2V': 5, '3V': 8, '2V1I': 6, '3V1I': 7})
+
+        for i in range(len(self.population)):
+            # Sample recent list: ['S', 'S', 'E', 'E', 'I', 'S', 'S', 'S', 'S', 'S']
+            self.population[i].compartment_history = ['S'] * 2 + ['E'] * 2 + ['I'] + ['S'] * 5
+            # Suppose everyone got passed on the disease,
+            # this is to test whether it will be immuned based on the mechanics.
+            self.population[i].suceptible = 1
+
+        # Create vaccination records
+        for i in range(len(self.population)):
+            if i == 0:
+                self.population[i].vaccine_history = [1, 1] + [0] * (len(self.population[i].compartment_history) - 2)
+            elif i == 1:
+                self.population[i].vaccine_history = [1] + [0] * (len(self.population[i].compartment_history) - 1)
+
+        # Act
+        self.epidemic.immune()
+
+        # Assert
+        for i in range(len(self.population)):
+            if i == 0:
+                self.assertEqual(0, self.population[i].suceptible, i)
+            else:
+                self.assertEqual(1, self.population[i].suceptible, i)
 
     @mock.patch('random.randint', return_value=0)
     def test_wear_off(self, mock_random_randint):

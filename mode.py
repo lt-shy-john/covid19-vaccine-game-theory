@@ -476,22 +476,22 @@ class Mode04(Mode):
         # Other parameters are stored within the person
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 4. ')
-        print('-------------------------\n')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 4. ')
+        self.logger.info('-------------------------\n')
         if self.alpha == 0:
-            print(
-                'Warning: Adoption parameter is 0, mode4 will not work under this. Please reset adoption parameter first. ')
+            self.logger.warn(
+                'Adoption parameter is 0, mode4 will not work under this. Please reset adoption parameter first. ')
             return
-        print('Please set rationality parameter below. ')
+        self.logger.info('Please set rationality parameter below. ')
         lambda_BR = self.people[0].lambda_BR
         lambda_BR_temp = input('Lambda >>> ')
         lambda_BR = super().set_correct_para(lambda_BR_temp, lambda_BR, pos=True)
         self.set_lambda(lambda_BR)
-        print('Assigning parameters to population. ')
+        self.logger.info('Assigning parameters to population. ')
         self.QRE()
         self.raise_flag()
-        print('\nMode 4 equipped. \n')
+        self.logger.info('\nMode 4 equipped. \n')
 
     def set_lambda(self, lambda_input):
         '''
@@ -513,10 +513,12 @@ class Mode04(Mode):
         disutility_fn = [self.alpha * person.lambda_BR * person.rI_BR for person in self.people]
         self.P_Alpha = np.divide(np.exp(utility_fn), (np.add(np.exp(utility_fn), np.exp(disutility_fn))),
                                  out=np.ones_like(utility_fn), where=(utility_fn != np.inf))
-        # print('QRE: ')
-        # print('U =',utility_fn)
-        # print('-U =',disutility_fn)
-        # print('p =',self.P_Alpha)
+        self.logger.debug('Calculated QRE: ')
+        self.logger.debug('QRE: ')
+        self.logger.debug('U =',utility_fn)
+        self.logger.debug('-U =',disutility_fn)
+        self.logger.debug('p =',self.P_Alpha)
+        self.logger.debug('')
 
 
 '''
@@ -564,16 +566,16 @@ class Mode05(Mode):
         self.data = None
 
     def __call__(self):
-        print('-------------------------')
-        print('You are editing mode 5. ')
-        print('-------------------------\n')
+        self.logger.info('-------------------------')
+        self.logger.info('You are editing mode 5. ')
+        self.logger.info('-------------------------\n')
         cmd = None
         while cmd != 'y':
-            print('Please review the contact network.')
+            self.logger.info('Please review the contact network.')
             self.view_network()
 
-            print('Input the agents you wished to connect... ')
-            print('Agents are linked by "-" and pairs separated by space.')
+            self.logger.info('Input the agents you wished to connect... ')
+            self.logger.info('Agents are linked by "-" and pairs separated by space.')
             self.data = input('> ')
             self.read_data()
             if self.data != '':
@@ -621,13 +623,13 @@ class Mode07(Mode):
             person.set_age()
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 7. ')
-        print('-------------------------\n')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 7. ')
+        self.logger.info('-------------------------\n')
         # 0 - 9, 10 - 19, 20 - 29, 30 - 39, 40 - 49, 50 - 59, 60 - 69, 70 - 79, 80 - 89, 90 - 99
 
         # Infection
-        print('Please set infection parameter for each age brackets below. ')
+        self.logger.info('Please set infection parameter for each age brackets below. ')
         beta0_temp = input('0 - 9 >>> ')
         self.beta_age[0] = super().set_correct_epi_para(beta0_temp, self.beta_age[0])
         beta1_temp = input('10 - 19 >>> ')
@@ -650,7 +652,7 @@ class Mode07(Mode):
         self.beta_age[9] = super().set_correct_epi_para(beta9_temp, self.beta_age[9])
 
         # Removal
-        print('Please set removal parameter for each age brackets below. ')
+        self.logger.info('Please set removal parameter for each age brackets below. ')
         delta0_temp = input('0 - 9 >>> ')
         self.delta_age[0] = super().set_correct_epi_para(delta0_temp, self.delta_age[0])
         delta1_temp = input('10 - 19 >>> ')
@@ -672,10 +674,10 @@ class Mode07(Mode):
         delta9_temp = input('90 - 99 >>> ')
         self.delta_age[9] = super().set_correct_epi_para(delta9_temp, self.delta_age[9])
 
-        print('You may edit the proportion of each brackets in person.py. ')
+        self.logger.info('You may edit the proportion of each brackets in person.py. ')
         self.set_population()
         self.raise_flag()
-        print('\nMode 7 equipped. \n')
+        self.logger.info('\nMode 7 equipped. \n')
 
 
 '''
@@ -715,23 +717,23 @@ class Mode08(Mode):
             person.set_gender()
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 8. ')
-        print('-------------------------\n')
-        print('Please set infection parameter for each age brackets below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 8. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set infection parameter for each age brackets below. ')
         beta0_temp = input('Male >>> ')
         self.beta_gender[0] = super().set_correct_epi_para(beta0_temp, self.beta_gender[0])
         beta1_temp = input('Female >>> ')
         self.beta_gender[1] = super().set_correct_epi_para(beta1_temp, self.beta_gender[1])
-        print('Please set removal parameter for each age brackets below. ')
+        self.logger.info('Please set removal parameter for each age brackets below. ')
         delta0_temp = input('Male >>> ')
         self.delta_gender[0] = super().set_correct_epi_para(delta0_temp, self.delta_gender[0])
         delta1_temp = input('Female >>> ')
         self.delta_gender[1] = super().set_correct_epi_para(delta1_temp, self.delta_gender[1])
-        print('You may edit the proportion of each brackets in person.py. ')
+        self.logger.info('You may edit the proportion of each brackets in person.py. ')
         self.set_population()
         self.raise_flag()
-        print('\nMode 8 equipped. \n')
+        self.logger.info('\nMode 8 equipped. \n')
 
 
 '''
@@ -746,12 +748,12 @@ class Mode10(Mode):
         self.type = None
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 10. ')
-        print('-------------------------\n')
-        print('Please set infection parameter below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 10. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set infection parameter below. ')
         for i in range(len(self.types)):
-            print(f'{i + 1}. {self.types[i]}')
+            self.logger.debug(f'Id: {i + 1} Vaccine type: {self.types[i]}')
         cmd = input('Please choose one option: ')
         if cmd == '1':
             self.type = 1
@@ -760,7 +762,7 @@ class Mode10(Mode):
         elif cmd == '3':
             self.type = 3
         self.raise_flag()
-        print('\nMode 10 equipped. \n')
+        self.logger.info('\nMode 10 equipped. \n')
 
     def check_input(self, cmd):
         '''
@@ -790,10 +792,10 @@ class Mode11(Mode):
         self.delta_V = None
 
     def __call__(self, beta, gamma, delta):
-        print('-------------------------')
-        print('You are creating mode 11. ')
-        print('-------------------------\n')
-        print('Please set infection parameter below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 11. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set infection parameter below. ')
         for i in range(len(self.types)):
             print(f'{i + 1}. {self.types[i]}')
         cmd = input('Please choose one option: ')
@@ -808,7 +810,7 @@ class Mode11(Mode):
             new_delta_temp = input('Delta >>> ')
             self.delta_V = super().set_correct_epi_para(new_delta_temp, self.delta_V)
         self.raise_flag()
-        print('\nMode 11 equipped. \n')
+        self.logger.info('\nMode 11 equipped. \n')
 
     def check_input(self, cmd):
         '''
@@ -823,15 +825,15 @@ class Mode11(Mode):
 
     def check_beta(self, beta):
         if beta < self.beta_V:
-            print('Warning: Your setting implies vaccine may cause higher tranmissibility. ')
+            self.logger.warn('Your setting implies vaccine may cause higher tranmissibility. ')
 
     def check_gamma(self, gamma):
         if gamma > self.gamma_V:
-            print('Warning: Your setting implies vaccine may cause lower effectiveness. ')
+            self.logger.warn('Your setting implies vaccine may cause lower effectiveness. ')
 
     def check_delta(self, delta):
         if delta > self.delta_V:
-            print('Warning: Your setting implies vaccine may cause higher death rate. ')
+            self.logger.warn('Your setting implies vaccine may cause higher death rate. ')
 
 
 '''
@@ -1253,8 +1255,7 @@ class Mode20(Mode):
         # return layered_ls
 
     def event_infected(self, i, verbose=False):
-        if verbose:
-            print(f'{self.people[i].id} is infected, passing info to others... ')
+        self.logger.debug(f'{self.people[i].id} is infected, passing info to others... ')
         incr_cI = np.ones(len(self.people))
 
         # Adverse event
@@ -1310,7 +1311,7 @@ class Mode20(Mode):
         '''
         if verbose:
             payoff = self.get_payoff(i)
-            print(f'\tPayoff of {self.people[i].id} is {payoff}.')
+            self.logger.debug(f'\tPayoff of {self.people[i].id} is {payoff}.')
         return 1 / (1 + math.exp(self.get_payoff(i)))
 
     def get_infected_neighbours_number(self, i):
@@ -1353,21 +1354,21 @@ class Mode21(Mode):
         self.info_nwk = info_nwk
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 21. ')
-        print('-------------------------\n')
-        print('Please set proportion of initial opinion below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 21. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set proportion of initial opinion below. ')
         propro_temp = input('Pro >>> ')
         self.info_nwk.propro = super().correct_para(propro_temp)
         agpro_temp = input('Ag >>> ')
         self.info_nwk.agpro = super().correct_para(agpro_temp)
         self.info_nwk.set_opinion()
-        print('All population has been assigned with their opinion. ')
+        self.logger.info('All population has been assigned with their opinion. ')
         self.set_personality()
-        print('All population has been assigned with default personality. ')
+        self.logger.info('All population has been assigned with default personality. ')
         # Roster has been set already.
         self.raise_flag()
-        print('\nMode 21 equipped. \n')
+        self.logger.info('\nMode 21 equipped. \n')
 
     def set_personality(self):
         for person in self.people:
@@ -1386,14 +1387,14 @@ class Mode22(Mode):
         self.InflexProProportion = None
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 22. ')
-        print('-------------------------\n')
-        print('Please set proportion of stubbon of pro-vaccine below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 22. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set proportion of stubbon of pro-vaccine below. ')
         propro_temp = input('Pro >>> ')
         self.assign_personality(propro_temp)
         self.raise_flag()
-        print('\nMode 22 equipped. \n')
+        self.logger.info('\nMode 22 equipped. \n')
 
     def assign_personality(self, p):
         '''
@@ -1481,15 +1482,15 @@ class Mode24(Mode):
         self.BalancerProportion = None
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 24. ')
-        print('-------------------------\n')
-        print('Please set proportion of contrarian below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 24. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set proportion of contrarian below. ')
         balpro_temp = input('Pro >>> ')
         self.assign_personality(balpro_temp)
         self.assign_personality()
         self.raise_flag()
-        print('\nMode 24 equipped. \n')
+        self.logger.info('\nMode 24 equipped. \n')
 
     def assign_personality(self, p):
         '''
@@ -1519,11 +1520,11 @@ class Mode31(Mode):
         super().__init__(people, 31, 'Medication incorporated', logger)
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 31. ')
-        print('-------------------------\n')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 31. ')
+        self.logger.info('-------------------------\n')
         self.raise_flag()
-        print('\nMode 31 equipped. \n')
+        self.logger.info('\nMode 31 equipped. \n')
 
 
 '''
@@ -1531,14 +1532,14 @@ class Mode31(Mode):
 '''
 
 class Mode43(Mode):
-    def __init__(self, people, logger):
+    def __init__(self, people, logger, instructions):
         super().__init__(people, 43, 'Advanced immunity period settings', logger)
-        self.instructions = {'I': 0, 'V': 0, '2V': 180}  # Hard coded atm, which means if taken two vaccines then impose immune time for 180 days.
+        self.instructions = instructions
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 43. ')
-        print('-------------------------\n')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 43. ')
+        self.logger.info('-------------------------\n')
 
         # Loop all possible instructions
         cmd = ''
@@ -1554,7 +1555,7 @@ class Mode43(Mode):
                 break
 
         self.raise_flag()
-        print('\nMode 43 equipped. \n')
+        self.logger.info('\nMode 43 equipped. \n')
 
     def correct_instructions_format(self):
         '''
@@ -1564,7 +1565,62 @@ class Mode43(Mode):
 
         'default is 'V' but no need to change.
         '''
-        pass
+
+        import re
+
+        for k, v in list(self.instructions.items()):
+            # Check V and I
+            if k == 'V' or k == 'I':
+                self.logger.debug(f'Read "{k}" as immune time instructions successfully. ')
+                continue
+
+            # Check if only have alphabets (or numbers), then correct it
+            if re.match('(^\w$)|(^\d$)', k):
+                self.logger.warn(f'{k} is not a valid instruction and will be deleted. ')
+                del self.instructions[k]
+                continue
+
+            # V|I (w/ number)
+            if re.match('^\d+\w$', k):
+                if re.match('^1(V|I)', k):
+                    self.logger.debug(f'Correcting "{k}" without the redundant "1" in front. ')
+                    new_key = k[-1] # The last char must be correct
+                    self.instructions[new_key] = v
+                    del self.instructions[k]
+                elif re.match('^\d+(V|I)$', k):
+                    self.logger.debug(f'Read "{k}" as immune time instructions successfully. ')
+                else:
+                    self.logger.warn(f'{k} is not a valid instruction and will be deleted. ')
+                    del self.instructions[k]
+                continue
+
+            if re.match('^(V|I)\d+$', k):
+                new_key = re.findall('\d+', k)[0] + re.findall('(V|I)+', k)[0]
+                self.logger.warn(f'{k} is not a valid instruction and will be corrected as "{new_key}". ')
+                self.instructions[new_key] = v
+                del self.instructions[k]
+                self.logger.debug(f'Created {k} into instructions. ')
+                continue
+
+            # V&I (w/ number)
+            if re.match('^\d+\w\d+\w$', k):
+                if re.match('^\d+V\d+I$', k):
+                    self.logger.debug(f'Read "{k}" as immune time instructions successfully. ')
+                elif re.match('^\d+I\d+V$', k):
+                    new_key = re.findall('\d+', k)[1] + 'V' + re.findall('\d+', k)[0] + 'I'
+                    self.logger.warn(f'{k} is not a valid instruction and will be corrected as "{new_key}". ')
+                    self.instructions[new_key] = v
+                    del self.instructions[k]
+                    self.logger.debug(f'Created {k} into instructions. ')
+                else:
+                    self.logger.warn(f'{k} is not a valid instruction and will be deleted. ')
+                    del self.instructions[k]
+                continue
+
+            # If the conditions are not catched, then delete them
+            self.logger.warn(f'{k} is not a valid instruction and will be deleted. ')
+            del self.instructions[k]
+
 
     def count_vaccine_taken(self, i, brand=None):
         '''
@@ -1609,6 +1665,10 @@ class Mode43(Mode):
         infected_times = 0
 
         # Day 0
+        if len(self.people[i].compartment_history) == 0:
+            return 0
+
+        # Day 1
         if self.people[i].compartment_history[t] == 'E':
             infected_times += 1
         t += 1
@@ -1634,7 +1694,7 @@ class Mode43(Mode):
 
         Returns
         -------
-        immune_time: int
+        immune_time: int (or None)
             If the person is immuned from transmission.
         '''
 
@@ -1651,6 +1711,30 @@ class Mode43(Mode):
         # If person has been infected and instruction says '2V1I', nothing happens.
         #
         # ================================================
+
+        self.logger.debug(f'Person {i} has taken {vaccine_taken} vaccines and infected {infected_times} times. ')
+
+        v_counter = vaccine_taken
+        i_counter = infected_times
+
+        while v_counter > 0:
+            while i_counter >= 0:
+                if i_counter == 0:
+                    target_instruction = f'{v_counter}V'
+                else:
+                    target_instruction = f'{v_counter}V{i_counter}I'
+                self.logger.debug(f'Checking rule {target_instruction}. ')
+                if target_instruction in self.instructions:
+                    return self.instructions[target_instruction]
+                i_counter -= 1
+            v_counter -= 1
+
+        # Check if '0' exists
+        if '0' in self.instructions:
+            self.logger.debug(f'Checking rule "0". ')
+            return self.instructions['0']
+
+        self.logger.debug('No suitable instructions found, referring to default instructions. ')
 
 '''
 51: Erdos-Renyi topology
@@ -1722,10 +1806,10 @@ class Mode51(Mode):
             self.contact_nwk.l1 = l1
 
     def __call__(self):
-        print('-------------------------')
-        print('You are creating mode 51. ')
-        print('-------------------------\n')
-        print('Please set infection parameter below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 51. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set infection parameter below. ')
         try:
             p_temp = float(input('p >>> '))
         except ValueError:
@@ -1734,7 +1818,7 @@ class Mode51(Mode):
         self.set_p(p_temp)
         cmd = input('Longitudinal social network? [y/n] ')
         if cmd == 'y':
-            print('Default rule: independent update. ')
+            self.logger.info('Default rule: independent update. ')
             cmd_update_rule = input('Change? [y/n] ')
             if cmd_update_rule == 'y':
                 self.contact_nwk.update_rule = 'XBS'
@@ -1748,7 +1832,7 @@ class Mode51(Mode):
                 self.set_p(l0)
         self.set_network()
         self.raise_flag()
-        print('E-R graph settings done.')
+        self.logger.info('E-R graph settings done.')
 
 
 '''
@@ -1819,10 +1903,10 @@ class Mode52(Mode):
         '''
         Setting mode 52 into model. If other network modes have set, they are dropped by `main.py`.
         '''
-        print('-------------------------')
-        print('You are creating mode 52. ')
-        print('-------------------------\n')
-        print('Please set connection parameter below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 52. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set connection parameter below. ')
         try:
             m_temp = int(input('m >>> '))
         except ValueError:
@@ -1832,7 +1916,7 @@ class Mode52(Mode):
 
         cmd = input('Longitudinal social network? [y/n] ')
         if cmd == 'y':
-            print('Default rule: Xulvi-Brunet Sokolov. ')
+            self.logger.info('Default rule: Xulvi-Brunet Sokolov. ')
             cmd_update_rule = input('Change? [y/n] ')
             if cmd_update_rule == 'y':
                 self.contact_nwk.update_rule = 'random'
@@ -1849,7 +1933,7 @@ class Mode52(Mode):
                 self.set_pupdate(pUpd)
         self.set_network()
         self.raise_flag()
-        print('Preferential attachment graph settings done.')
+        self.logger.info('Preferential attachment graph settings done.')
 
 
 '''
@@ -1929,10 +2013,10 @@ class Mode53(Mode):
         '''
         Setting mode 53 into model. If other network modes have set, they are dropped by `main.py`.
         '''
-        print('-------------------------')
-        print('You are creating mode 53. ')
-        print('-------------------------\n')
-        print('Please set infection parameter below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 53. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set infection parameter below. ')
         try:
             k_temp = int(input('k >>> '))
         except ValueError:
@@ -1950,7 +2034,7 @@ class Mode53(Mode):
         '''
         cmd = input('Longitudinal social network? [y/n] ')
         if cmd == 'y':
-            print('Default rule: independent update. ')
+            self.logger.info('Default rule: independent update. ')
             cmd_update_rule = input('Change? [y/n] ')
             if cmd_update_rule == 'y':
                 self.contact_nwk.update_rule = 'XBS'
@@ -1967,7 +2051,7 @@ class Mode53(Mode):
                 self.set_l1(l1Upd)
         self.set_network()
         self.raise_flag()
-        print('Watts-Strogatz graph settings done.')
+        self.logger.info('Watts-Strogatz graph settings done.')
 
 
 '''
@@ -2040,10 +2124,10 @@ class Mode54(Mode):
         '''
         Setting mode 52 into model. If other network modes have set, they are dropped by `main.py`.
         '''
-        print('-------------------------')
-        print('You are creating mode 54. ')
-        print('-------------------------\n')
-        print('Please set infection parameter below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 54. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set infection parameter below. ')
         try:
             m_temp = int(input('m >>> '))
         except ValueError:
@@ -2055,7 +2139,7 @@ class Mode54(Mode):
         '''
         cmd = input('Longitudinal social network? [y/n] ')
         if cmd == 'y':
-            print('Default rule: independent update. ')
+            self.logger.info('Default rule: independent update. ')
             cmd_update_rule = input('Change? [y/n] ')
             if cmd_update_rule == 'y':
                 self.contact_nwk.update_rule = 'XBS'
@@ -2072,7 +2156,7 @@ class Mode54(Mode):
                 self.set_l1(l1Upd)
         self.set_network()
         self.raise_flag()
-        print('Preferential attachment graph settings done.')
+        self.logger.info('Preferential attachment graph settings done.')
 
 
 '''
@@ -2090,14 +2174,14 @@ class Mode501(Mode):
         '''
         Setting mode 501 into model.
         '''
-        print('-------------------------')
-        print('You are creating mode 501. ')
-        print('-------------------------\n')
-        print('Please set initial infection number below. ')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 501. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set initial infection number below. ')
         Ii_temp = input('>>> ')
         self.init_infection = super().set_correct_para(Ii_temp, self.init_infection)
         self.raise_flag()
-        print('\nMode 501 equipped. \n')
+        self.logger.info('\nMode 501 equipped. \n')
 
     def set_init_infection(self, Ii):
         return self.correct_para(Ii, pos=True)
@@ -2121,12 +2205,12 @@ class Mode505(Mode):
         '''
         Setting mode 505 into model.
         '''
-        print('-------------------------')
-        print('You are creating mode 505. ')
-        print('-------------------------\n')
-        print('Please set initial infection mode below. ')
-        print('0\tInfect by leaf')
-        print('1\tInfect by hub')
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 505. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set initial infection mode below. ')
+        self.logger.info('0\tInfect by leaf')
+        self.logger.info('1\tInfect by hub')
         mode_505_temp = input('>>> ')
         try:
             if int(mode_505_temp) == 1:
@@ -2139,7 +2223,7 @@ class Mode505(Mode):
             elif mode_505_temp.lower() == 'leaf':
                 self.mode = 'Leaf'
         self.raise_flag()
-        print('\nMode 505 equipped. \n')
+        self.logger.info('\nMode 505 equipped. \n')
 
     def set_infection(self, init_infection=4):
         if self.mode == 'Hub':

@@ -699,6 +699,7 @@ mode22 = mode.Mode22(population, info_nwk, root)
 mode23 = mode.Mode23(population, info_nwk, root)
 mode24 = mode.Mode24(population, info_nwk, root)
 mode31 = mode.Mode31(population, root)
+mode43 = mode.Mode43(population, root, {'0': 0, 'V': 0, 'I': 0, '2V': 180, '3V': 200, '1V1I': 28, '2V1I':180, '2V2I':200})
 mode51 = mode.Mode51(population, contact_nwk, root)
 mode52 = mode.Mode52(population, root, contact_nwk)
 mode53 = mode.Mode53(population, root, contact_nwk)
@@ -710,6 +711,7 @@ mode_master_list = [mode01, mode02, mode04, mode05, mode07, mode08,
 mode10, mode11, mode15,
 mode20, mode21, mode22, mode23, mode24,
 mode31,
+mode43,
 mode51, mode52, mode53, mode54,
 mode501, mode505]
 
@@ -775,6 +777,16 @@ for i in range(len(sys.argv)):
                             modes[21] = mode21
                         else:
                             mode.pop(21)
+                    elif mode_flag == 43:
+                        # Check if default instruction is set, then change main immune time
+                        if '0' in mode43.instructions:
+                            root.debug('Default immune time detected from mode 43 instructions. ')
+                            immune_time = mode43.instructions['0']
+                        mode43.raise_flag()
+                        if mode43.flag == 'X':
+                            modes[43] = mode43
+                        else:
+                            modes.pop(43)
                     elif mode_flag == 51:
                         if 52 in modes:
                             root.debug('Mode 52 has been activated. Ignore mode 51. ')
