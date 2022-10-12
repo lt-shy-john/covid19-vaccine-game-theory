@@ -1548,7 +1548,8 @@ class Mode43(Mode):
             tmp_immunity_period = input('Enter immunity period:')
 
             # Check format and append
-            self.instructions[self.correct_instructions_format(tmp_instructions)] = self.correct_para(tmp_immunity_period, pos=True)
+            self.correct_instructions_format()
+            self.instructions[tmp_instructions] = self.correct_para(tmp_immunity_period, pos=True)
 
             cmd = input('Continue? [y/n]')
             if cmd == '' or cmd.lower() == 'n':
