@@ -11,16 +11,21 @@ class Parser:
         logger = customLogger.gen_logging('', 'info')
 
         if type(args) != list:
-            args = args.split()
+            args = args.split()[1:]
+        else:
+            args = args[1:]
         cmd = {}
 
-        cmd['N'] = args[2]
-        cmd['T'] = args[3]
-        cmd['alpha'] = args[4]
-        cmd['beta'] = args[5]
-        cmd['gamma'] = args[6]
-        cmd['phi'] = args[7]
-        cmd['delta'] = args[8]
+        try:
+            int(args[0])
+        finally:
+            cmd['N'] = args[0]
+            cmd['T'] = args[1]
+            cmd['alpha'] = args[2]
+            cmd['beta'] = args[3]
+            cmd['gamma'] = args[4]
+            cmd['phi'] = args[5]
+            cmd['delta'] = args[6]
 
 
         def subls_modes(ls):
@@ -39,7 +44,7 @@ class Parser:
 
         for i in range(len(args)):
             if args[i] == '-import' or args[i] == '--i':
-                if args[i + 1][0] == '-' or args[i + 1][0:2] == '--':
+                if args[+ 1][0] == '-' or args[i + 1][0:2] == '--':
                     logger.info("Invalid setting file name specified. ")
                 else:
                     # print(os.getcwd())  # To debug when file cannot be fetched.
@@ -54,7 +59,7 @@ class Parser:
                 # print(modes_tmp)
                 for i in range(len(modes_tmp)):
                     if re.match(r'--\d', modes_tmp[i]):
-                        cmd['modes'][modes_tmp[i][2:]] = list(sub_ls_mode(modes_tmp[i:]))
+                        cmd['modes'][int(modes_tmp[i][2:])] = list(sub_ls_mode(modes_tmp[i:]))
             if args[i] == '-verbose' or args[i] == '--v':
                 if args[i + 1] in ['debug', 'info', 'error']:
                     cmd['logger_level'] = args[i + 1]
