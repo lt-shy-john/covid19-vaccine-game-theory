@@ -509,7 +509,7 @@ filename = ''  # Default file name to export (.csv). Change when use prompt 'exp
 
 mode_master_list = []
 # All objects should add into mode_master_list
-mode01 = mode.Mode01(population, root)
+mode01 = mode.Mode01(population, root, beta)
 mode02 = mode.Mode02(population, beta, root)
 mode04 = mode.Mode04(population, alpha, root)
 mode05 = mode.Mode05(population, contact_nwk, root)
@@ -549,455 +549,456 @@ Express mode
 Loads the settings prior to the run. Optional keyword 'run' to run the simulation automatically.
 '''
 
-settings = Parser.parse_arg(sys.argv)
-if 'logger_level' in settings:
-    logging_level = ['debug', 'info', 'warning', 'error', 'critical']
-    if type(settings['logger_level']) == str:
-        if settings['logger_level'].lower() in logging_level:
-            root.info("Logging level detected: " + settings['logger_level'])
-            verbose_level = settings['logger_level']
+if len(sys.argv) > 1:
+    settings = Parser.parse_arg(sys.argv)
+    if 'logger_level' in settings:
+        logging_level = ['debug', 'info', 'warning', 'error', 'critical']
+        if type(settings['logger_level']) == str:
+            if settings['logger_level'].lower() in logging_level:
+                root.info("Logging level detected: " + settings['logger_level'])
+                verbose_level = settings['logger_level']
+            else:
+                verbose_level = 'info'
         else:
             verbose_level = 'info'
-    else:
-        verbose_level = 'info'
 
-    # Write log to file is filename exists
-    if 'filename' in settings:
-        root = customLogger.gen_logging(settings['filename'], verbose_level)
-    else:
-        root = customLogger.gen_logging('', verbose_level)
-if 'immune time' in settings:
-    immune_time_temp = settings['immune time']
-    immune_time = set_correct_para(immune_time_temp, immune_time, pos=True)
-if 'test rate' in settings:
-    test_rate_temp = settings['test rate']
-    test_rate = set_correct_epi_para(test_rate_temp, test_rate)
-if 'import setting' in settings:
-    try:
-        vaccine_available, vaccine_cap_filename = read_settings(settings['import setting'])
-        root.debug(f'Vaccine read from setting: {[x.__dict__ for x in vaccine_available]}')
-        if vaccine_cap_filename != None:
-            root.debug(f'Fetched vaccine daily cap filename: {vaccine_cap_filename}. ')
-    except FileNotFoundError as fnfe:
-        root.error(fnfe)
-        root.error(f'Current directory: {os.getcwd()}')
-if 'modes' in settings:
-    '''
-    Sample value from pasred settings:
-    {'modes': {1: ['*b=0.6,0.75', '*p=0.54,0.46'], 2: ['*rI=-1', '*rS=1', '*lI=True', '*i=0.14'], 52: ['*m=3']}}
-    '''
-    if 1 in settings['modes']:
-        root.debug('Express mode: Activating mode 1. ')
-        for item in settings['modes'][1]:
-            if item.startswith('*b='):
-                mode01_b_config = item[3:].split(',')
-                b_c = float(mode01_b_config[0])
-                b_r = float(mode01_b_config[1])
-                mode01.set_beta(0, b_c)
-                mode01.set_beta(1, b_r)
-            if item.startswith('*p='):
-                mode01_p_config = item[3:].split(',')
-                w_c = float(mode01_p_config[0])
-                w_r = float(mode01_p_config[1])
-                mode01.set_weight(w_c, w_r)
-        mode01.assign_regions()
-        mode01.raise_flag()
-        if mode01.flag == 'X':
-            modes[1] = mode01
+        # Write log to file is filename exists
+        if 'filename' in settings:
+            root = customLogger.gen_logging(settings['filename'], verbose_level)
         else:
-            mode.pop(1)
-    if 2 in settings['modes']:
-        root.debug('Express mode: Activating mode 2. ')
-        for item in settings['modes'][2]:
-            if item.startswith('*rI='):
-                r_I_temp = mode02.rI
-                r_I_config = item[4:]
-                mode02.rI = set_correct_para(r_I_config, r_I_temp)
-            elif item.startswith('*rS='):
-                r_S_temp = mode02.rI
-                r_S_config = item[4:]
-                mode02.rS = set_correct_para(r_S_config, r_S_temp)
-            elif item.startswith('*lI='):
-                localIsolation_temp = True
-                localIsolation_config = item[4:]
-                mode02.localIsolation = set_correct_bool_para(localIsolation_config, localIsolation_temp)
-            elif item.startswith('*i='):
-                mode02_isolation_period_config = item[3:]
-                mode02.isolationPeriod = set_correct_para(mode02_isolation_period_config, mode02.isolationPeriod,
-                                                          pos=True)
-        mode02.create_setting()
-        mode02.raise_flag()
-        if mode02.flag == 'X':
-            modes[2] = mode02
-        else:
-            mode.pop(2)
-    if 4 in settings['modes']:
-        root.debug('Express mode: Activating mode 4. ')
-        for item in settings['modes'][4]:
-            if item.startswith('*l='):
-                lambda_BR = population[0].lambda_BR
-                mode04_l_config = item[3:]
-                lambda_BR = set_correct_para(mode04_l_config, lambda_BR, pos=True)
-                mode04.set_lambda(lambda_BR)
-        mode04.QRE()
-        mode04.raise_flag()
-        if mode04.flag == 'X':
-            modes[4] = mode04
-        else:
-            mode.pop(4)
-    if 7 in settings['modes']:
-        root.debug('Express mode: Activating mode 7. ')
-        for item in settings['modes'][7]:
-            if item.startswith('*b='):
-                mode07_b_config = item[3:].split(',')
-                mode07.beta_age = [float(x) for x in mode07_b_config]
-            elif item.startswith('*d='):
-                mode07_d_config = item[3:].split(',')
-                mode07.delta_age = [float(x) for x in mode07_d_config]
-        mode07.set_population()
-        mode07.raise_flag()
-        if mode07.flag == 'X':
-            modes[7] = mode07
-        else:
-            modes.pop(7)
-    if 8 in settings['modes']:
-        root.debug('Express mode: Activating mode 8. ')
-        for item in settings['modes'][8]:
-            if item.startswith('*b='):
-                mode08_b_config = item[3:].split(',')
-                mode08.beta_gender = [float(x) for x in mode08_b_config]
-            elif item.startswith('*d='):
-                mode08_d_config = item[3:].split(',')
-                mode08.delta_gender = [float(x) for x in mode08_d_config]
-        mode08.set_population()
-        mode08.raise_flag()
-        if mode08.flag == 'X':
-            modes[8] = mode08
-        else:
-            modes.pop(8)
-    if 10 in settings['modes']:
-        root.debug('Express mode: Activating mode 10. ')
-        for item in settings['modes'][10]:
-            if item.startswith('*mode='):
-                modes[10].type = modes[10].check_input(item[6:])
-        if mode10.flag == 'X':
-            modes[10] = mode10
-        else:
-            modes.pop(10)
-    elif 11 in settings['modes']:
-        root.debug('Express mode: Activating mode 11. ')
-        for item in settings['modes'][11]:
-            if item.startswith('*mode='):
-                modes[11].type = modes[11].check_input(item[6:])
-            elif item.startswith('*b='):
-                mode11_b_config = item[3:]
-                mode11.beta_V = set_correct_para(mode11_b_config, mode11.beta_V)
-                mode11.check_beta()
-            elif item.startswith('*g='):
-                mode11_g_config = item[3:]
-                mode11.gamma_V = set_correct_para(mode11_g_config, mode11.gamma_V)
-                mode11.check_gamma()
-            elif item.startswith('*d='):
-                mode11_d_config = item[3:]
-                mode11.delta_V = set_correct_para(mode11_d_config, mode11.delta_V)
-                mode11.check_delta()
-        if mode11.flag == 'X':
-            modes[11] = mode11
-        else:
-            modes.pop(11)
-    if 15 in settings['modes']:
-        root.debug('Express mode: Activating mode 15. ')
-        mode15.raise_flag()
-        if mode15.flag == 'X':
-            modes[15] = mode15
-        else:
-            modes.pop(15)
-    if 20 in settings['modes']:
-        root.debug('Express mode: Activating mode 20. ')
-        for item in settings['modes'][20]:
-            if item.startswith('*cV='):
-                cV_temp = item[4:]
-                mode20.set_cV(cV_temp)
-            elif item.startswith('*cI='):
-                cI_temp = item[4:]
-                mode20.set_cI(cI_temp)
-            elif item.startswith('*kV='):
-                kV_temp = item[4:]
-                mode20.set_kV(kV_temp)
-            elif item.startswith('*kI='):
-                kI_temp = item[4:]
-                mode20.set_kI(kI_temp)
-            elif item.startswith('*sV='):
-                sV_temp = item[4:]
-                mode20.set_sV(sV_temp)
-            elif item.startswith('*sI='):
-                sI_temp = item[4:]
-                mode20.set_sI(sI_temp)
-            elif item.startswith('*pV='):
-                pV_temp = item[4:]
-                mode20.set_pV(pV_temp)
-            elif item.startswith('*pI='):
-                pI_temp = item[4:]
-                mode20.set_pI(pI_temp)
-            elif item.startswith('*r='):
-                rho_temp = item[3:]
-                mode20.set_rho(rho_temp)
-        mode20.assign_costs()
-        mode20.raise_flag()
-        if mode20.flag == 'X':
-            modes[20] = mode20
-        else:
-            modes.pop(20)
-    if 21 in settings['modes']:
-        root.debug('Express mode: Activating mode 21. ')
-        for item in settings['modes'][21]:
-            if item.startswith('*+='):
-                mode21_pro_config = float(item[3:])
-                mode21.info_nwk.set_pro(mode21_pro_config)
-            elif item.startswith('*-='):
-                mode21_ag_config = float(item[3:])
-                mode21.info_nwk.set_ag(mode21_ag_config)
-        if mode21.info_nwk.propro != None and mode21.info_nwk.agpro != None:
-            mode21.info_nwk.set_opinion()
-            mode21.set_personality()
-            mode21.raise_flag()
-            if mode21.flag == 'X':
-                modes[21] = mode21
+            root = customLogger.gen_logging('', verbose_level)
+    if 'immune time' in settings:
+        immune_time_temp = settings['immune time']
+        immune_time = set_correct_para(immune_time_temp, immune_time, pos=True)
+    if 'test rate' in settings:
+        test_rate_temp = settings['test rate']
+        test_rate = set_correct_epi_para(test_rate_temp, test_rate)
+    if 'import setting' in settings:
+        try:
+            vaccine_available, vaccine_cap_filename = read_settings(settings['import setting'])
+            root.debug(f'Vaccine read from setting: {[x.__dict__ for x in vaccine_available]}')
+            if vaccine_cap_filename != None:
+                root.debug(f'Fetched vaccine daily cap filename: {vaccine_cap_filename}. ')
+        except FileNotFoundError as fnfe:
+            root.error(fnfe)
+            root.error(f'Current directory: {os.getcwd()}')
+    if 'modes' in settings:
+        '''
+        Sample value from pasred settings:
+        {'modes': {1: ['*b=0.6,0.75', '*p=0.54,0.46'], 2: ['*rI=-1', '*rS=1', '*lI=True', '*i=0.14'], 52: ['*m=3']}}
+        '''
+        if 1 in settings['modes']:
+            root.debug('Express mode: Activating mode 1. ')
+            for item in settings['modes'][1]:
+                if item.startswith('*b='):
+                    mode01_b_config = item[3:].split(',')
+                    b_c = float(mode01_b_config[0])
+                    b_r = float(mode01_b_config[1])
+                    mode01.set_beta(0, b_c)
+                    mode01.set_beta(1, b_r)
+                if item.startswith('*p='):
+                    mode01_p_config = item[3:].split(',')
+                    w_c = float(mode01_p_config[0])
+                    w_r = float(mode01_p_config[1])
+                    mode01.set_weight(w_c, w_r)
+            mode01.assign_regions()
+            mode01.raise_flag()
+            if mode01.flag == 'X':
+                modes[1] = mode01
             else:
-                modes.pop(21)
-        else:
-            root.warning('Unable to activate mode 21. Either proportion of support or against vaccines are not specified. ')
-    if 22 in settings['modes']:
-        root.debug('Express mode: Activating mode 22. ')
-        for item in settings['modes'][22]:
-            if item.startswith('*p='):
-                mode22_pro_config = float(item[3:])
-                root.debug(f'Proportion of stubbonly support vaccination are {mode22_pro_config}. ')
-                mode22.assign_personality(mode22_pro_config)
-            elif item.startswith('*+='):
-                mode22_pro_config = float(item[3:])
-                root.debug(f'Proportion of pro-vaccine is {mode22_pro_config}. ')
-                mode22.info_nwk.set_pro(mode22_pro_config)
-            elif item.startswith('*-='):
-                mode22_ag_config = float(item[3:])
-                root.debug(f'Proportion of against vaccine is {mode22_ag_config}. ')
-                mode22.info_nwk.set_ag(mode22_ag_config)
-        if mode22.info_nwk.propro != None and mode22.info_nwk.agpro != None and mode22.InflexProProportion != None:
-            mode22.info_nwk.set_opinion()
-            mode22.raise_flag()
-            if mode22.flag == 'X':
-                modes[22] = mode22
+                mode.pop(1)
+        if 2 in settings['modes']:
+            root.debug('Express mode: Activating mode 2. ')
+            for item in settings['modes'][2]:
+                if item.startswith('*rI='):
+                    r_I_temp = mode02.rI
+                    r_I_config = item[4:]
+                    mode02.rI = set_correct_para(r_I_config, r_I_temp)
+                elif item.startswith('*rS='):
+                    r_S_temp = mode02.rI
+                    r_S_config = item[4:]
+                    mode02.rS = set_correct_para(r_S_config, r_S_temp)
+                elif item.startswith('*lI='):
+                    localIsolation_temp = True
+                    localIsolation_config = item[4:]
+                    mode02.localIsolation = set_correct_bool_para(localIsolation_config, localIsolation_temp)
+                elif item.startswith('*i='):
+                    mode02_isolation_period_config = item[3:]
+                    mode02.isolationPeriod = set_correct_para(mode02_isolation_period_config, mode02.isolationPeriod,
+                                                              pos=True)
+            mode02.create_setting()
+            mode02.raise_flag()
+            if mode02.flag == 'X':
+                modes[2] = mode02
             else:
-                modes.pop(22)
-        else:
-            root.warning('Unable to activate mode 22. Either proportion of support or against vaccines, or the stubborn population, are not specified. ')
-    if 23 in settings['modes']:
-        root.debug('Express mode: Activating mode 23. ')
-        for item in settings['modes'][23]:
-            if item.startswith('*p='):
-                mode23_ag_config = float(item[3:])
-                root.debug(f'Proportion of stubbonly against vaccination are {mode23_ag_config}. ')
-                mode23.assign_personality(mode23_ag_config)
-                root.debug('Assigned personality to the population. ')
-            elif item.startswith('*+='):
-                mode23_pro_config = float(item[3:])
-                root.debug(f'Proportion of pro-vaccine is {mode23_pro_config}. ')
-                mode23.info_nwk.set_pro(mode23_pro_config)
-            elif item.startswith('*-='):
-                mode23_ag_config = float(item[3:])
-                root.debug(f'Proportion of against vaccine is {mode23_ag_config}. ')
-                mode23.info_nwk.set_ag(mode23_ag_config)
-        if mode23.info_nwk.propro != None and mode23.info_nwk.agpro != None and mode23.InflexAgProportion != None:
-            mode23.info_nwk.set_opinion()
-            mode23.raise_flag()
-            if mode23.flag == 'X':
-                modes[23] = mode23
+                mode.pop(2)
+        if 4 in settings['modes']:
+            root.debug('Express mode: Activating mode 4. ')
+            for item in settings['modes'][4]:
+                if item.startswith('*l='):
+                    lambda_BR = population[0].lambda_BR
+                    mode04_l_config = item[3:]
+                    lambda_BR = set_correct_para(mode04_l_config, lambda_BR, pos=True)
+                    mode04.set_lambda(lambda_BR)
+            mode04.QRE()
+            mode04.raise_flag()
+            if mode04.flag == 'X':
+                modes[4] = mode04
             else:
-                modes.pop(23)
-        else:
-            root.warning('Unable to activate mode 23. Either proportion of support or against vaccines, or the stubborn population, are not specified. ')
-    if 24 in settings['modes']:
-        root.debug('Express mode: Activating mode 24. ')
-        for item in settings['modes'][24]:
-            if item.startswith('*p='):
-                mode24_pro_config = float(item[3:])
-                mode24.assign_personality(mode24_pro_config)
-            elif item.startswith('*+='):
-                mode24_pro_config = float(item[3:])
-                mode24.info_nwk.set_pro(mode24_pro_config)
-            elif item.startswith('*-='):
-                mode24_ag_config = float(item[3:])
-                mode24.info_nwk.set_ag(mode24_ag_config)
-        if mode24.info_nwk.propro != None and mode24.info_nwk.agpro != None:
-            mode24.info_nwk.set_opinion()
-            mode24.raise_flag()
-            if mode24.flag == 'X':
-                modes[24] = mode24
+                mode.pop(4)
+        if 7 in settings['modes']:
+            root.debug('Express mode: Activating mode 7. ')
+            for item in settings['modes'][7]:
+                if item.startswith('*b='):
+                    mode07_b_config = item[3:].split(',')
+                    mode07.beta_age = [float(x) for x in mode07_b_config]
+                elif item.startswith('*d='):
+                    mode07_d_config = item[3:].split(',')
+                    mode07.delta_age = [float(x) for x in mode07_d_config]
+            mode07.set_population()
+            mode07.raise_flag()
+            if mode07.flag == 'X':
+                modes[7] = mode07
             else:
-                modes.pop(24)
-        else:
-            root.warning('Unable to activate mode 24. Either proportion of support or against vaccines, or the balancer population, are not specified. ')
-    if 43 in settings['modes']:
-        root.debug('Express mode: Activating mode 43. ')
-        for item in settings['modes'][43]:
-            if item.startswith('*instructions='):
-                mode_43_instructions_tmp = item[14:].split(',')
-                for instructions in mode_43_instructions_tmp:
-                    instructions = instructions.split(':')
-                    mode43.instructions[instructions[0]] = correct_para(instructions[1], pos=True)
-        mode43.correct_instructions_format()
-        if '0' in mode43.instructions:
-            root.debug('Default immune time detected from mode 43 instructions. ')
-            immune_time = mode43.instructions['0']
-    if 51 in settings['modes']:
-        root.debug('Express mode: Activating mode 51. ')
-        if 52 in modes:
-            root.debug('Mode 52 has been activated. Ignore mode 51. ')
-        elif 53 in modes:
-            root.debug('Mode 53 has been activated. Ignore mode 52. ')
-        elif 54 in modes:
-            root.debug('Mode 54 has been activated. Ignore mode 52. ')
-        else:
-            mode51()
-            if mode51.flag == 'X':
-                modes[51] = mode51
+                modes.pop(7)
+        if 8 in settings['modes']:
+            root.debug('Express mode: Activating mode 8. ')
+            for item in settings['modes'][8]:
+                if item.startswith('*b='):
+                    mode08_b_config = item[3:].split(',')
+                    mode08.beta_gender = [float(x) for x in mode08_b_config]
+                elif item.startswith('*d='):
+                    mode08_d_config = item[3:].split(',')
+                    mode08.delta_gender = [float(x) for x in mode08_d_config]
+            mode08.set_population()
+            mode08.raise_flag()
+            if mode08.flag == 'X':
+                modes[8] = mode08
             else:
-                modes.pop(51)
-    if 52 in settings['modes']:
-        root.debug('Express mode: Activating mode 52. ')
-        if 51 in modes:
-            root.debug('Mode 51 has been activated. Ignore mode 52. ')
-        elif 53 in modes:
-            root.debug('Mode 53 has been activated. Ignore mode 52. ')
-        elif 54 in modes:
-            root.debug('Mode 54 has been activated. Ignore mode 52. ')
-        else:
-            for item in settings['modes'][52]:
-                if item.startswith('*m='):
-                    mode52_m_config = int(item[3:])
-                    mode52.set_m(mode52_m_config)
-                    root.debug(f'Set number of connections m = {mode52.m}. ')
-                elif item.startswith('*p='):
-                    contact_nwk.update_rule = 'XBS'
-                    mode52_p_config = float(item[3:])
-                    mode52.set_pupdate(mode52_p_config)
-                    root.debug(f'Probability of updates p = {contact_nwk.PUpdate}. ')
-                elif item.startswith('*a='):
-                    contact_nwk.update_rule = 'XBS'
-                    mode52_assort = int(item[3:])
-                    if mode52_assort == 1:
-                        contact_nwk.assort = True
-                    elif mode52_assort == 0:
-                        contact_nwk.assort = False
-                    root.debug(f'Update rule: XBS. ')
-                elif item.startswith('*l='):
-                    contact_nwk.update_rule = 'random'
-                    mode52_l_config = [int(x) for x in item[3:].split(',')]
-                    mode52.set_l0(mode52_l_config[0])
-                    mode52.set_l1(mode52_l_config[1])
-                    root.debug(f'Update rule: random. ')
-            mode52.set_network()
-            root.debug(f'Preferential attachment is created. ')
-            mode52.raise_flag()
-            if mode52.flag == 'X':
-                modes[52] = mode52
+                modes.pop(8)
+        if 10 in settings['modes']:
+            root.debug('Express mode: Activating mode 10. ')
+            for item in settings['modes'][10]:
+                if item.startswith('*mode='):
+                    modes[10].type = modes[10].check_input(item[6:])
+            if mode10.flag == 'X':
+                modes[10] = mode10
             else:
-                mode.pop(52)
-    if 53 in settings['modes']:
-        root.debug('Express mode: Activating mode 53. ')
-        if 51 in modes:
-            root.debug('Mode 51 has been activated. Ignore mode 53. ')
-        elif 52 in modes:
-            root.debug('Mode 53 has been activated. Ignore mode 53. ')
-        elif 54 in modes:
-            root.debug('Mode 54 has been activated. Ignore mode 53. ')
-        else:
-            for item in settings['modes'][53]:
-                if item.startswith('*k='):
-                    pass
-                elif item.startswith('*p='):
-                    pass
-            # root.debug(f'Small world network is created. ')
-            # mode53.raise_flag()
-            # if mode53.flag == 'X':
-            #     modes[53] = mode53
-            # else:
-            #     mode.pop(53)
-    if 54 in settings['modes']:
-        root.debug('Express mode: Activating mode 54. ')
-        if 51 in modes:
-            root.debug('Mode 51 has been activated. Ignore mode 54. ')
-        elif 52 in modes:
-            root.debug('Mode 53 has been activated. Ignore mode 54. ')
-        elif 53 in modes:
-            root.debug('Mode 54 has been activated. Ignore mode 54. ')
-        else:
-            for item in settings['modes'][54]:
-                for item in settings['modes'][54]:
+                modes.pop(10)
+        elif 11 in settings['modes']:
+            root.debug('Express mode: Activating mode 11. ')
+            for item in settings['modes'][11]:
+                if item.startswith('*mode='):
+                    modes[11].type = modes[11].check_input(item[6:])
+                elif item.startswith('*b='):
+                    mode11_b_config = item[3:]
+                    mode11.beta_V = set_correct_para(mode11_b_config, mode11.beta_V)
+                    mode11.check_beta()
+                elif item.startswith('*g='):
+                    mode11_g_config = item[3:]
+                    mode11.gamma_V = set_correct_para(mode11_g_config, mode11.gamma_V)
+                    mode11.check_gamma()
+                elif item.startswith('*d='):
+                    mode11_d_config = item[3:]
+                    mode11.delta_V = set_correct_para(mode11_d_config, mode11.delta_V)
+                    mode11.check_delta()
+            if mode11.flag == 'X':
+                modes[11] = mode11
+            else:
+                modes.pop(11)
+        if 15 in settings['modes']:
+            root.debug('Express mode: Activating mode 15. ')
+            mode15.raise_flag()
+            if mode15.flag == 'X':
+                modes[15] = mode15
+            else:
+                modes.pop(15)
+        if 20 in settings['modes']:
+            root.debug('Express mode: Activating mode 20. ')
+            for item in settings['modes'][20]:
+                if item.startswith('*cV='):
+                    cV_temp = item[4:]
+                    mode20.set_cV(cV_temp)
+                elif item.startswith('*cI='):
+                    cI_temp = item[4:]
+                    mode20.set_cI(cI_temp)
+                elif item.startswith('*kV='):
+                    kV_temp = item[4:]
+                    mode20.set_kV(kV_temp)
+                elif item.startswith('*kI='):
+                    kI_temp = item[4:]
+                    mode20.set_kI(kI_temp)
+                elif item.startswith('*sV='):
+                    sV_temp = item[4:]
+                    mode20.set_sV(sV_temp)
+                elif item.startswith('*sI='):
+                    sI_temp = item[4:]
+                    mode20.set_sI(sI_temp)
+                elif item.startswith('*pV='):
+                    pV_temp = item[4:]
+                    mode20.set_pV(pV_temp)
+                elif item.startswith('*pI='):
+                    pI_temp = item[4:]
+                    mode20.set_pI(pI_temp)
+                elif item.startswith('*r='):
+                    rho_temp = item[3:]
+                    mode20.set_rho(rho_temp)
+            mode20.assign_costs()
+            mode20.raise_flag()
+            if mode20.flag == 'X':
+                modes[20] = mode20
+            else:
+                modes.pop(20)
+        if 21 in settings['modes']:
+            root.debug('Express mode: Activating mode 21. ')
+            for item in settings['modes'][21]:
+                if item.startswith('*+='):
+                    mode21_pro_config = float(item[3:])
+                    mode21.info_nwk.set_pro(mode21_pro_config)
+                elif item.startswith('*-='):
+                    mode21_ag_config = float(item[3:])
+                    mode21.info_nwk.set_ag(mode21_ag_config)
+            if mode21.info_nwk.propro != None and mode21.info_nwk.agpro != None:
+                mode21.info_nwk.set_opinion()
+                mode21.set_personality()
+                mode21.raise_flag()
+                if mode21.flag == 'X':
+                    modes[21] = mode21
+                else:
+                    modes.pop(21)
+            else:
+                root.warning('Unable to activate mode 21. Either proportion of support or against vaccines are not specified. ')
+        if 22 in settings['modes']:
+            root.debug('Express mode: Activating mode 22. ')
+            for item in settings['modes'][22]:
+                if item.startswith('*p='):
+                    mode22_pro_config = float(item[3:])
+                    root.debug(f'Proportion of stubbonly support vaccination are {mode22_pro_config}. ')
+                    mode22.assign_personality(mode22_pro_config)
+                elif item.startswith('*+='):
+                    mode22_pro_config = float(item[3:])
+                    root.debug(f'Proportion of pro-vaccine is {mode22_pro_config}. ')
+                    mode22.info_nwk.set_pro(mode22_pro_config)
+                elif item.startswith('*-='):
+                    mode22_ag_config = float(item[3:])
+                    root.debug(f'Proportion of against vaccine is {mode22_ag_config}. ')
+                    mode22.info_nwk.set_ag(mode22_ag_config)
+            if mode22.info_nwk.propro != None and mode22.info_nwk.agpro != None and mode22.InflexProProportion != None:
+                mode22.info_nwk.set_opinion()
+                mode22.raise_flag()
+                if mode22.flag == 'X':
+                    modes[22] = mode22
+                else:
+                    modes.pop(22)
+            else:
+                root.warning('Unable to activate mode 22. Either proportion of support or against vaccines, or the stubborn population, are not specified. ')
+        if 23 in settings['modes']:
+            root.debug('Express mode: Activating mode 23. ')
+            for item in settings['modes'][23]:
+                if item.startswith('*p='):
+                    mode23_ag_config = float(item[3:])
+                    root.debug(f'Proportion of stubbonly against vaccination are {mode23_ag_config}. ')
+                    mode23.assign_personality(mode23_ag_config)
+                    root.debug('Assigned personality to the population. ')
+                elif item.startswith('*+='):
+                    mode23_pro_config = float(item[3:])
+                    root.debug(f'Proportion of pro-vaccine is {mode23_pro_config}. ')
+                    mode23.info_nwk.set_pro(mode23_pro_config)
+                elif item.startswith('*-='):
+                    mode23_ag_config = float(item[3:])
+                    root.debug(f'Proportion of against vaccine is {mode23_ag_config}. ')
+                    mode23.info_nwk.set_ag(mode23_ag_config)
+            if mode23.info_nwk.propro != None and mode23.info_nwk.agpro != None and mode23.InflexAgProportion != None:
+                mode23.info_nwk.set_opinion()
+                mode23.raise_flag()
+                if mode23.flag == 'X':
+                    modes[23] = mode23
+                else:
+                    modes.pop(23)
+            else:
+                root.warning('Unable to activate mode 23. Either proportion of support or against vaccines, or the stubborn population, are not specified. ')
+        if 24 in settings['modes']:
+            root.debug('Express mode: Activating mode 24. ')
+            for item in settings['modes'][24]:
+                if item.startswith('*p='):
+                    mode24_pro_config = float(item[3:])
+                    mode24.assign_personality(mode24_pro_config)
+                elif item.startswith('*+='):
+                    mode24_pro_config = float(item[3:])
+                    mode24.info_nwk.set_pro(mode24_pro_config)
+                elif item.startswith('*-='):
+                    mode24_ag_config = float(item[3:])
+                    mode24.info_nwk.set_ag(mode24_ag_config)
+            if mode24.info_nwk.propro != None and mode24.info_nwk.agpro != None:
+                mode24.info_nwk.set_opinion()
+                mode24.raise_flag()
+                if mode24.flag == 'X':
+                    modes[24] = mode24
+                else:
+                    modes.pop(24)
+            else:
+                root.warning('Unable to activate mode 24. Either proportion of support or against vaccines, or the balancer population, are not specified. ')
+        if 43 in settings['modes']:
+            root.debug('Express mode: Activating mode 43. ')
+            for item in settings['modes'][43]:
+                if item.startswith('*instructions='):
+                    mode_43_instructions_tmp = item[14:].split(',')
+                    for instructions in mode_43_instructions_tmp:
+                        instructions = instructions.split(':')
+                        mode43.instructions[instructions[0]] = correct_para(instructions[1], pos=True)
+            mode43.correct_instructions_format()
+            if '0' in mode43.instructions:
+                root.debug('Default immune time detected from mode 43 instructions. ')
+                immune_time = mode43.instructions['0']
+        if 51 in settings['modes']:
+            root.debug('Express mode: Activating mode 51. ')
+            if 52 in modes:
+                root.debug('Mode 52 has been activated. Ignore mode 51. ')
+            elif 53 in modes:
+                root.debug('Mode 53 has been activated. Ignore mode 52. ')
+            elif 54 in modes:
+                root.debug('Mode 54 has been activated. Ignore mode 52. ')
+            else:
+                mode51()
+                if mode51.flag == 'X':
+                    modes[51] = mode51
+                else:
+                    modes.pop(51)
+        if 52 in settings['modes']:
+            root.debug('Express mode: Activating mode 52. ')
+            if 51 in modes:
+                root.debug('Mode 51 has been activated. Ignore mode 52. ')
+            elif 53 in modes:
+                root.debug('Mode 53 has been activated. Ignore mode 52. ')
+            elif 54 in modes:
+                root.debug('Mode 54 has been activated. Ignore mode 52. ')
+            else:
+                for item in settings['modes'][52]:
                     if item.startswith('*m='):
+                        mode52_m_config = int(item[3:])
+                        mode52.set_m(mode52_m_config)
+                        root.debug(f'Set number of connections m = {mode52.m}. ')
+                    elif item.startswith('*p='):
+                        contact_nwk.update_rule = 'XBS'
+                        mode52_p_config = float(item[3:])
+                        mode52.set_pupdate(mode52_p_config)
+                        root.debug(f'Probability of updates p = {contact_nwk.PUpdate}. ')
+                    elif item.startswith('*a='):
+                        contact_nwk.update_rule = 'XBS'
+                        mode52_assort = int(item[3:])
+                        if mode52_assort == 1:
+                            contact_nwk.assort = True
+                        elif mode52_assort == 0:
+                            contact_nwk.assort = False
+                        root.debug(f'Update rule: XBS. ')
+                    elif item.startswith('*l='):
+                        contact_nwk.update_rule = 'random'
+                        mode52_l_config = [int(x) for x in item[3:].split(',')]
+                        mode52.set_l0(mode52_l_config[0])
+                        mode52.set_l1(mode52_l_config[1])
+                        root.debug(f'Update rule: random. ')
+                mode52.set_network()
+                root.debug(f'Preferential attachment is created. ')
+                mode52.raise_flag()
+                if mode52.flag == 'X':
+                    modes[52] = mode52
+                else:
+                    mode.pop(52)
+        if 53 in settings['modes']:
+            root.debug('Express mode: Activating mode 53. ')
+            if 51 in modes:
+                root.debug('Mode 51 has been activated. Ignore mode 53. ')
+            elif 52 in modes:
+                root.debug('Mode 53 has been activated. Ignore mode 53. ')
+            elif 54 in modes:
+                root.debug('Mode 54 has been activated. Ignore mode 53. ')
+            else:
+                for item in settings['modes'][53]:
+                    if item.startswith('*k='):
                         pass
-            # root.debug(f'Lattice network is created. ')
-            # mode54.raise_flag()
-            # if mode54.flag == 'X':
-            #     modes[54] = mode54
-            # else:
-            #     mode.pop(54)
-    if 501 in settings['modes']:
-        root.debug('Express mode: Activating mode 501. ')
-        for item in settings['modes'][501]:
-            if item.startswith('*Ii='):
-                Ii_temp = item[4:]
-                mode501.init_infection = mode501.set_init_infection(Ii_temp)
-        mode501.raise_flag()
-        if mode501.flag == 'X':
-            modes[501] = mode501
-        else:
-            mode.pop(501)
-    if 505 in settings['modes']:
-        root.debug('Express mode: Activating mode 505. ')
-        for item in settings['modes'][505]:
-            if item.startswith('*m='):
-                mode_505 = item[3:]
-                try:
-                    if int(mode_505) == 1:
-                        mode_tmp = 'Hub'
-                        root.debug('Set initial infection by hub. ')
-                    elif int(mode_505) == 0:
-                        mode_tmp = 'Leaf'
-                        root.debug('Set initial infection by leaf. ')
-                except ValueError:
-                    if mode_505.lower() == 'hub':
-                        mode_tmp = 'Hub'
-                        root.debug('Set initial infection by hub. ')
-                    elif mode_505.lower() == 'leaf':
-                        mode_tmp = 'Leaf'
-                        root.debug('Set initial infection by leaf. ')
-        mode505.raise_flag()
-        if mode505.flag == 'X':
-            modes[505] = mode505
-            modes[505].mode = mode_tmp
-        else:
-            mode.pop(505)
-if 'filename' in settings:
-    if settings['filename'] != '':
-        filename = settings['filename']
+                    elif item.startswith('*p='):
+                        pass
+                # root.debug(f'Small world network is created. ')
+                # mode53.raise_flag()
+                # if mode53.flag == 'X':
+                #     modes[53] = mode53
+                # else:
+                #     mode.pop(53)
+        if 54 in settings['modes']:
+            root.debug('Express mode: Activating mode 54. ')
+            if 51 in modes:
+                root.debug('Mode 51 has been activated. Ignore mode 54. ')
+            elif 52 in modes:
+                root.debug('Mode 53 has been activated. Ignore mode 54. ')
+            elif 53 in modes:
+                root.debug('Mode 54 has been activated. Ignore mode 54. ')
+            else:
+                for item in settings['modes'][54]:
+                    for item in settings['modes'][54]:
+                        if item.startswith('*m='):
+                            pass
+                # root.debug(f'Lattice network is created. ')
+                # mode54.raise_flag()
+                # if mode54.flag == 'X':
+                #     modes[54] = mode54
+                # else:
+                #     mode.pop(54)
+        if 501 in settings['modes']:
+            root.debug('Express mode: Activating mode 501. ')
+            for item in settings['modes'][501]:
+                if item.startswith('*Ii='):
+                    Ii_temp = item[4:]
+                    mode501.init_infection = mode501.set_init_infection(Ii_temp)
+            mode501.raise_flag()
+            if mode501.flag == 'X':
+                modes[501] = mode501
+            else:
+                mode.pop(501)
+        if 505 in settings['modes']:
+            root.debug('Express mode: Activating mode 505. ')
+            for item in settings['modes'][505]:
+                if item.startswith('*m='):
+                    mode_505 = item[3:]
+                    try:
+                        if int(mode_505) == 1:
+                            mode_tmp = 'Hub'
+                            root.debug('Set initial infection by hub. ')
+                        elif int(mode_505) == 0:
+                            mode_tmp = 'Leaf'
+                            root.debug('Set initial infection by leaf. ')
+                    except ValueError:
+                        if mode_505.lower() == 'hub':
+                            mode_tmp = 'Hub'
+                            root.debug('Set initial infection by hub. ')
+                        elif mode_505.lower() == 'leaf':
+                            mode_tmp = 'Leaf'
+                            root.debug('Set initial infection by leaf. ')
+            mode505.raise_flag()
+            if mode505.flag == 'X':
+                modes[505] = mode505
+                modes[505].mode = mode_tmp
+            else:
+                mode.pop(505)
+    if 'filename' in settings:
+        if settings['filename'] != '':
+            filename = settings['filename']
 
-if 'express' in settings and settings['express'] == True:
-    root.info('===== Simulation Running =====')
-    current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename,
-                             alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI,
-                             beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time,
-                             vaccine_available, vaccine_cap_filename, verbose_mode, root, 'info')
-    # Load modes
-    current_run.load_modes(modes)
-    if len(modes) > 0:
-        root.debug('modes', current_run.modes)
-        root.debug('\nMode objects loaded.\n')
-    # Run
-    current_run()
-    print('=====  Simulation Ended  =====')
-    print('\nSee you!')
-    quit()
+    if 'express' in settings and settings['express'] == True:
+        root.info('===== Simulation Running =====')
+        current_run = Simulation(population, T, population, contact_nwk, info_nwk, alpha, beta, gamma, phi, delta, filename,
+                                 alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI,
+                                 beta_IV, beta_RV, beta_SI2, beta_II2, beta_RI2, beta_VI2, test_rate, immune_time,
+                                 vaccine_available, vaccine_cap_filename, verbose_mode, root, 'info')
+        # Load modes
+        current_run.load_modes(modes)
+        if len(modes) > 0:
+            root.debug('modes', current_run.modes)
+            root.debug('\nMode objects loaded.\n')
+        # Run
+        current_run()
+        print('=====  Simulation Ended  =====')
+        print('\nSee you!')
+        quit()
 
 '''
 Normal mode
