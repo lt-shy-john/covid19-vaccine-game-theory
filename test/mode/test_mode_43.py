@@ -9,7 +9,7 @@ class TestMode43(TestCase):
         N = 5
         self.logger = customLogger.gen_logging('', None)
         self.population = [Person() for x in range(N)]
-        self.mode = {43: Mode43(self.population, self.logger)}
+        self.mode = {43: Mode43(self.population, self.logger, None)}
 
     def test_correct_instructions_format(self):
         # Arrange

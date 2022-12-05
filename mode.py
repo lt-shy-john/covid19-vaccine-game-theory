@@ -119,9 +119,9 @@ class Mode01(Mode):
         The infection rate while living in city or rural environment.
     '''
 
-    def __init__(self, people, logger, betas=[0.5, 0.5]):
+    def __init__(self, people, logger, betas):
         super().__init__(people, 1, 'Living in city/ rural', logger)
-        self.weight = [4, 6]
+        self.weight = [6, 4]
         self.betas = betas
 
     def set_weight(self, c, r):

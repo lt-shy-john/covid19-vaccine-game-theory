@@ -515,7 +515,7 @@ class TestEpidemic(TestCase):
         N = len(self.population)
         vaccine_name = "Test"
         self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3)]
-        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+        self.epidemic.generate_vaccine_dose_quota_records(N)
 
         # Act
         self.epidemic.vaccine_dose_record(self.epidemic.vaccine_ls[0])
@@ -531,7 +531,7 @@ class TestEpidemic(TestCase):
         self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3),
                                     Vaccine(name=vaccine_name, dose=2, efficacy=1, alpha=0.8),
                                     Vaccine(name=vaccine_name_alt, dose=1, efficacy=1, alpha=0.8)]
-        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+        self.epidemic.generate_vaccine_dose_quota_records(N)
 
         # Act
         flag = self.epidemic.vaccine_dose_flag(self.epidemic.vaccine_ls[1])
@@ -545,7 +545,7 @@ class TestEpidemic(TestCase):
         vaccine_name = "Test_01"
         vaccine_name_alt = "Test_02"
         self.epidemic.vaccine_ls = [Vaccine(name=vaccine_name, dose=1, efficacy=1, alpha=0.3)]
-        self.epidemic.generate_vaccine_dose_quota_records(N, self.epidemic.vaccine_ls)
+        self.epidemic.generate_vaccine_dose_quota_records(N)
         self.epidemic.vaccine_dose_quota[self.epidemic.vaccine_ls[0].brand+":"+str(self.epidemic.vaccine_ls[0].dose)] = 0
 
         # Act
@@ -672,12 +672,33 @@ class TestEpidemic(TestCase):
 
     def test_infect_mode01(self):
         # Arrange
+        for person in self.population:
+            if person.id == 33:
+                person.suceptible = 1
+                continue
+            elif person.id == 34:
+                person.suceptible = 1
+                continue
+            elif person.id == 35:
+                person.suceptible = 1
+                continue
+            elif person.id == 36:
+                person.suceptible = 1
+                continue
+            person.suceptible = 0
+
+        self.epidemic.mode[1] = Mode01(self.population, self.logger, [1,0])
+        self.epidemic.mode[1].assign_regions()
 
         # Act
         self.epidemic.infect()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if self.population[i].location == 0: # City
+                self.assertEqual(self.population[i].suceptible, 1, f"id: {i} from city should be infected")
+            else:
+                self.assertEqual(self.population[i].suceptible, 0, f"id: {i} from rural should not be infected")
 
     def test_infect_mode07(self):
         # Arrange

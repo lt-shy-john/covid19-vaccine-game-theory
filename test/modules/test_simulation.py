@@ -27,7 +27,7 @@ class TestSimulation(TestCase):
 
     def test_load_modes(self):
         # Arrange
-        modes = {1: Mode01(self.population, self.logger)}
+        modes = {1: Mode01(self.population, self.logger, [0, 0])}
 
         # Act
         self.simulation.load_modes(modes)
