@@ -597,6 +597,8 @@ class Mode07(Mode):
     ----------
     beta: iterable of floats (0 to 1)
         Transmission rate of different age brackets.
+    delta: iterable of floats (0 to 1)
+        Removal rate of different age brackets.
 
     Note
     ----
@@ -606,8 +608,10 @@ class Mode07(Mode):
 
     def __init__(self, people, beta, delta, logger):
         super().__init__(people, 7, 'Age distribution', logger)
-        self.beta_age = [beta for x in range(10)]
-        self.delta_age = [delta for x in range(10)]
+        # todo: customise age_brackets and check age_brackets if they are continuous
+        self.age_brackets = ['0 - 9', '10 - 19', '20 - 29', '30 - 39', '40 - 49', '50 - 59', '60 - 69', '70 - 79', '80 - 89', '90 - 99']
+        self.beta_age = beta
+        self.delta_age = delta
 
     def set_population(self):
         '''
@@ -690,7 +694,9 @@ class Mode08(Mode):
     Attributes
     ----------
     beta: iterable of floats (0 to 1)
-        Transmission rate of different age brackets.
+        Transmission rate of different gender.
+    delta: iterable of floats (0 to 1)
+        Removal rate of different gender.
 
     Note
     ----
@@ -700,8 +706,8 @@ class Mode08(Mode):
 
     def __init__(self, people, beta, delta, logger):
         super().__init__(people, 8, 'Gender population', logger)
-        self.beta_gender = [beta for x in range(2)]
-        self.delta_gender = [delta for x in range(2)]
+        self.beta_gender = beta
+        self.delta_gender = delta
 
     def set_population(self):
         '''

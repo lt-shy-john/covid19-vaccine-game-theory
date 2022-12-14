@@ -670,7 +670,8 @@ class TestEpidemic(TestCase):
             else:
                 self.assertEqual(person.suceptible, 1)
 
-    def test_infect_mode01(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_infect_mode01(self, mock_random_randint):
         # Arrange
         for person in self.population:
             if person.id == 33:
@@ -695,64 +696,218 @@ class TestEpidemic(TestCase):
 
         # Assert
         for i in range(len(self.population)):
-            if self.population[i].location == 0: # City
-                self.assertEqual(self.population[i].suceptible, 1, f"id: {i} from city should be infected")
+            if self.population[i].id in {33, 34, 35, 36}:
+                continue
+            elif self.population[i].location == 0: # City
+                self.assertEqual(1, self.population[i].suceptible, f"id: {i} from city should be infected")
             else:
-                self.assertEqual(self.population[i].suceptible, 0, f"id: {i} from rural should not be infected")
+                self.assertEqual(0, self.population[i].suceptible, f"id: {i} from rural should not be infected")
 
-    def test_infect_mode07(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_infect_mode07(self, mock_random_randint):
         # Arrange
+        for person in self.population:
+            if person.id == 33:
+                person.suceptible = 1
+                continue
+            elif person.id == 34:
+                person.suceptible = 1
+                continue
+            elif person.id == 35:
+                person.suceptible = 1
+                continue
+            elif person.id == 36:
+                person.suceptible = 1
+                continue
+            person.suceptible = 0
+
+        self.epidemic.mode[7] = Mode07(self.population, [0]*3+[1]+[0]*6, [0]*10, self.logger)
+        self.epidemic.mode[7].set_population()
 
         # Act
         self.epidemic.infect()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if self.population[i].id in {33, 34, 35, 36}:
+                continue
+            elif self.population[i].age >= 30 and self.population[i].age < 40:
+                self.assertEqual(1, self.population[i].suceptible, f"id: {i} with age {self.population[i].age} should be infected")
+            else:
+                self.assertEqual(0, self.population[i].suceptible, f"id: {i} with age {self.population[i].age} should not be infected")
 
-    def test_infect_mode08(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_infect_mode08(self, mock_random_randint):
         # Arrange
+        for person in self.population:
+            if person.id == 33:
+                person.suceptible = 1
+                continue
+            elif person.id == 34:
+                person.suceptible = 1
+                continue
+            elif person.id == 35:
+                person.suceptible = 1
+                continue
+            elif person.id == 36:
+                person.suceptible = 1
+                continue
+            person.suceptible = 0
+
+        self.epidemic.mode[8] = Mode08(self.population, [0,1], [0,0], self.logger)
+        self.epidemic.mode[8].set_population()
 
         # Act
         self.epidemic.infect()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if self.population[i].id in {33, 34, 35, 36}:
+                continue
+            elif self.population[i].gender == 1:
+                self.assertEqual(1, self.population[i].suceptible,
+                                 f"id: {i} (female) should be infected")
+            else:
+                self.assertEqual(0, self.population[i].suceptible,
+                                 f"id: {i} (male) should not be infected")
 
-    def test_infect_mode11(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_infect_mode11_stop_transmit(self, mock_random_randint):
         # Arrange
+        for person in self.population:
+            if person.id == 33:
+                person.suceptible = 1
+                continue
+            elif person.id == 34:
+                person.suceptible = 1
+                continue
+            elif person.id == 35:
+                person.suceptible = 1
+                continue
+            elif person.id == 36:
+                person.suceptible = 1
+                continue
+            person.suceptible = 0
+
+        self.epidemic.mode[11] = Mode11(self.population, self.logger)
+        self.epidemic.mode[11].set_type = 'Stop transmissability'
 
         # Act
         self.epidemic.infect()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if self.population[i].id in {33, 34, 35, 36}:
+                continue
+            else:
+                self.assertEqual(0, self.population[i].suceptible,
+                                 f"id: {i} should not be infected")
+
+    @mock.patch('random.randint', return_value=0)
+    def test_infect_mode11_stop_transmit_network(self, mock_random_randint):
+        # Arrange
+        for person in self.population:
+            if person.id == 33:
+                person.suceptible = 1
+                continue
+            elif person.id == 34:
+                person.suceptible = 1
+                continue
+            elif person.id == 35:
+                person.suceptible = 1
+                continue
+            elif person.id == 36:
+                person.suceptible = 1
+                continue
+            person.suceptible = 0
+
+        self.epidemic.mode[11] = Mode11(self.population, self.logger)
+        self.epidemic.mode[11].set_type = 'Stop transmissability'
+        self.epidemic.mode[51] = Mode51(self.population, self.contact_nwk, self.contact_nwk)
+
+        # Act
+        self.epidemic.infect()
+
+        # Assert
+        for i in range(len(self.population)):
+            if {33, 34, 35, 36}.intersection({i}):
+                continue
+            else:
+                self.assertEqual(0, self.population[i].suceptible,
+                                 f"id: {i} should not be infected")
 
     def test_infect_mode20(self):
         # Arrange
+        for person in self.population:
+            if person.id == 33:
+                person.suceptible = 1
+                continue
+            elif person.id == 34:
+                person.suceptible = 1
+                continue
+            elif person.id == 35:
+                person.suceptible = 1
+                continue
+            elif person.id == 36:
+                person.suceptible = 1
+                continue
+            person.suceptible = 0
+
+        self.epidemic.mode[20] = Mode20(self.population, self.contact_nwk, self.epidemic.infection, self.logger)
 
         # Act
         self.epidemic.infect()
 
         # Assert
-        self.fail()
+        self.fail("Need to investigate the mechanism of this mode in transmission first. ")
 
     def test_infect_nwk(self):
         # Arrange
+        for i in range(len(self.population)):
+            if i == 33:
+                self.population[i].suceptible = 1
+                continue
+            self.population[i].suceptible = 0
+
+        self.epidemic.mode[51] = Mode51(self.population, self.contact_nwk, self.contact_nwk)
+        network = self.epidemic.mode[51].contact_nwk.nwk_graph
+        neighbour_nodes = {nodes for nodes in network.neighbors(self.population[33])}
 
         # Act
         self.epidemic.infect()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if self.population[i] in neighbour_nodes:
+                self.assertEqual(1, self.population[i].suceptible, f"id: {i} should be infected since it is neighbour of initial infection. ")
+            else:
+                self.assertEqual(0, self.population[i].suceptible,
+                                 f"id: {i} should not be infected. ")
 
     def test_infect_nwk_with_overseas_travel(self):
         # Arrange
+        for i in range(len(self.population)):
+            if i == 33:
+                self.population[i].suceptible = 1
+                continue
+            self.population[i].suceptible = 0
+
+        self.epidemic.mode[2] = Mode02(self.population, self.epidemic.infection, self.logger)
+        self.epidemic.mode[51] = Mode51(self.population, self.contact_nwk, self.contact_nwk)
+        network = self.epidemic.mode[51].contact_nwk.nwk_graph
+        neighbour_nodes = {nodes for nodes in network.neighbors(self.population[33])}
 
         # Act
         self.epidemic.infect()
 
         # Assert
-        self.fail()
+        for i in range(len(self.population)):
+            if self.population[i] in neighbour_nodes:
+                self.assertEqual(1, self.population[i].suceptible,
+                                 f"id: {i} should be infected since it is neighbour of initial infection. ")
+            else:
+                self.assertEqual(0, self.population[i].suceptible,
+                                 f"id: {i} should not be infected. ")
 
     def test_infection_clock(self):
         self.population[0].suceptible = 1
