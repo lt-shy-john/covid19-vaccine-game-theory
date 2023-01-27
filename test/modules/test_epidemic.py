@@ -356,6 +356,19 @@ class TestEpidemic(TestCase):
         # Assert
         # self.fail()
 
+    def test_vaccinate_mode15_intimacy(self):
+        # Arrange
+        self.epidemic.vaccine_ls = [Vaccine(name="Test_01", dose=1, efficacy=0, alpha=0.3),
+                                    Vaccine(name="Test_01", dose=2, efficacy=0, alpha=0.3)]
+        mode = {15: Mode15(self.population, self.logger), 20: Mode20(self.population, self.contact_nwk, 1, self.logger), 52: Mode52(self.population, self.logger, self.contact_nwk)}
+        self.epidemic.load_modes(mode)
+
+        # Act
+        self.epidemic.vaccinate()
+
+        # Assert
+        self.fail()
+
     def test_generate_vaccine_dose_count_record(self):
         # Arrange
         self.epidemic.vaccine_ls = [Vaccine(name="Test", efficacy=1, alpha=0.3)]
@@ -632,8 +645,47 @@ class TestEpidemic(TestCase):
     def test_removed_mode08(self):
         self.fail()
 
-    def test_social_contact(self):
-        self.fail()
+    @mock.patch('random.randint', return_value=0)
+    def test_social_contact(self, mock_random_randint):
+        # Arrange
+        init_id = 0
+        for person in self.population:
+            # For some reason it has to reassign id for each person
+            person.id = init_id
+            init_id += 1
+
+        for person in self.population:
+            if person.id == 20:
+                person.vaccinated = 1
+            elif person.id == 31:
+                person.removed = 1
+            elif person.id == 33:
+                person.suceptible = 1
+                continue
+            person.suceptible = 0
+        self.epidemic.mode[52] = Mode52(self.population, self.logger, 3, self.contact_nwk)
+
+        # Act
+        self.epidemic.social_contact()
+        network = self.epidemic.mode[52].contact_nwk.nwk_graph
+        def get_initial_infected(ls):
+            for person in ls:
+                print(person.id, end=", ")
+                if person.id == 33:
+                    return person
+
+        initial_infected = get_initial_infected(self.population)
+        neighbour_nodes = {nodes for nodes in network.neighbors(get_initial_infected(self.population))}
+
+        # Assert
+        infected_crit = lambda x: self.population[i] in neighbour_nodes or self.population[i].id == 33 and not(self.population[i].id == 31 or self.population[i].id == 20)
+        for i in range(len(self.population)):
+            if infected_crit(i):
+                self.assertEqual(1, self.population[i].suceptible,
+                                 f"id: {self.population[i].id} should be infected since it is neighbour of initial infection. ")
+            else:
+                self.assertEqual(0, self.population[i].suceptible,
+                                 f"id: {self.population[i].id} should not be infected. ")
 
     def test_overseas_infect(self):
         # Arrange
@@ -861,7 +913,8 @@ class TestEpidemic(TestCase):
         # Assert
         self.fail("Need to investigate the mechanism of this mode in transmission first. ")
 
-    def test_infect_nwk(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_infect_nwk(self, mock_random_randint):
         # Arrange
         for i in range(len(self.population)):
             if i == 33:
@@ -878,13 +931,14 @@ class TestEpidemic(TestCase):
 
         # Assert
         for i in range(len(self.population)):
-            if self.population[i] in neighbour_nodes:
+            if self.population[i] in neighbour_nodes or i == 33:
                 self.assertEqual(1, self.population[i].suceptible, f"id: {i} should be infected since it is neighbour of initial infection. ")
             else:
                 self.assertEqual(0, self.population[i].suceptible,
                                  f"id: {i} should not be infected. ")
 
-    def test_infect_nwk_with_overseas_travel(self):
+    @mock.patch('random.randint', return_value=0)
+    def test_infect_nwk_with_overseas_travel(self, mock_random_randint):
         # Arrange
         for i in range(len(self.population)):
             if i == 33:
@@ -902,7 +956,7 @@ class TestEpidemic(TestCase):
 
         # Assert
         for i in range(len(self.population)):
-            if self.population[i] in neighbour_nodes:
+            if self.population[i] in neighbour_nodes or i == 33:
                 self.assertEqual(1, self.population[i].suceptible,
                                  f"id: {i} should be infected since it is neighbour of initial infection. ")
             else:
