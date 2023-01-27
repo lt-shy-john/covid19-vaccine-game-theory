@@ -1848,11 +1848,11 @@ class Mode51(Mode):
 
 
 class Mode52(Mode):
-    def __init__(self, people, logger, contact_nwk=None):
+    def __init__(self, people, logger, m=1, contact_nwk=None):
         super().__init__(people, 52, 'Preferential attachment', logger)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
-        self.m = 1  # No. of new edges linked
+        self.m = m  # No. of new edges linked
 
     def set_network(self):
         '''
