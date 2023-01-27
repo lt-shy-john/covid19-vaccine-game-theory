@@ -11,3 +11,5 @@ overseas_travel_driver.py
 run_*.py
 
 *.txt
+*.csv
+*.log
