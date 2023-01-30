@@ -344,7 +344,7 @@ class TestEpidemic(TestCase):
         test_info_nwk.agpro = 0.5
         test_info_nwk.set_opinion()
 
-        mode = {15: Mode15(self.population, self.logger), 21: Mode21(self.population, test_info_nwk, self.logger), 52: Mode52(self.population, self.logger, self.contact_nwk)}
+        mode = {15: Mode15(self.population, self.logger), 21: Mode21(self.population, test_info_nwk, self.logger), 52: Mode52(self.population, self.logger, self.contact_nwk, 3)}
         self.epidemic.load_modes(mode)
         self.epidemic.vaccine_ls = [Vaccine(name="Test", efficacy=1, alpha=0.3)]
 
@@ -360,7 +360,8 @@ class TestEpidemic(TestCase):
         # Arrange
         self.epidemic.vaccine_ls = [Vaccine(name="Test_01", dose=1, efficacy=0, alpha=0.3),
                                     Vaccine(name="Test_01", dose=2, efficacy=0, alpha=0.3)]
-        mode = {15: Mode15(self.population, self.logger), 20: Mode20(self.population, self.contact_nwk, 1, self.logger), 52: Mode52(self.population, self.logger, self.contact_nwk)}
+        mode = {15: Mode15(self.population, self.logger), 20: Mode20(self.population, self.contact_nwk, 1, self.logger), 52: Mode52(
+            self.population, self.logger, self.contact_nwk, 3)}
         self.epidemic.load_modes(mode)
 
         # Act
@@ -663,7 +664,7 @@ class TestEpidemic(TestCase):
                 person.suceptible = 1
                 continue
             person.suceptible = 0
-        self.epidemic.mode[52] = Mode52(self.population, self.logger, 3, self.contact_nwk)
+        self.epidemic.mode[52] = Mode52(self.population, self.logger, self.contact_nwk, 3)
 
         # Act
         self.epidemic.social_contact()

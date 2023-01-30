@@ -481,7 +481,7 @@ class Mode04(Mode):
         self.logger.info('-------------------------\n')
         if self.alpha == 0:
             self.logger.warn(
-                'Adoption parameter is 0, mode4 will not work under this. Please reset adoption parameter first. ')
+                'Adoption parameter is 0, mode 4 will not work under this. Please reset adoption parameter first. ')
             return
         self.logger.info('Please set rationality parameter below. ')
         lambda_BR = self.people[0].lambda_BR
@@ -1171,8 +1171,16 @@ class Mode20(Mode):
     def set_pI(self, pI_temp):
         self.pI = super().correct_epi_para(pI_temp)
 
-    def set_perceived_infection(self, global_infection, verbose=False):
-        # Clear objects
+    def set_perceived_infection(self, global_infection):
+        '''
+        Set perceived infection. In this case it is Mode20.theta
+
+        parameters
+        ----------
+        global_infection: int
+            How may people infected at time t.
+        '''
+        # Restart theta and local_infection_p
         self.theta = np.ones(len(self.people))
         self.local_infection_p = np.ones(len(self.people))
 
@@ -1186,7 +1194,6 @@ class Mode20(Mode):
                     pass
             return
         if self.contact_nwk.network != None:
-            # If contact network exists
             for i in range(len(self.people)):
                 for neighbour in self.contact_nwk.nwk_graph.neighbors(self.people[i]):
                     try:
@@ -1194,8 +1201,7 @@ class Mode20(Mode):
                             local_infection[i] += 1
                     except nx.exception.NetworkXError:
                         continue
-                if verbose:
-                    print(
+                self.logger.debug(
                         f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))} contacts infected. ')
             self.local_infection_p = local_infection / len(self.people)
             self.theta = np.add(self.local_infection_p * self.rho,
@@ -1221,7 +1227,7 @@ class Mode20(Mode):
         seed = random.randint(0, 10000) / 10000
         if seed < self.pV:
             if self.contact_nwk != None:
-                self.event_vaccinated_dfs(i, verbose)
+                self.event_vaccinated_dfs(i)
             else:
                 self.event_vaccinated_mixed(i, verbose)
 
@@ -1232,7 +1238,7 @@ class Mode20(Mode):
         other_person = random.choice(self.people)
         other_person += self.kV * self.sV
 
-    def event_vaccinated_dfs(self, i, verbose=False):
+    def event_vaccinated_dfs(self, i):
         '''
         Run a DFS to all neigbours.
         '''
@@ -1243,22 +1249,21 @@ class Mode20(Mode):
             layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph,
                                                                                       source=self.people[i],
                                                                                       depth_limit=d))
-            # print(layer)
             layered_ls.append(layer)
             layered_ls[-1] = layered_ls[-1].difference(visited)
+            self.logger.debug(f"New layer added from DFS. Source person id: {self.people[i].id} \nAdded layer {len(layered_ls)-1}: {[node.id for node in layered_ls[-1]]} (id)")
 
             # Add costs to vaccination
             for n in layered_ls[-1]:
                 if n == self.people[i]:
                     continue
                 n.cV += (self.kV * self.sV) ** d
-                # print(n.cV+(d-1))
+                self.logger.debug(f"Added vaccination costs {n.cV} to person {self.people[i].id}. ")
             d += 1
 
             # Fulfill visited ls
             for n in layer:
                 visited.append(n)
-        # return layered_ls
 
     def event_infected(self, i, verbose=False):
         self.logger.debug(f'{self.people[i].id} is infected, passing info to others... ')
@@ -1848,7 +1853,7 @@ class Mode51(Mode):
 
 
 class Mode52(Mode):
-    def __init__(self, people, logger, m=1, contact_nwk=None):
+    def __init__(self, people, logger, contact_nwk, m=1):
         super().__init__(people, 52, 'Preferential attachment', logger)
         # Initially set partner living in the same region.
         self.contact_nwk = contact_nwk
