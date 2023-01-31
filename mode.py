@@ -522,7 +522,7 @@ class Mode04(Mode):
 
 
 '''
-05: Edit partner network
+05: Edit contact network
 '''
 
 
@@ -542,27 +542,39 @@ class Mode05(Mode):
             print('Topology will be generated after the first run.')
             pass
 
-    def read_data(self):
-        # Parse data stream
+    def read_data(self, data=None):
+        '''
+        Parse data stream from format "1-2 2-3"
+        * "-" separate the nodes
+        * Space separate the links
+        Numbers are person id (Starts with 1)
+        '''
+        self.logger.debug("Generating graph from edge data... ")
+        if data != None and self.data == None:
+            self.data = data
+        elif data != None and self.data != None:
+            self.logger.warn("Conflict where there is existing input edge data. Overwriting with new inputs. ")
+            self.data = data
         self.data = self.data.split()
         for i in range(len(self.data)):
             self.data[i] = self.data[i].split('-')
-            # print(self.data[i][0],self.data[i][1])
+            self.logger.debug(f"Reading: id {self.data[i][0]} and id {self.data[i][1]}. ")
         tmp_container = []
         for i in range(len(self.data)):
-            # print(self.data[i])
+            self.logger.debug(self.data[i])
             for j in range(len(self.people)):
                 if self.people[j].id == int(self.data[i][0]) or self.people[j].id == int(self.data[i][1]):
                     tmp_container.append(self.people[j])
-                    # print(tmp_container)
+                    self.logger.debug(tmp_container)
                 if len(tmp_container) == 2:
                     if self.g.network == None:
                         self.g.network = []
                     self.g.network.append(tuple(tmp_container))
                     self.g.nwk_graph.add_edges_from([tuple(tmp_container)])
                     tmp_container = []
-                    print('Added')
+                    self.logger.debug('Added links')
                     break
+            tmp_container = []
         self.data = None
 
     def __call__(self):
@@ -576,6 +588,7 @@ class Mode05(Mode):
 
             self.logger.info('Input the agents you wished to connect... ')
             self.logger.info('Agents are linked by "-" and pairs separated by space.')
+            self.logger.info('Please use person ID (Starts with 1)')
             self.data = input('> ')
             self.read_data()
             if self.data != '':

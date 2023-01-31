@@ -2,9 +2,9 @@ from unittest import TestCase
 
 from person import Person
 from contact import ContactNwk
+from mode import Mode05
 from mode import Mode02
 from mode import Mode20
-from mode import Mode52
 import customLogger
 
 
@@ -14,10 +14,8 @@ class TestMode20(TestCase):
         self.logger = customLogger.gen_logging('', 'debug')
         self.population = [Person() for x in range(N)]
         self.contact_nwk = ContactNwk(self.population, False, self.logger)
-        self.mode = {20: Mode20(self.population, self.contact_nwk, 0.14, self.logger), 52: Mode52(self.population,
-                                                                                                  self.logger,
-                                                                                                  self.contact_nwk, 1)} # todo: Check if beta to be 0?
-        self.mode[52].set_network()
+        self.mode = {5: Mode05(self.population, self.contact_nwk, self.logger), 20: Mode20(self.population, self.contact_nwk, 0.14, self.logger)}
+        self.mode[5].read_data("1-2 1-3 2-4 2-5 3-5 3-6")
 
     def test_set_perceived_infection(self):
         # Arrange
@@ -68,6 +66,9 @@ class TestMode20(TestCase):
 
         # Act
         self.mode[20].event_vaccinated_dfs(i)
+
+        # Assert
+        print(self.mode[20].theta, self.mode[20].local_infection_p)
 
     def test_event_infected(self):
         # Arrange

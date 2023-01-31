@@ -87,7 +87,7 @@ class TestMode43(TestCase):
 
     def test_get_immune_time(self):
         # Arrange
-        self.mode[43].instructions = {'V': 0, '1I': 0, '2V': 0, 'V3': 0, '2V1I':0, '2I1V': 0}  # todo: Add the instructions
+        self.mode[43].instructions = {'V': 0, '1I': 0, '2V': 0, 'V3': 0, '2V1I':0, '2I1V': 0}
 
         self.population[0].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.population[1].vaccine_history = [0, 0, 0, 0, 1, 0, 1, 0, 0, 0]
@@ -121,7 +121,7 @@ class TestMode43(TestCase):
         Test when instructions specifically looks for a particular brand.
         '''
         # Arrange
-        self.mode[43].instructions = {} # todo: Copy the instructions from above
+        self.mode[43].instructions = {'V': 0, '1I': 0, '2V': 0, 'V3': 0, '2V1I':0, '2I1V': 0}
 
         self.population[0].vaccine_history = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         self.population[1].vaccine_history = [0, 0, 0, 0, 'Sample:1', 0, 'Sample:2', 0, 0, 0]
