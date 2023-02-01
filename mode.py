@@ -561,18 +561,16 @@ class Mode05(Mode):
             self.logger.debug(f"Reading: id {self.data[i][0]} and id {self.data[i][1]}. ")
         tmp_container = []
         for i in range(len(self.data)):
-            self.logger.debug(self.data[i])
             for j in range(len(self.people)):
                 if self.people[j].id == int(self.data[i][0]) or self.people[j].id == int(self.data[i][1]):
                     tmp_container.append(self.people[j])
-                    self.logger.debug(tmp_container)
                 if len(tmp_container) == 2:
                     if self.g.network == None:
                         self.g.network = []
                     self.g.network.append(tuple(tmp_container))
                     self.g.nwk_graph.add_edges_from([tuple(tmp_container)])
+                    self.logger.debug(f'Added links between {[_.id for _ in tmp_container]}')
                     tmp_container = []
-                    self.logger.debug('Added links')
                     break
             tmp_container = []
         self.data = None
@@ -1141,10 +1139,10 @@ class Mode20(Mode):
         # * cV (cost of vaccination), or cI (cost of infection)
         # * Vaccinated or not
         # * Information spread
-        self.cV = 1
-        self.cI = 1
-        self.cV_ls = np.ones(len(self.people)) * self.cV
-        self.cV_ls = np.ones(len(self.people)) * self.cI
+        self.cV = None # Uniform(0,1)
+        self.cI = None # Uniform(0,1)
+        self.cV_ls = []
+        self.cI_ls = []
         # Increament of perceived risk
         self.kV = 0.6
         self.kI = 0.7
@@ -1157,14 +1155,6 @@ class Mode20(Mode):
 
     def set_rho(self, rho_temp):
         self.rho = super().correct_epi_para(rho_temp)
-
-    def set_cV(self, cV_temp):
-        self.cV = super().correct_epi_para(cV_temp)
-        self.cV_ls = np.ones(len(self.people)) * self.cV
-
-    def set_cI(self, cI_temp):
-        self.cI = super().correct_epi_para(cI_temp)
-        self.cV_ls = np.ones(len(self.people)) * self.cI
 
     def set_kV(self, kV_temp):
         self.kV = super().correct_epi_para(kV_temp)
@@ -1228,12 +1218,13 @@ class Mode20(Mode):
         Assign Mode20.cV and Mode20.cI to each person as initial values.
         '''
         for person in self.people:
-            person.cV = self.cV
-            person.cI = self.cI
+            person.cV = random.randint(0, 10000) / 10000
+            self.cV_ls.append(person.cV)
+            person.cI = random.randint(0, 10000) / 10000
+            self.cI_ls.append(person.cI)
 
-    def event_vaccinated(self, i, verbose=False):
-        if verbose:
-            print(f'{self.people[i].id} is vaccinated, passing info to others... ')
+    def event_vaccinated(self, i):
+        self.logger.debug(f'{self.people[i].id} is vaccinated, passing info to others... ')
         incr_cV = np.ones(len(self.people))
 
         # Adverse event
@@ -1242,9 +1233,9 @@ class Mode20(Mode):
             if self.contact_nwk != None:
                 self.event_vaccinated_dfs(i)
             else:
-                self.event_vaccinated_mixed(i, verbose)
+                self.event_vaccinated_mixed(i)
 
-    def event_vaccinated_mixed(self, i, verbose=False):
+    def event_vaccinated_mixed(self, i):
         '''
         Randomly pick neighbours and implement adverse event to them.
         '''
@@ -1255,30 +1246,16 @@ class Mode20(Mode):
         '''
         Run a DFS to all neigbours.
         '''
-        visited = []
-        layered_ls = []
-        d = 1
-        while len(visited) < len(self.contact_nwk.nwk_graph.nodes):
-            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph,
-                                                                                      source=self.people[i],
-                                                                                      depth_limit=d))
-            layered_ls.append(layer)
-            layered_ls[-1] = layered_ls[-1].difference(visited)
-            self.logger.debug(f"New layer added from DFS. Source person id: {self.people[i].id} \nAdded layer {len(layered_ls)-1}: {[node.id for node in layered_ls[-1]]} (id)")
+        for j in range(len(self.people)):
+            if self.people[i] == self.people[j]:
+                continue
+            self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
+            d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
+            self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
+            self.people[j].cV += (self.kV * self.sV) ** d
+            self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} to person {self.people[j].id}. ")
 
-            # Add costs to vaccination
-            for n in layered_ls[-1]:
-                if n == self.people[i]:
-                    continue
-                n.cV += (self.kV * self.sV) ** d
-                self.logger.debug(f"Added vaccination costs {n.cV} to person {self.people[i].id}. ")
-            d += 1
-
-            # Fulfill visited ls
-            for n in layer:
-                visited.append(n)
-
-    def event_infected(self, i, verbose=False):
+    def event_infected(self, i):
         self.logger.debug(f'{self.people[i].id} is infected, passing info to others... ')
         incr_cI = np.ones(len(self.people))
 
@@ -1286,38 +1263,24 @@ class Mode20(Mode):
         seed = random.randint(0, 10000) / 10000
         if seed < self.pI:
             if self.contact_nwk != None:
-                self.event_infected_dfs(i, verbose)
+                self.event_infected_dfs(i)
             else:
-                self.event_infected_mixed(i, verbose)
+                self.event_infected_mixed(i)
 
-    def event_infected_dfs(self, i, verbose=False):
+    def event_infected_dfs(self, i):
         '''
         Run a DFS to all neigbours.
         '''
-        visited = []
-        layered_ls = []
-        d = 1
-        while len(visited) < len(self.contact_nwk.nwk_graph.nodes):
-            layer = set(nx.algorithms.traversal.depth_first_search.dfs_preorder_nodes(self.contact_nwk.nwk_graph,
-                                                                                      source=self.people[i],
-                                                                                      depth_limit=d))
-            # print(layer)
-            layered_ls.append(layer)
-            layered_ls[-1] = layered_ls[-1].difference(visited)
+        for j in range(len(self.people)):
+            if self.people[i] == self.people[j]:
+                continue
+            self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
+            d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
+            self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
+            self.people[j].cI += (self.kI * self.sI) ** d
+            self.logger.debug(f"Added infection costs {(self.kI * self.sI) ** d} to person {self.people[j].id}. ")
 
-            # Add costs to vaccination
-            for n in layered_ls[-1]:
-                if n == self.people[i]:
-                    continue
-                n.cI += (self.kI * self.sI) ** d
-                # print(n.cV+(d-1))
-            d += 1
-
-            # Fulfill visited ls
-            for n in layer:
-                visited.append(n)
-
-    def event_infected_mixed(self, i, verbose=False):
+    def event_infected_mixed(self, i):
         '''
         Randomly pick neighbours and implement adverse event to them.
         '''
@@ -1329,13 +1292,12 @@ class Mode20(Mode):
         self.people[i].payoff_I = -self.people[i].cI * self.theta[i]
         return self.people[i].payoff_V - self.people[i].payoff_I
 
-    def FDProb(self, i, verbose=False):
+    def FDProb(self, i):
         '''
         Compute the probability from Fermi-Dirac distro
         '''
-        if verbose:
-            payoff = self.get_payoff(i)
-            self.logger.debug(f'\tPayoff of {self.people[i].id} is {payoff}.')
+        payoff = self.get_payoff(i)
+        self.logger.debug(f'Payoff of {self.people[i].id} is {payoff}.')
         return 1 / (1 + math.exp(self.get_payoff(i)))
 
     def get_infected_neighbours_number(self, i):
@@ -1359,7 +1321,7 @@ class Mode20(Mode):
                 if self.people[i].suceptible == 1:
                     self.event_infected(i, verbose)
                 elif self.people[i].vaccinated == 1:
-                    self.event_vaccinated(i, verbose)
+                    self.event_vaccinated(i)
             else:
                 if self.people[i].suceptible == 1:
                     self.event_infected_mixed(i, verbose)

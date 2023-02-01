@@ -68,6 +68,10 @@ class Person:
         self.vaccine_history = []
         self.test_history = []
 
+        # Intimacy game
+        self.cV = None
+        self.cI = None
+
     def make_population(N):
         population = []
         for i in range(N):
