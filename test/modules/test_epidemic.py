@@ -38,6 +38,9 @@ class TestEpidemic(TestCase):
         N = 50
         self.logger = customLogger.gen_logging('', None)
         self.population = [Person() for x in range(N)]
+        for i in range(len(self.population)):
+            # Reset IDs
+            self.population[i].id = i+1
         self.contact_nwk = ContactNwk(self.population, False, self.logger)
         self.contact_nwk.set_default_edge_list()
         self.contact_nwk.nwk_graph = nx.Graph(self.contact_nwk.network)

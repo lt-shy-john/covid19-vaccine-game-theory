@@ -1128,10 +1128,11 @@ class Mode20(Mode):
         super().__init__(people, 20, 'Intimacy game', logger)
         self.contact_nwk = contact_nwk
         self.beta = beta
-        self.local_infection_p = np.ones(len(self.people))  # The proportion, not number of cases.
+        self.local_infection_p = np.ones(len(self.people))
+        self.global_infection_p = np.ones(len(self.people))
         self.theta = np.ones(len(self.people))
 
-        # Weights on local and global pereption
+        # Weights on local and global perception
         self.rho = 1
         self.ProbV = np.ones(len(self.people))
 
@@ -1174,18 +1175,19 @@ class Mode20(Mode):
     def set_pI(self, pI_temp):
         self.pI = super().correct_epi_para(pI_temp)
 
-    def set_perceived_infection(self, global_infection):
+    def set_perceived_infection(self, no_infection):
         '''
         Set perceived infection. In this case it is Mode20.theta
 
         parameters
         ----------
-        global_infection: int
+        no_infection: int
             How may people infected at time t.
         '''
         # Restart theta and local_infection_p
         self.theta = np.ones(len(self.people))
-        self.local_infection_p = np.ones(len(self.people))
+        self.local_infection_p = np.zeros(len(self.people))
+        self.global_infection_p = np.zeros(len(self.people))
 
         # Start
         local_infection = np.zeros(len(self.people))
@@ -1206,12 +1208,14 @@ class Mode20(Mode):
                         continue
                 self.logger.debug(
                         f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))} contacts infected. ')
-            self.local_infection_p = local_infection / len(self.people)
-            self.theta = np.add(self.local_infection_p * self.rho,
-                                np.ones(len(self.people)) * global_infection * (1 - self.rho))
+            self.local_infection_p = local_infection
+            self.global_infection_p = no_infection - self.local_infection_p
+            self.theta = np.add(self.local_infection_p * self.rho/no_infection,
+                                self.global_infection_p * (1 - self.rho)/no_infection)
         else:
-            self.theta *= global_infection
-            self.local_infection_p *= global_infection
+            self.theta *= no_infection
+            self.local_infection_p *= no_infection
+            self.global_infection_p *= no_infection
 
     def assign_costs(self):
         '''
@@ -1239,8 +1243,8 @@ class Mode20(Mode):
         '''
         Randomly pick neighbours and implement adverse event to them.
         '''
-        other_person = random.choice(self.people)
-        other_person += self.kV * self.sV
+        other_person = random.choice(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))
+        other_person.cV += self.kV * self.sV
 
     def event_vaccinated_dfs(self, i):
         '''
@@ -1284,8 +1288,8 @@ class Mode20(Mode):
         '''
         Randomly pick neighbours and implement adverse event to them.
         '''
-        other_person = random.choice(self.people)
-        other_person += self.kI * self.sI
+        other_person = random.choice(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))
+        other_person.cI += self.kI * self.sI
 
     def get_payoff(self, i):
         self.people[i].payoff_V = -self.people[i].cV
