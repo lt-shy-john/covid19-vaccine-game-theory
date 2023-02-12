@@ -475,6 +475,17 @@ def WriteSummary(obs, filename):
                     contents.append('Balancers in groups')
                     contents.append(f'\n\tProportion: {obs.modes[24].BalancerProportion}\n')
 
+        if 20 in obs.modes:
+            contents.append('\n# Intimacy Game \n')
+            contents.append('\trho: {}\n\n'.format(obs.modes[20].rho))
+            contents.append('\tkV: {}\n'.format(obs.modes[20].kV))
+            contents.append('\tsV: {}\n'.format(obs.modes[20].sV))
+            contents.append('\tpV: {}\n\n'.format(obs.modes[20].pV))
+            contents.append('\tkI: {}\n'.format(obs.modes[20].kI))
+            contents.append('\tsI: {}\n'.format(obs.modes[20].sI))
+            contents.append('\tpI: {}\n\n'.format(obs.modes[20].pI))
+            contents.append('\tFast mode: False\n\n')
+
         contents.append('\n\n# Notes\n')
         if 2 in obs.modes:
             contents.append('* Reward for travel: rI\n')
@@ -483,6 +494,12 @@ def WriteSummary(obs, filename):
             contents.append('* Default immunity time rule maybe listed as "0", when overwritten by this mode. ')
             contents.append('* Immunity time decided by number of vaccines taken, then number of prior infections. \n')
             contents.append('  For example, a person taken 2 doses and infected once may follow rule "2V" if "2V1I" does not exist. \n')
+        if 20 in obs.modes:
+            contents.append('* Mode 20 parameters\n')
+            contents.append('\t* rho - How much attention to infection/ vaccination events around a person. \n')
+            contents.append('\t* cV/ cI - Game thoeretical cost of vaccination/ infection. \n')
+            contents.append('\t* sV*kV/ sI*kI - Increament of costs. With contact nwk it will broadcast to the power of the distance of event source. \n')
+            contents.append('\t* pV/ pI - Probability to broadcast event to others. \n')
 
         contents.append('\n## COVID-19 Information\n')
         contents.append('Please see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7270519/ for compartment. The actual compartment model is described in https://github.com/lt-shy-john/covid19-vaccine-game-theory/blob/main/report/report.pdf. \n')
