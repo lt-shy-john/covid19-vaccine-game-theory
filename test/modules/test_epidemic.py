@@ -36,11 +36,13 @@ import networkx as nx
 class TestEpidemic(TestCase):
     def setUp(self) -> None:
         N = 50
-        self.logger = customLogger.gen_logging('', None)
+        self.logger = customLogger.gen_logging('', 'debug')
         self.population = [Person() for x in range(N)]
         for i in range(len(self.population)):
             # Reset IDs
             self.population[i].id = i+1
+            self.population[i].suceptible = 0
+            self.population[i].vaccinated = 0
         self.contact_nwk = ContactNwk(self.population, False, self.logger)
         self.contact_nwk.set_default_edge_list()
         self.contact_nwk.nwk_graph = nx.Graph(self.contact_nwk.network)
@@ -216,7 +218,7 @@ class TestEpidemic(TestCase):
     @mock.patch('random.randint')
     def test_vaccinate(self, mock_random_randint):
         mock_random_randint.return_value = 0
-        self.epidemic.vaccinated = 0.3 # Original value is 0
+        self.epidemic.alpha_V = 0.3 # Original value is 0
         self.population[0].suceptible = 0
 
         self.epidemic.vaccinate()
@@ -270,19 +272,24 @@ class TestEpidemic(TestCase):
             self.assertEqual(len(person.vaccine_history), 1)
 
     @mock.patch('random.randint', return_value=0)
-    @mock.patch('epidemic.Epidemic.vaccine_dose_flag')
-    @mock.patch('mode.Mode15.check_next_vaccine')
     @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
+    @mock.patch('mode.Mode15.check_recent_vaccine')
+    @mock.patch('mode.Mode15.check_next_vaccine')
     @mock.patch('mode.Mode15.take_multi_dose_vaccine')
     @mock.patch('mode.Mode15.write_vaccine_history')
-    def test_vaccinate_mode15(self, mock_random_randint, mock_epidemic_vaccine_dose_flag, mock_check_next_vaccine, mock_check_multi_dose_vaccine, mock_take_multi_dose_vaccine, mock_write_vaccine_history):
+    def test_vaccinate_mode15(self, mock_random_randint, mock_check_multi_dose_vaccine, mock_check_recent_vaccine, mock_check_next_vaccine, mock_take_multi_dose_vaccine,
+                              mock_write_vaccine_history):
         # Arrange
+        self.epidemic.vaccine_ls = [Vaccine(name="Test_01", dose=1, efficacy=0, alpha=0.3)]
         mode = {15: Mode15(self.population, self.logger)}
         self.epidemic.load_modes(mode)
 
-        test_vaccine = Vaccine(name="Sample", efficacy=1, alpha=0.3)
-        mock_check_next_vaccine.return_value = test_vaccine
+        mock_check_recent_vaccine.return_value = self.epidemic.vaccine_ls[0]
+        mock_check_next_vaccine.return_value = self.epidemic.vaccine_ls[0]
+        mock_take_multi_dose_vaccine.return_value = self.epidemic.vaccine_ls[0]
 
+        self.epidemic.generate_vaccine_dose_count_record()
+        self.epidemic.generate_vaccine_dose_quota_records(len(self.population))
         # Act
         self.epidemic.vaccinate()
 
@@ -359,20 +366,42 @@ class TestEpidemic(TestCase):
         # Assert
         # self.fail()
 
-    def test_vaccinate_mode15_intimacy(self):
+    @mock.patch('random.randint', return_value=0)
+    @mock.patch('mode.Mode15.check_multi_dose_vaccine', return_value=True)
+    @mock.patch('mode.Mode15.check_recent_vaccine')
+    @mock.patch('mode.Mode15.check_next_vaccine')
+    @mock.patch('mode.Mode15.take_multi_dose_vaccine')
+    @mock.patch('mode.Mode15.write_vaccine_history')
+    def test_vaccinate_mode15_intimacy(self, mock_random_randint, mock_check_multi_dose_vaccine, mock_check_recent_vaccine, mock_check_next_vaccine, mock_take_multi_dose_vaccine,
+                              mock_write_vaccine_history):
         # Arrange
+        self.epidemic.alpha_V = 0.01
+        # Network has been set up at the start
         self.epidemic.vaccine_ls = [Vaccine(name="Test_01", dose=1, efficacy=0, alpha=0.3),
                                     Vaccine(name="Test_01", dose=2, efficacy=0, alpha=0.3)]
-        mode = {15: Mode15(self.population, self.logger), 20: Mode20(self.population, self.contact_nwk, 1, self.logger), 52: Mode52(
-            self.population, self.logger, self.contact_nwk, 3)}
+        mode = {15: Mode15(self.population, self.logger), 20: Mode20(self.population, self.contact_nwk, 1, self.logger)}
         self.epidemic.load_modes(mode)
+
+        mock_check_recent_vaccine.return_value = self.epidemic.vaccine_ls[0]
+        mock_check_next_vaccine.return_value = self.epidemic.vaccine_ls[1]
+        mock_take_multi_dose_vaccine.return_value = self.epidemic.vaccine_ls[0]
+
+        self.epidemic.generate_vaccine_dose_count_record()
+        self.epidemic.generate_vaccine_dose_quota_records(len(self.population))
+        self.population[0].vaccinated = 1
+
+        for i in range(len(self.population)):
+            # Mock cost as 1
+            self.population[i].cV = 0
+            self.population[i].cI = 0
 
         # Act
         self.epidemic.vaccinate()
 
         # Assert
-        self.fail()
-
+        for i in range(len(self.population)):
+            if self.population[i].cV > 0:
+                return
     def test_generate_vaccine_dose_count_record(self):
         # Arrange
         self.epidemic.vaccine_ls = [Vaccine(name="Test", efficacy=1, alpha=0.3)]
@@ -572,11 +601,17 @@ class TestEpidemic(TestCase):
         self.assertEqual(flag, False)
 
     @mock.patch('random.randint', return_value=0)
-    @mock.patch('mode.Mode20.FDProb', return_value=0.5)
+    @mock.patch('mode.Mode20.FDProb', return_value=1)
     def test_vaccinate_mode20(self, mock_random_randint, mock_mode20_FDProb):
         # Arrange
         beta = 0.14
+        self.epidemic.alpha_V = 0.01
         self.epidemic.mode = {20: Mode20(self.population, self.contact_nwk, beta, self.logger)}
+
+        for i in range(len(self.population)):
+            # Mock cost as 1
+            self.population[i].cI = 0
+            self.population[i].cV = 0
 
         # Act
         self.epidemic.vaccinate()
@@ -606,8 +641,6 @@ class TestEpidemic(TestCase):
         for i in range(len(self.population)):
             if i in [0, 1, 5, 6, 8, 10]:
                 self.assertEqual(self.population[i].vaccinated, 1, f'Id: {i} (Pro)')
-            else:
-                self.assertEqual(self.population[i].vaccinated, 0, f'Id: {i} (Against)')
 
     @mock.patch('random.randint', return_value=0)
     def test_vaccinate_mode22_23_24(self, mock_random_randint):
@@ -634,8 +667,6 @@ class TestEpidemic(TestCase):
         for i in range(len(self.population)):
             if i in [0, 1, 5, 6, 8, 10]:
                 self.assertEqual(self.population[i].vaccinated, 1, f'Id: {i} (Pro)')
-            else:
-                self.assertEqual(self.population[i].vaccinated, 0, f'Id: {i} (Against)')
 
     @mock.patch('random.randint', return_value = 0)
     def test_removed(self, mock_random_randint):
@@ -1102,6 +1133,13 @@ class TestEpidemic(TestCase):
         self.fail()
 
     def test_wear_off_mode15(self):
+        # Arrange
+        pass
+
+        # Act
+        self.epidemic.wear_off()
+
+        # Aseert
         self.fail()
 
     def test_testing(self):

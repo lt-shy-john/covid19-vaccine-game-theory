@@ -423,142 +423,91 @@ class Epidemic:
         pro = 0
 
     def vaccinate(self):
-        self.logger.debug('Starting method Epidemic.vaccine()...')
-        for i in range(len(self.people)):
-            # If already taken vaccine
-            if self.people[i].vaccinated == 1:
-                self.logger.debug(f'Person {self.people[i].id} has already taken vaccine. ')
+        self.logger.debug('Starting Epidemic.vaccine().')
+        for person in self.people:
+            next_vaccine = None
+
+            # Already vaccinated
+            if person.vaccinated == 1:
                 continue
 
-            seed = random.randint(0,10000)/10000
-            self.logger.debug(f'Seed for person {self.people[i].id}: {seed}')
-            if 4 in self.mode:
-                self.logger.debug('Mode 4 activated for %s - α: %s'.format(self.people[i].id, self.mode[4].P_Alpha[i]))
-                if seed < self.mode[4].P_Alpha[i] and self.people[i].vaccinated == 0:
-                    self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
-                    self.people[i].vaccinated = 1
-                    self.people[i].vaccine_history.append(1)
-                else:
-                    self.logger.debug(f'{self.people[i].id} has decided not to take vaccine. ({self.mode[4].P_Alpha[i]} < {seed}, {seed < self.mode[4].P_Alpha[i] })')
-                    self.people[i].vaccine_history.append(0)
+            # Mode 12
+            pass
+
+            # Opinions
+            if person.personality == 2:
+                self.logger.debug(f'Person does not want to take vaccine')
                 continue
+            elif person.opinion == 0:
+                continue
+
+            # Find alpha for each person
+            idx = self.people.index([p for p in self.people if p.id == person.id][0])
+            self.logger.debug(f'Person {person.id} is {idx}th person in the self.people')
+            if self.alpha_V != None:
+                vaccinated_theshold = self.alpha_V
+            else:
+                vaccinated_theshold = self.vaccinated
+
+            # Mode 15, extract current vaccine
             if 15 in self.mode:
-                self.logger.debug(f'Mode 15 activated for {self.people[i].id}')
-                has_multiple_vaccine = self.mode[15].check_multi_dose_vaccine(self.vaccine_ls)
-                # Combination with other modes
-                if has_multiple_vaccine and any(m in self.mode for m in [21, 22, 23, 24]):
-                    self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                    if 21 in self.mode:
-                        self.logger.debug('Applying local group updates in vaccination. ')
-                    else:
-                        self.logger.debug('Applying personal opinions in vaccination. ')
-                    person = self.people[i]
-                    seed = random.randint(0, 10000) / 10000
-                    last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
-                    next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
-                    if next_vaccine == None:
-                        continue
-                    self.logger.debug(f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
-                    # Check if in cap
-                    if len(self.vaccine_daily_quota) > 0 and self.vaccine_daily_quota[next_vaccine.brand] == 0:
-                        self.logger.debug(f'{next_vaccine.brand} is out of stock. ')
-                        continue
-                    if not self.vaccine_dose_flag(next_vaccine):
-                        self.logger.debug(f'Person {self.people[i].id} will not take vaccine {next_vaccine.brand} dose {next_vaccine.dose} due to cap. ')
-                        continue
-
-                    # Check opinion
-                    if person.opinion == 1 and seed < next_vaccine.alpha_V:
-                        self.logger.debug(f"{self.people[i].id} is willing to take vaccine. ")
-                        self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                        vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
-                        if vaccine_taken != None:
-                            self.vaccine_stock_taken(vaccine_taken)
-                            self.vaccine_dose_taken(vaccine_taken)
-                            self.vaccine_dose_record(vaccine_taken)
-                            if self.vaccine_cap_filename is not None:
-                                self.vaccine_supply_record(vaccine_taken)
-                            self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')
-                        self.mode[15].write_vaccine_history(i, vaccine_taken)
-                        vaccine_taken = None
-                    else:
-                        if self.people[i].opinion == 0:
-                            self.logger.debug(f'Person does not want to take vaccine, {seed} >= {next_vaccine.alpha_V}')
-                        else:
-                            self.logger.debug(f'Person did not take vaccine, {seed} >= {next_vaccine.alpha_V}')
-                        self.people[i].vaccine_history.append(0)
-                elif has_multiple_vaccine:
-                    self.logger.debug(f"Vaccine with multiple dose detected for {self.people[i].id}. ")
-                    seed = random.randint(0, 10000) / 10000
-                    last_vaccine = self.mode[15].check_recent_vaccine(i, self.vaccine_ls)
-                    next_vaccine = self.mode[15].check_next_vaccine(i, self.vaccine_ls, last_vaccine)
+                self.logger.debug(f'Mode 15 activated for {person.id}.')
+                has_vaccine_doses = self.mode[15].check_multi_dose_vaccine(self.vaccine_ls)
+                if has_vaccine_doses:
+                    last_vaccine = self.mode[15].check_recent_vaccine(idx, self.vaccine_ls)
+                    next_vaccine = self.mode[15].check_next_vaccine(idx, self.vaccine_ls, last_vaccine)
                     if next_vaccine == None:
                         continue
                     self.logger.debug(
-                        f'{self.people[i].id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
+                        f'{person.id} may take vaccine {next_vaccine.brand}:{next_vaccine.dose}. (α = {next_vaccine.alpha_V}) ')
                     # Check if in cap
                     if len(self.vaccine_daily_quota) > 0 and self.vaccine_daily_quota[next_vaccine.brand] == 0:
                         self.logger.debug(f'{next_vaccine.brand} is out of stock. ')
                         continue
                     if not self.vaccine_dose_flag(next_vaccine):
                         self.logger.debug(
-                            f'Person {self.people[i].id} will not take vaccine {next_vaccine.brand} dose {next_vaccine.dose} due to cap. ')
+                            f'Person {person.id} will not take vaccine {next_vaccine.brand} dose {next_vaccine.dose} due to cap. ')
                         continue
+                    vaccinated_theshold *= next_vaccine.alpha_V
 
-                    # Take the vaccine dose
-                    vaccine_taken = self.mode[15].take_multi_dose_vaccine(i, self.vaccine_ls)
-                    if vaccine_taken != None:
-                        if len(self.vaccine_stocktake) > 0 and len(self.current_vaccine_dose_count) > 0:
-                            self.vaccine_stock_taken(vaccine_taken)
-                            self.vaccine_dose_taken(vaccine_taken)
-                            self.vaccine_dose_record(vaccine_taken)
-                        if len(self.vaccine_daily_quota) > 0:
-                            self.vaccine_supply_record(vaccine_taken)
-                        self.logger.debug(f'Person {self.people[i].id} has taken the vaccine {vaccine_taken.brand} dose {vaccine_taken.dose}. ')
-                    self.mode[15].write_vaccine_history(i, vaccine_taken)
-                    vaccine_taken = None
-                else:
-                    if seed < self.vaccinated and self.people[i].vaccinated == 0:
-                        self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
-                        self.people[i].vaccinated = 1
-                        self.people[i].vaccine_history.append(1)
-                    else:
-                        self.logger.debug(f'Person did not take vaccine, {seed} >= {self.vaccinated}')
-                        self.people[i].vaccine_history.append(0)
-                continue
+            # Mode 20
             if 20 in self.mode:
-                self.logger.debug('Applying intimacy game in vaccination. ')
-                threshold = self.mode[20].FDProb(i, self.verbose_mode)
-                if seed < threshold:
-                    self.people[i].vaccinated = 1
-                    self.people[i].vaccine_history.append(1)
-                else:
-                    self.people[i].vaccine_history.append(0)
-                continue
-            if any(m in self.mode for m in [21, 22, 23, 24]):
-                self.logger.debug('Applying local group updates in vaccination. ')
-                person = self.people[i]
-                seed = random.randint(0,10000)/10000
-                if person.opinion == 1 and seed < self.alpha_V:
-                    self.logger.debug(f'Person {self.people[i].id} taken vaccine, {seed} < {self.alpha_V}')
-                    person.vaccinated = 1
-                    self.people[i].vaccine_history.append(1)
-                else:
-                    self.logger.debug(f'Person did not take vaccine, {seed} >= {self.alpha_V}')
-                    self.people[i].vaccine_history.append(0)
-                continue
-            if self.people[i].suceptible == 1:
-                self.people[i].vaccine_history.append(0)
-                self.logger.debug('Person is already infected, not taking vaccine. ')
-                continue
+                self.logger.debug(f'Mode 20 activated to broadcast message from {person.id}.')
+                vaccinated_theshold *= self.mode[20].FDProb(idx)
+
+            # Mode 10
+            if 10 in self.mode:
+                self.logger.debug(f'Mode 10 activated for {person.id}.')
+            # Mode 4
+            if 4 in self.mode:
+                self.logger.debug(f'Mode 4 activated for {person.id}.')
+                vaccinated_theshold *= self.mode[4].P_Alpha[idx]
+            self.logger.debug(f'Person {person.id} has vaccination rate {vaccinated_theshold}. ')
 
             # Vaccinate
-            if seed < self.vaccinated and self.people[i].vaccinated == 0:
-                self.logger.debug(f'{self.people[i].id} has decided to take vaccine. ')
-                self.people[i].vaccinated = 1
-                self.people[i].vaccine_history.append(1)
+            seed = random.randint(0, 10000) / 10000
+            if seed < vaccinated_theshold:
+                self.logger.debug(f'{person.id} has decided to take vaccine. ')
+                person.vaccinated = 1
+                person.vaccine_history.append(1)
+
+                # Mode 20
+                if 20 in self.mode:
+                    self.mode[20].event_vaccinated(person=person)
+                if next_vaccine is not None:
+                    if len(self.vaccine_stocktake) > 0 and len(self.current_vaccine_dose_count) > 0:
+                        self.vaccine_stock_taken(next_vaccine)
+                        self.vaccine_dose_taken(next_vaccine)
+                        self.vaccine_dose_record(next_vaccine)
+                    if len(self.vaccine_daily_quota) > 0:
+                        self.vaccine_supply_record(next_vaccine)
+                    self.logger.debug(
+                        f'Person {person.id} has taken the vaccine {next_vaccine.brand} dose {next_vaccine.dose}. ')
+                if 15 in self.mode:
+                    self.mode[15].write_vaccine_history(idx, next_vaccine)
             else:
-                self.people[i].vaccine_history.append(0)
+                self.logger.debug(f'{person.id} has decided not to take vaccine (α = {vaccinated_theshold}). ')
+                person.vaccine_history.append(0)
 
 
     def vaccine_clock(self, i):

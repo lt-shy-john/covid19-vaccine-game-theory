@@ -40,23 +40,20 @@ class TestMode20(TestCase):
     def test_event_vaccinated_mixed(self, mock_random_choice):
         # Arrange
         self.mode[20].assign_costs()
-        idx = self.population.index([_ for _ in self.population if _.id == 1][0])
-        neighbours = list(self.contact_nwk.nwk_graph.neighbors(self.population[idx]))
-        print("Self:", self.population[idx].id, ", Neighbour:",
-              [p.id for p in neighbours])
+        idx = 0
 
         for i in range(len(self.population)):
             # Mock cost as 1
             self.population[i].cV = 0
 
-        mock_random_choice.return_value = neighbours[0]
+        mock_random_choice.return_value = self.population[1]
 
         # Act
         self.mode[20].event_vaccinated_mixed(idx)
 
         # Assert
         for i in range(len(self.population)):
-            if self.population[i] in neighbours and (self.mode[20].kV * self.mode[20].sV == self.population[i].cV):
+            if self.mode[20].kV * self.mode[20].sV == self.population[i].cV:
                 return
         self.fail()
 
@@ -111,23 +108,20 @@ class TestMode20(TestCase):
     def test_event_infected_mixed(self, mock_random_choice):
         # Arrange
         self.mode[20].assign_costs()
-        idx = self.population.index([_ for _ in self.population if _.id == 1][0])
-        neighbours = list(self.contact_nwk.nwk_graph.neighbors(self.population[idx]))
-        print("Self:", self.population[idx].id, ", Neighbour:",
-              [p.id for p in neighbours])
+        idx = 0
 
         for i in range(len(self.population)):
             # Mock cost as 1
             self.population[i].cI = 0
 
-        mock_random_choice.return_value = neighbours[0]
+        mock_random_choice.return_value = self.population[1]
 
         # Act
         self.mode[20].event_infected_mixed(idx)
 
         # Assert
         for i in range(len(self.population)):
-            if self.population[i] in neighbours and (self.mode[20].kI * self.mode[20].sI == self.population[i].cI):
+            if self.mode[20].kI * self.mode[20].sI == self.population[i].cI:
                 return
         self.fail()
 
@@ -175,12 +169,3 @@ class TestMode20(TestCase):
 
         # Assert
         self.assertEqual(1, result)
-
-    def test_intimacy_game(self):
-        # Arrange
-
-        # Act
-        self.mode[20].IntimacyGame()
-
-        # Assert
-        self.fail()

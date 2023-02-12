@@ -507,18 +507,17 @@ class Mode04(Mode):
 
     def QRE(self):
         '''
-        Return a list of probability to adaopt vaccine with size of population.
+        Return a list of probability to adopt vaccine with size of population.
         '''
         utility_fn = [self.alpha * person.lambda_BR * person.rV_BR for person in self.people]
         disutility_fn = [self.alpha * person.lambda_BR * person.rI_BR for person in self.people]
         self.P_Alpha = np.divide(np.exp(utility_fn), (np.add(np.exp(utility_fn), np.exp(disutility_fn))),
                                  out=np.ones_like(utility_fn), where=(utility_fn != np.inf))
         self.logger.debug('Calculated QRE: ')
-        self.logger.debug('QRE: ')
-        self.logger.debug('U =',utility_fn)
-        self.logger.debug('-U =',disutility_fn)
-        self.logger.debug('p =',self.P_Alpha)
-        self.logger.debug('')
+        self.logger.debug('\tQRE: ')
+        self.logger.debug('\tU =', utility_fn)
+        self.logger.debug('\t-U =', disutility_fn)
+        self.logger.debug('\tp =', self.P_Alpha)
 
 
 '''
@@ -1227,69 +1226,128 @@ class Mode20(Mode):
             person.cI = random.randint(0, 10000) / 10000
             self.cI_ls.append(person.cI)
 
-    def event_vaccinated(self, i):
-        self.logger.debug(f'{self.people[i].id} is vaccinated, passing info to others... ')
-        incr_cV = np.ones(len(self.people))
+    def event_vaccinated(self, i=None, person=None):
+        if type(i) == int:
+            self.logger.debug(f'{self.people[i].id} is vaccinated, passing info to others... ')
+            # Broadcast event
+            seed = random.randint(0, 10000) / 10000
+            if seed < self.pV:
+                if self.contact_nwk != None:
+                    self.event_vaccinated_dfs(i)
+                else:
+                    self.event_vaccinated_mixed(i)
+        elif type(person) == Person:
+            self.logger.debug(f'{person.id} is vaccinated, passing info to others... ')
+            # Broadcast event
+            seed = random.randint(0, 10000) / 10000
+            if seed < self.pV:
+                if self.contact_nwk != None:
+                    self.event_vaccinated_dfs(person=person)
+                else:
+                    self.event_vaccinated_mixed(person=person)
+        else: raise TypeError('Mode20.event_vaccinated() input must include the index of person or person object. ')
 
-        # Adverse event
-        seed = random.randint(0, 10000) / 10000
-        if seed < self.pV:
-            if self.contact_nwk != None:
-                self.event_vaccinated_dfs(i)
-            else:
-                self.event_vaccinated_mixed(i)
-
-    def event_vaccinated_mixed(self, i):
+    def event_vaccinated_mixed(self, i=None, person=None):
         '''
-        Randomly pick neighbours and implement adverse event to them.
+       Randomly pick from population and implement adverse event to them.
         '''
-        other_person = random.choice(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))
-        other_person.cV += self.kV * self.sV
+        if type(i) == int:
+            other_person = random.choice(self.people[i])
+            other_person.cV += self.kV * self.sV
+            self.logger.debug(
+                f'Person {other_person.id} has cost of infection increased by {self.kV * self.sV} to {other_person.cV}. ')
+        elif type(person) == Person:
+            other_person = random.choice(person)
+            other_person.cV += self.kV * self.sV
+            self.logger.debug(
+                f'Person {other_person.id} has cost of infection increased by {self.kV * self.sV} to {other_person.cV}. ')
 
-    def event_vaccinated_dfs(self, i):
+    def event_vaccinated_dfs(self, i=None, person=None):
         '''
         Run a DFS to all neigbours.
         '''
-        for j in range(len(self.people)):
-            if self.people[i] == self.people[j]:
-                continue
-            self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
-            d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
-            self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
-            self.people[j].cV += (self.kV * self.sV) ** d
-            self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} to person {self.people[j].id}. ")
+        if type(i) == int:
+            for j in range(len(self.people)):
+                if self.people[i] == self.people[j]:
+                    continue
+                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, self.people[i], self.people[j]))) == 0:
+                    self.logger.debug(f'No paths between {self.people[i].id} and {self.people[j].id}. ')
+                    continue
+                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
+                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
+                self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
+                self.people[j].cV += (self.kV * self.sV) ** d
+                self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} to person {self.people[j].id}. ")
+        elif type(person) == Person:
+            for other in self.people:
+                if other == person:
+                    continue
+                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, person, other))) == 0:
+                    self.logger.debug(f'No paths between {person.id} and {other.id}. ')
+                    continue
+                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, person, other)])
+                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, person, other)) - 1
+                self.logger.debug(f'{other.id} has distance {d} from {person.id}. ')
+                other.cV += (self.kV * self.sV) ** d
+                self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} to person {other.id}. ")
 
-    def event_infected(self, i):
-        self.logger.debug(f'{self.people[i].id} is infected, passing info to others... ')
-        incr_cI = np.ones(len(self.people))
+    def event_infected(self, i=None, person=None):
+        if type(i) == int:
+            self.logger.debug(f'{self.people[i].id} is infected, passing info to others... ')
+            # Broadcast event
+            seed = random.randint(0, 10000) / 10000
+            if seed < self.pI:
+                if self.contact_nwk != None:
+                    self.event_infected_dfs(i)
+                else:
+                    self.event_infected_mixed(i)
+        elif type(person) == Person:
+            self.logger.debug(f'{person.id} is infected, passing info to others... ')
+            # Broadcast event
+            seed = random.randint(0, 10000) / 10000
+            if seed < self.pV:
+                if self.contact_nwk != None:
+                    self.event_infected_dfs(person=person)
+                else:
+                    self.event_infected_mixed(person=person)
+        else: raise TypeError('Mode20.event_infected() input must include the index of person or person object. ')
 
-        # Adverse event
-        seed = random.randint(0, 10000) / 10000
-        if seed < self.pI:
-            if self.contact_nwk != None:
-                self.event_infected_dfs(i)
-            else:
-                self.event_infected_mixed(i)
-
-    def event_infected_dfs(self, i):
+    def event_infected_dfs(self, i=None, person=None):
         '''
         Run a DFS to all neigbours.
         '''
-        for j in range(len(self.people)):
-            if self.people[i] == self.people[j]:
-                continue
-            self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
-            d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
-            self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
-            self.people[j].cI += (self.kI * self.sI) ** d
-            self.logger.debug(f"Added infection costs {(self.kI * self.sI) ** d} to person {self.people[j].id}. ")
+        if type(i) == int:
+            for j in range(len(self.people)):
+                if self.people[i] == self.people[j]:
+                    continue
+                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, self.people[i], self.people[j]))) == 0:
+                    self.logger.debug(f'No paths between {self.people[i].id} and {self.people[j].id}. ')
+                    continue
+                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
+                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
+                self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
+                self.people[j].cI += (self.kI * self.sI) ** d
+                self.logger.debug(f"Added infection costs {(self.kI * self.sI) ** d} to person {self.people[j].id}. ")
+        elif type(person) == Person:
+            for other in self.people:
+                if other == person:
+                    continue
+                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, person, other))) == 0:
+                    self.logger.debug(f'No paths between {person.id} and {other.id}. ')
+                    continue
+                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, person, other)])
+                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, person, other)) - 1
+                self.logger.debug(f'{other.id} has distance {d} from {person.id}. ')
+                other.cI += (self.kI * self.sI) ** d
+                self.logger.debug(f"Added vaccination costs {(self.kI * self.sI) ** d} to person {other.id}. ")
 
-    def event_infected_mixed(self, i):
+    def event_infected_mixed(self, i=None, person=None):
         '''
-        Randomly pick neighbours and implement adverse event to them.
+        Randomly pick from population and implement adverse event to them.
         '''
-        other_person = random.choice(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))
+        other_person = random.choice(self.people[i])
         other_person.cI += self.kI * self.sI
+        self.logger.debug(f'Person {other_person.id} has cost of infection increased by {self.kI * self.sI} to {other_person.cI}. ')
 
     def get_payoff(self, i):
         self.people[i].payoff_V = -self.people[i].cV
@@ -1311,26 +1369,26 @@ class Mode20(Mode):
                 count += 1
         return count
 
-    def IntimacyGame(self, beta, verbose=False):
+    def intimacy_game_vaccination(self, no_infected):
         '''
         Simulate intimacy game of each time step.
         '''
-        self.set_perceived_infection(beta)
+        self.set_perceived_infection(no_infected)
 
         for i in range(len(self.people)):
-            self.FDProb(i, verbose)
+            self.FDProb(i)
 
         for i in range(len(self.people)):
             if self.contact_nwk != None:
                 if self.people[i].suceptible == 1:
-                    self.event_infected(i, verbose)
+                    self.event_infected(i)
                 elif self.people[i].vaccinated == 1:
-                    self.event_vaccinated(i)
+                    self.event_vaccinated(i=i)
             else:
                 if self.people[i].suceptible == 1:
-                    self.event_infected_mixed(i, verbose)
+                    self.event_infected_mixed(i=i)
                 elif self.people[i].vaccinated == 1:
-                    self.event_vaccinated_mixed(i, verbose)
+                    self.event_vaccinated_mixed(i=i)
 
 
 '''
