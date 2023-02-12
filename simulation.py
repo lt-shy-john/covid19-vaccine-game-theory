@@ -107,7 +107,7 @@ class Simulation:
         # Intimacy game
         if 20 in self.modes:
             self.logger.debug('Calculating theta for intimacy game... ')
-            self.modes[20].set_perceived_infection(self.beta, self.verbose_mode)
+            self.modes[20].set_perceived_infection(self.beta)
 
         if self.filename != '':
             write.WriteStates(self.epidemic, self.filename)
@@ -132,7 +132,7 @@ class Simulation:
             # Intimacy game
             if 20 in self.modes:
                 self.logger.debug('Calculating payoffs (intimacy game)... ')
-                self.modes[20].IntimacyGame(self.beta, self.verbose_mode)
+                self.modes[20].intimacy_game_vaccination(self.beta)
 
             # Contact network update
             if any(i in self.modes for i in [5, 51, 52, 53, 54]):
@@ -183,7 +183,6 @@ class Simulation:
         self.logger.info('\n=========== Result ============\n')
         self.logger.info('There are {} people infected.'.format(self.epidemic.I))
         self.logger.info('There are {} people vaccinated.'.format(self.epidemic.V))
-        print()
 
         # Return any data
         if self.filename != '':
