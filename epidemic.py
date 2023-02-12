@@ -424,6 +424,9 @@ class Epidemic:
 
     def vaccinate(self):
         self.logger.debug('Starting Epidemic.vaccine().')
+        if self.alpha_V == 0 and any(m in self.modes for m in [4, 10, 15, 20, 21, 22, 23, 24]):
+            self.logger.warning('One of more modes cannot take affect to change vaccination due to α = 0. ')
+
         for person in self.people:
             next_vaccine = None
 
@@ -569,15 +572,15 @@ class Epidemic:
         self.logger.debug('Starting method Epidemic.infect()...')
 
         # Intimacy game
-        if 20 in self.mode:
-            self.logger.debug('Applying intimacy game in infection. ')
-            for i in range(len(self.people)):
-                threshold = 1 - (1 - self.infection) ** (self.mode[20].get_infected_neighbours_number(i))
-                seed = random.randint(0,1000)/1000
-
-                if seed < threshold:
-                    self.people[i].suceptible = 1
-                    continue
+        # if 20 in self.mode:
+        #     self.logger.debug('Applying intimacy game in infection. ')
+        #     for i in range(len(self.people)):
+        #         threshold = 1 - (1 - self.infection) ** (self.mode[20].get_infected_neighbours_number(i))
+        #         seed = random.randint(0,1000)/1000
+        #
+        #         if seed < threshold:
+        #             self.people[i].suceptible = 1
+        #             continue
 
         # Network contact controlled by Epidemic.social_contact()
         if any(m in self.mode for m in [51, 52, 53, 53]):
