@@ -111,7 +111,8 @@ class Simulation:
 
         if self.filename != '':
             write.WriteStates(self.epidemic, self.filename)
-            write.writeVaccineDoseDailyCount_header(self, self.filename)
+            if len(self.epidemic.vaccine_stocktake) > 0:
+                write.writeVaccineDoseDailyCount_header(self, self.filename)
         for t in range(self.T):
             self.logger.info('=========== t = {} ============\n'.format(t+1))
             self.logger.info('N = {}'.format(len(self.people)))
@@ -145,7 +146,7 @@ class Simulation:
                             A = nx.convert_matrix.to_numpy_array(self.contact_nwk.nwk_graph)
                             np.savetxt(path + "\\" + self.filename + '-contact_nwk' + "adj_matrix_" + str(t).zfill(
                                 self.T % 10) + '.txt', A, fmt="%d")
-                else: self.logger.info('Contact adjacency metrix not generated with large population. (Maximum 5 people)')
+                else: self.logger.info('Contact adjacency matrix not generated with large population. (Maximum 5 people)')
 
 
 
@@ -197,9 +198,10 @@ class Simulation:
             if self.alpha > 0 or any(i in self.modes for i in [12, 15]):
                 write.writeVaccinePassport(self, self.filename)
                 self.logger.info('Vaccine history exported in \'{}-vaccination.csv\''.format(self.filename))
-                write.writeVaccineDailyCount(self, self.filename)
-                self.logger.info('Vaccine daily stocktake exported in \'{}-vaccine_usage.csv\''.format(self.filename))
-                self.logger.info('Vaccine daily dose usage exported in \'{}-vaccine_dose_usage.csv\''.format(self.filename))
+                if len(self.epidemic.vaccine_stocktake) > 0:
+                    write.writeVaccineDailyCount(self, self.filename)
+                    self.logger.info('Vaccine daily stocktake exported in \'{}-vaccine_usage.csv\''.format(self.filename))
+                    self.logger.info('Vaccine daily dose usage exported in \'{}-vaccine_dose_usage.csv\''.format(self.filename))
             if any(i in self.modes for i in [22, 23, 24]):
                 self.logger.info('Population personality and information network details exported in \'{}-opinion.csv\''.format(self.filename))
             elif 21 in self.modes:
