@@ -1360,7 +1360,10 @@ class Mode20(Mode):
         '''
         payoff = self.get_payoff(i)
         self.logger.debug(f'Payoff of {self.people[i].id} is {payoff}.')
-        return 1 / (1 + math.exp(self.get_payoff(i)))
+        try:
+            return 1 / (1 + math.exp(self.get_payoff(i)))
+        except OverflowError:
+            return 0
 
     def get_infected_neighbours_number(self, i):
         count = 0
