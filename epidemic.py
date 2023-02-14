@@ -424,7 +424,7 @@ class Epidemic:
 
     def vaccinate(self):
         self.logger.debug('Starting Epidemic.vaccine().')
-        if self.alpha_V == 0 and any(m in self.modes for m in [4, 10, 15, 20, 21, 22, 23, 24]):
+        if self.alpha_V == 0 and any(m in self.mode for m in [4, 10, 15, 20, 21, 22, 23, 24]):
             self.logger.warning('One of more modes cannot take affect to change vaccination due to α = 0. ')
 
         for person in self.people:
