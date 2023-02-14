@@ -743,6 +743,12 @@ if len(sys.argv) > 1:
                 elif item.startswith('*r='):
                     rho_temp = item[3:]
                     mode20.set_rho(rho_temp)
+                elif item.startswith('*cf='):
+                    try:
+                        cutoff_temp = bool(item[4:])
+                    except:
+                        cutoff_temp = False
+                    mode20.cutoff(cutoff_temp)
             mode20.assign_costs()
             mode20.raise_flag()
             if mode20.flag == 'X':

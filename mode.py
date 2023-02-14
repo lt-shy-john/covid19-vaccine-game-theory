@@ -396,10 +396,10 @@ class Mode02(Mode):
                 self.logger.debug(f'\tPerson {person.id} is not subject to overseas isolation (At local). ')
                 continue
             if list(person.overseas.keys())[0] + ':isolate' in person.travel_history[-1]:
-                self.logger.debug(f'\tPerson {person.id} is isolated ovserseas. ')
+                self.logger.debug(f'\tPerson {person.id} is isolated overseas. ')
                 continue
             if list(person.overseas.keys())[0] + ':hospitalised' in person.travel_history[-1]:
-                self.logger.debug(f'\tPerson {person.id} is hospitalised ovserseas. ')
+                self.logger.debug(f'\tPerson {person.id} is hospitalised overseas. ')
                 continue
 
             seed = random.randint(0, 1000) / 1000
@@ -1004,7 +1004,7 @@ class Mode15(Mode):
             if parsed_vaccine_used_brand == vaccine.brand:
                 self.logger.debug(f"\tFound vaccine {vaccine.brand}...")
                 if latest_vaccine == parsed_vaccine_used_dose and parsed_vaccine_used_dose == vaccine.dose:
-                    self.logger.debug(f"\tTaking last booster again (Excpected: {latest_vaccine}, Actual: {vaccine.dose}).")
+                    self.logger.debug(f"\tTaking last booster again (Expected: {latest_vaccine}, Actual: {vaccine.dose}).")
                     vaccine_used = vaccine
                     return vaccine_used
                 elif vaccine.dose >= parsed_vaccine_used_dose and latest_vaccine >= parsed_vaccine_used_dose:
@@ -1143,15 +1143,24 @@ class Mode20(Mode):
         self.cI = None # Uniform(0,1)
         self.cV_ls = []
         self.cI_ls = []
-        # Increament of perceived risk
+        # Increment of perceived risk
         self.kV = 0.6
         self.kI = 0.7
         # Spread of information
         self.sV = 0.8
         self.sI = 0.8
-        # Prob advere event
+        # Prob adverse event
         self.pV = 0.5
         self.pI = 0.5
+
+        self.fast_mode = False
+        self.cutoff = None
+
+    def set_cV(self, cV_temp):
+        self.cV = super().correct_epi_para(cV_temp)
+
+    def set_cI(self, cI_temp):
+        self.cV = super().correct_epi_para(cI_temp)
 
     def set_rho(self, rho_temp):
         self.rho = super().correct_epi_para(rho_temp)
@@ -1216,15 +1225,17 @@ class Mode20(Mode):
             self.local_infection_p *= no_infection
             self.global_infection_p *= no_infection
 
-    def assign_costs(self):
+    def assign_costs(self, mask=[]):
         '''
         Assign Mode20.cV and Mode20.cI to each person as initial values.
         '''
         for person in self.people:
-            person.cV = random.randint(0, 10000) / 10000
-            self.cV_ls.append(person.cV)
-            person.cI = random.randint(0, 10000) / 10000
-            self.cI_ls.append(person.cI)
+            if 'v' not in mask:
+                person.cV = random.randint(0, 10000) / 10000
+                self.cV_ls.append(person.cV)
+            if 'i' not in mask:
+                person.cI = random.randint(0, 10000) / 10000
+                self.cI_ls.append(person.cI)
 
     def event_vaccinated(self, i=None, person=None):
         if type(i) == int:
@@ -1253,43 +1264,33 @@ class Mode20(Mode):
         '''
         if type(i) == int:
             other_person = random.choice(self.people[i])
-            other_person.cV += self.kV * self.sV
-            self.logger.debug(
-                f'Person {other_person.id} has cost of infection increased by {self.kV * self.sV} to {other_person.cV}. ')
         elif type(person) == Person:
             other_person = random.choice(person)
-            other_person.cV += self.kV * self.sV
-            self.logger.debug(
-                f'Person {other_person.id} has cost of infection increased by {self.kV * self.sV} to {other_person.cV}. ')
+
+        other_person.cV += self.kV * self.sV
+        self.logger.debug(
+            f'Person {other_person.id} has cost of infection increased by {self.kV * self.sV} to {other_person.cV}. ')
 
     def event_vaccinated_dfs(self, i=None, person=None):
         '''
-        Run a DFS to all neigbours.
+        Run a DFS to all neighbours.
         '''
+        if len(self.people) >= 50:
+            if self.cutoff is not None and self.cutoff > 6:
+                self.logger.warn('Network size is too large and will put cutoff at distance 6. ')
+            self.cutoff = 6
         if type(i) == int:
-            for j in range(len(self.people)):
-                if self.people[i] == self.people[j]:
-                    continue
-                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, self.people[i], self.people[j]))) == 0:
-                    self.logger.debug(f'No paths between {self.people[i].id} and {self.people[j].id}. ')
-                    continue
-                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
-                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
-                self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
-                self.people[j].cV += (self.kV * self.sV) ** d
-                self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} to person {self.people[j].id}. ")
+            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
+            lengths = {k: len(v) - 1 for k, v in lengths.items()}
         elif type(person) == Person:
-            for other in self.people:
-                if other == person:
-                    continue
-                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, person, other))) == 0:
-                    self.logger.debug(f'No paths between {person.id} and {other.id}. ')
-                    continue
-                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, person, other)])
-                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, person, other)) - 1
-                self.logger.debug(f'{other.id} has distance {d} from {person.id}. ')
-                other.cV += (self.kV * self.sV) ** d
-                self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} to person {other.id}. ")
+            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, person, cutoff=self.cutoff)
+            lengths = {k: len(v) - 1 for k, v in lengths.items()}
+
+        for p, d in lengths.items():
+            if d <= 0:
+                continue
+            p.cV += (self.kV * self.sV) ** d
+            self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} (d = {d}) to person {p.id}. ")
 
     def event_infected(self, i=None, person=None):
         if type(i) == int:
@@ -1314,40 +1315,37 @@ class Mode20(Mode):
 
     def event_infected_dfs(self, i=None, person=None):
         '''
-        Run a DFS to all neigbours.
+        Run a DFS to all neighbours.
         '''
+        if len(self.people) >= 50:
+            if self.cutoff > 6:
+                self.logger.warn('Network size is too large and will put cutoff at distance 6. ')
+            self.cutoff = 6
         if type(i) == int:
-            for j in range(len(self.people)):
-                if self.people[i] == self.people[j]:
-                    continue
-                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, self.people[i], self.people[j]))) == 0:
-                    self.logger.debug(f'No paths between {self.people[i].id} and {self.people[j].id}. ')
-                    continue
-                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])])
-                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, self.people[i], self.people[j])) - 1
-                self.logger.debug(f'{self.people[j].id} has distance {d} from {self.people[i].id}. ')
-                self.people[j].cI += (self.kI * self.sI) ** d
-                self.logger.debug(f"Added infection costs {(self.kI * self.sI) ** d} to person {self.people[j].id}. ")
+            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
+            lengths = {k: len(v) - 1 for k, v in lengths.items()}
         elif type(person) == Person:
-            for other in self.people:
-                if other == person:
-                    continue
-                elif len(list(nx.all_simple_paths(self.contact_nwk.nwk_graph, person, other))) == 0:
-                    self.logger.debug(f'No paths between {person.id} and {other.id}. ')
-                    continue
-                self.logger.debug([_.id for _ in nx.shortest_path(self.contact_nwk.nwk_graph, person, other)])
-                d = len(nx.shortest_path(self.contact_nwk.nwk_graph, person, other)) - 1
-                self.logger.debug(f'{other.id} has distance {d} from {person.id}. ')
-                other.cI += (self.kI * self.sI) ** d
-                self.logger.debug(f"Added vaccination costs {(self.kI * self.sI) ** d} to person {other.id}. ")
+            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, person, cutoff=self.cutoff)
+            lengths = {k: len(v) - 1 for k, v in lengths.items()}
+
+        for p, d in lengths.items():
+            if d <= 0:
+                continue
+            p.cI += (self.kI * self.sI) ** d
+            self.logger.debug(f"Added vaccination costs {(self.kI * self.sI) ** d} (d = {d}) to person {p.id}. ")
 
     def event_infected_mixed(self, i=None, person=None):
         '''
         Randomly pick from population and implement adverse event to them.
         '''
-        other_person = random.choice(self.people[i])
+        if type(i) == int:
+            other_person = random.choice(self.people[i])
+        elif type(person) == Person:
+            other_person = random.choice(person)
+
         other_person.cI += self.kI * self.sI
-        self.logger.debug(f'Person {other_person.id} has cost of infection increased by {self.kI * self.sI} to {other_person.cI}. ')
+        self.logger.debug(
+            f'Person {other_person.id} has cost of infection increased by {self.kI * self.sI} to {other_person.cI}. ')
 
     def get_payoff(self, i):
         self.people[i].payoff_V = -self.people[i].cV
@@ -1392,6 +1390,65 @@ class Mode20(Mode):
                     self.event_infected_mixed(i=i)
                 elif self.people[i].vaccinated == 1:
                     self.event_vaccinated_mixed(i=i)
+
+    def __call__(self):
+        self.logger.info('-------------------------')
+        self.logger.info('You are creating mode 20. ')
+        self.logger.info('-------------------------\n')
+        self.logger.info('Please set weight of local-global spread. ')
+        rho_temp = input('rho >>> ')
+        self.rho = self.set_rho(rho_temp)
+        mask = []
+        # Vaccination
+        self.logger.info('Please set initial (game theoretical) cost of vaccination. ')
+        self.logger.info('If set "R" or "r" then the population will have cost randomly assigned. ')
+        cV_temp = input('cV >>> ')
+        if self.cV.lower() != 'r':
+            self.cV_temp = self.set_cV(cV_temp)
+        else:
+            mask.append('v')
+        self.logger.info('Please set increment of cost of vaccination. ')
+        kV_temp = input('kV >>> ')
+        self.kV = self.set_kV(kV_temp)
+        self.logger.info('Please set spread of vaccination event. ')
+        sV_temp = input('sV >>> ')
+        self.sV = self.set_sV(sV_temp)
+        self.logger.info('Please set probability of vaccination event broadcasted through network. ')
+        self.logger.info('(Complement is to broadcast at mixed population) ')
+        pV_temp = input('pV >>> ')
+        self.pV = self.set_sV(pV_temp)
+        # Infection
+        self.logger.info('Please set initial (game theoretical) cost of infection. ')
+        self.logger.info('If set "R" or "r" then the population will have cost randomly assigned. ')
+        cI_temp = input('cI >>> ')
+        if self.cI.lower() != 'r':
+            self.cI_temp = self.set_cI(cI_temp)
+        else:
+            mask.append('i')
+        self.logger.info('Please set increment of cost of infection. ')
+        kI_temp = input('kI >>> ')
+        self.kI = self.set_kI(kI_temp)
+        self.logger.info('Please set spread of infection event. ')
+        sI_temp = input('sI >>> ')
+        self.sI = self.set_sI(sI_temp)
+        self.logger.info('Please set probability of infection event broadcasted through network. ')
+        self.logger.info('(Complement is to broadcast at mixed population) ')
+        pI_temp = input('pI >>> ')
+        self.pI = self.set_pI(pI_temp)
+
+        self.logger.info('Please set layers of event broadcasted through network. ')
+        try:
+            self.cutoff = int(input('Cutoff >>> '))
+        except:
+            self.logger.warn('Invalid cutoff value, set as none. ')
+        self.logger.info('Please set if fast mode enabled. ')
+        try:
+            self.fast_mode = bool(input('Fast mode >>> '))
+        except:
+            self.logger.warn('Invalid value, set as false. ')
+
+        self.raise_flag()
+        self.logger.info('\nMode 20 equipped. \n')
 
 
 '''
@@ -1669,7 +1726,7 @@ class Mode43(Mode):
                     del self.instructions[k]
                 continue
 
-            # If the conditions are not catched, then delete them
+            # If the conditions are not caught, then delete them
             self.logger.warn(f'{k} is not a valid instruction and will be deleted. ')
             del self.instructions[k]
 
@@ -1901,7 +1958,7 @@ class Mode52(Mode):
 
     def set_network(self):
         '''
-        Setup the network and nwk_graph
+        Set up the network and nwk_graph
         '''
         self.contact_nwk.nwk_graph = nx.generators.random_graphs.barabasi_albert_graph(len(self.people), self.m)
 
@@ -2003,7 +2060,7 @@ class Mode53(Mode):
 
     def set_network(self):
         '''
-        Setup the network and nwk_graph
+        Set up the network and nwk_graph
         '''
         self.contact_nwk.nwk_graph = nx.generators.random_graphs.watts_strogatz_graph(len(self.people), self.k, self.p)
 
@@ -2121,7 +2178,7 @@ class Mode54(Mode):
 
     def set_network(self):
         '''
-        Setup the network and nwk_graph
+        Set up the network and nwk_graph
         '''
         self.contact_nwk.nwk_graph = nx.generators.lattice.grid_2d_graph(len(self.people), self.m, self.n)
 
