@@ -1447,6 +1447,7 @@ class Mode20(Mode):
         except:
             self.logger.warn('Invalid value, set as false. ')
 
+        self.assign_costs(mask=mask)
         self.raise_flag()
         self.logger.info('\nMode 20 equipped. \n')
 

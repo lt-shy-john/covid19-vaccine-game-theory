@@ -648,6 +648,8 @@ class Epidemic:
             if seed < self.infection:
                 self.logger.debug(f'{self.people[i].id} is infected. ')
                 self.people[i].suceptible = 1
+                if 20 in self.mode:
+                    self.mode[20].event_infected(i=i)
 
     def social_contact(self):
         '''
