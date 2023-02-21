@@ -749,6 +749,11 @@ if len(sys.argv) > 1:
                     except:
                         cutoff_temp = False
                     mode20.cutoff(cutoff_temp)
+                elif item.startswith('*x='):
+                    try:
+                        mode20.x = int(item[3:])
+                    except:
+                        mode20.x = 6
             mode20.assign_costs()
             mode20.raise_flag()
             if mode20.flag == 'X':

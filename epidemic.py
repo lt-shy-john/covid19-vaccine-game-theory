@@ -432,6 +432,7 @@ class Epidemic:
 
             # Already vaccinated
             if person.vaccinated == 1:
+                self.logger.debug(f'Person {person.id} has already been vaccinated. ')
                 continue
 
             # Mode 12
@@ -484,6 +485,7 @@ class Epidemic:
             # Mode 4
             if 4 in self.mode:
                 self.logger.debug(f'Mode 4 activated for {person.id}.')
+                self.logger.debug(f'\tPerson {person.id} has adoption probability of α = {self.mode[4].P_Alpha[idx]}. ')
                 vaccinated_theshold *= self.mode[4].P_Alpha[idx]
             self.logger.debug(f'Person {person.id} has vaccination rate {vaccinated_theshold}. ')
 

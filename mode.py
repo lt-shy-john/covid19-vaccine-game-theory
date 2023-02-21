@@ -1152,6 +1152,8 @@ class Mode20(Mode):
         # Prob adverse event
         self.pV = 0.5
         self.pI = 0.5
+        # Degree of responsiveness to differences of payoff
+        self.x = 6
 
         self.fast_mode = False
         self.cutoff = None
@@ -1208,12 +1210,13 @@ class Mode20(Mode):
             return
         if self.contact_nwk.network != None:
             for i in range(len(self.people)):
-                for neighbour in self.contact_nwk.nwk_graph.neighbors(self.people[i]):
-                    try:
+                try:
+                    for neighbour in self.contact_nwk.nwk_graph.neighbors(self.people[i]):
                         if neighbour.suceptible == 1:
                             local_infection[i] += 1
-                    except nx.exception.NetworkXError:
-                        continue
+                except nx.exception.NetworkXError as e:
+                    self.logger.error(e)
+                    continue
                 self.logger.debug(
                         f'{self.people[i].id} has {local_infection[i]} out {len(list(self.contact_nwk.nwk_graph.neighbors(self.people[i])))} contacts infected. ')
             self.local_infection_p = local_infection
@@ -1275,24 +1278,35 @@ class Mode20(Mode):
         '''
         Run a DFS to all neighbours.
         '''
+        self.logger.debug('Starting Mode20.event_vaccinated_dfs()... ')
         if len(self.people) >= 50:
             if self.cutoff is not None and self.cutoff > 6:
                 self.logger.warn('Network size is too large and will put cutoff at distance 6. ')
             self.cutoff = 6
         if type(i) == int:
-            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
-            lengths = {k: len(v) - 1 for k, v in lengths.items()}
+            try:
+                lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
+                lengths = {k: len(v) - 1 for k, v in lengths.items()}
+            except nx.NodeNotFound as e:
+                self.logger.error(e)
         elif type(person) == Person:
-            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, person, cutoff=self.cutoff)
-            lengths = {k: len(v) - 1 for k, v in lengths.items()}
-
-        for p, d in lengths.items():
-            if d <= 0:
-                continue
-            p.cV += (self.kV * self.sV) ** d
-            self.logger.debug(f"Added vaccination costs {(self.kV * self.sV) ** d} (d = {d}) to person {p.id}. ")
+            try:
+                lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, person, cutoff=self.cutoff)
+                lengths = {k: len(v) - 1 for k, v in lengths.items()}
+            except nx.NodeNotFound as e:
+                self.logger.error(e)
+        try:
+            for p, d in lengths.items():
+                if d <= 0:
+                    continue
+                p.cV += (self.kV * self.sV) ** d
+                self.logger.debug(f"\tAdded vaccination costs {(self.kV * self.sV) ** d} (d = {d}) to person {p.id}. ")
+        except:
+            self.logger.error(e)
+            self.logger.debug(f"\tNo cost of vaccination added. ")
 
     def event_infected(self, i=None, person=None):
+        self.logger.debug('Starting Mode20.event_infected()... ')
         if type(i) == int:
             self.logger.debug(f'{self.people[i].id} is infected, passing info to others... ')
             # Broadcast event
@@ -1317,27 +1331,38 @@ class Mode20(Mode):
         '''
         Run a DFS to all neighbours.
         '''
+        self.logger.debug('Starting Mode20.event_infected_dfs()... ')
         if len(self.people) >= 50 and self.cutoff != None:
             if self.cutoff > 6:
                 self.logger.warn('Network size is too large and will put cutoff at distance 6. ')
             self.cutoff = 6
         if type(i) == int:
-            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
-            lengths = {k: len(v) - 1 for k, v in lengths.items()}
+            try:
+                lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
+                lengths = {k: len(v) - 1 for k, v in lengths.items()}
+            except nx.NodeNotFound as e:
+                self.logger.error(e)
         elif type(person) == Person:
-            lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, person, cutoff=self.cutoff)
-            lengths = {k: len(v) - 1 for k, v in lengths.items()}
-
-        for p, d in lengths.items():
-            if d <= 0:
-                continue
-            p.cI += (self.kI * self.sI) ** d
-            self.logger.debug(f"Added vaccination costs {(self.kI * self.sI) ** d} (d = {d}) to person {p.id}. ")
+            try:
+                lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, person, cutoff=self.cutoff)
+                lengths = {k: len(v) - 1 for k, v in lengths.items()}
+            except nx.NodeNotFound as e:
+                self.logger.error(e)
+        try:
+            for p, d in lengths.items():
+                if d <= 0:
+                    continue
+                p.cI += (self.kI * self.sI) ** d
+                self.logger.debug(f"\tAdded infection costs {(self.kI * self.sI) ** d} (d = {d}) to person {p.id}. ")
+        except:
+            self.logger.error(e)
+            self.logger.debug(f"\tNo infection costs added. ")
 
     def event_infected_mixed(self, i=None, person=None):
         '''
         Randomly pick from population and implement adverse event to them.
         '''
+        self.logger.debug('Starting Mode20.event_infected_mixed()... ')
         if type(i) == int:
             other_person = random.choice(self.people[i])
         elif type(person) == Person:
@@ -1350,6 +1375,7 @@ class Mode20(Mode):
     def get_payoff(self, i):
         self.people[i].payoff_V = -self.people[i].cV
         self.people[i].payoff_I = -self.people[i].cI * self.theta[i]
+        self.logger.debug(f'\tThe payoff of {self.people[i].id} are V: {self.people[i].payoff_V} and I: {self.people[i].payoff_I}. ')
         return self.people[i].payoff_V - self.people[i].payoff_I
 
     def FDProb(self, i):
@@ -1357,10 +1383,12 @@ class Mode20(Mode):
         Compute the probability from Fermi-Dirac distro
         '''
         payoff = self.get_payoff(i)
-        self.logger.debug(f'Payoff of {self.people[i].id} is {payoff}.')
+        self.logger.debug(f'\tPayoff of {self.people[i].id} is {payoff}.')
         try:
-            return 1 / (1 + math.exp(self.get_payoff(i)))
+            self.logger.debug(f'\tAdoption probability of {self.people[i].id} is {1 / (1 + math.exp(-self.x * self.get_payoff(i)))}')
+            return 1 / (1 + math.exp(-self.get_payoff(i)))
         except OverflowError:
+            self.logger.debug(f'\tAdoption probability of {self.people[i].id} is 0')
             return 0
 
     def get_infected_neighbours_number(self, i):
@@ -1376,6 +1404,7 @@ class Mode20(Mode):
         '''
         self.set_perceived_infection(no_infected)
 
+        self.logger.debug('Calculating the probability of taking vaccine for all: ')
         for i in range(len(self.people)):
             self.FDProb(i)
 
@@ -1435,6 +1464,13 @@ class Mode20(Mode):
         self.logger.info('(Complement is to broadcast at mixed population) ')
         pI_temp = input('pI >>> ')
         self.pI = self.set_pI(pI_temp)
+        self.logger.info('Please set degree of responsiveness to differences of payoff. ')
+        x_temp = input('x >>> ')
+        try:
+            self.x = int(x_temp)
+        except:
+            self.logger.warn('Cannot parse degree of responiveness, set to 6. ')
+            self.x = self.x
 
         self.logger.info('Please set layers of event broadcasted through network. ')
         try:
