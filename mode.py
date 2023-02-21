@@ -1317,7 +1317,7 @@ class Mode20(Mode):
         '''
         Run a DFS to all neighbours.
         '''
-        if len(self.people) >= 50:
+        if len(self.people) >= 50 and self.cutoff != None:
             if self.cutoff > 6:
                 self.logger.warn('Network size is too large and will put cutoff at distance 6. ')
             self.cutoff = 6
