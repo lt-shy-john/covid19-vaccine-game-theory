@@ -1283,6 +1283,7 @@ class Mode20(Mode):
             if self.cutoff is not None and self.cutoff > 6:
                 self.logger.warn('Network size is too large and will put cutoff at distance 6. ')
             self.cutoff = 6
+        lengths = {}
         if type(i) == int:
             try:
                 lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
@@ -1336,6 +1337,7 @@ class Mode20(Mode):
             if self.cutoff > 6:
                 self.logger.warn('Network size is too large and will put cutoff at distance 6. ')
             self.cutoff = 6
+        lengths = {}
         if type(i) == int:
             try:
                 lengths = nx.single_source_shortest_path(self.contact_nwk.nwk_graph, self.people[i], cutoff=self.cutoff)
@@ -1408,17 +1410,29 @@ class Mode20(Mode):
         for i in range(len(self.people)):
             self.FDProb(i)
 
-        for i in range(len(self.people)):
+        for person in self.people:
             if self.contact_nwk != None:
-                if self.people[i].suceptible == 1:
-                    self.event_infected(i)
-                elif self.people[i].vaccinated == 1:
-                    self.event_vaccinated(i=i)
+                if person.suceptible == 1:
+                    self.event_infected(person=person)
+                elif person.vaccinated == 1:
+                    self.event_vaccinated(person=person)
             else:
-                if self.people[i].suceptible == 1:
-                    self.event_infected_mixed(i=i)
-                elif self.people[i].vaccinated == 1:
-                    self.event_vaccinated_mixed(i=i)
+                if person.suceptible == 1:
+                    self.event_infected_mixed(person=person)
+                elif person.vaccinated == 1:
+                    self.event_vaccinated_mixed(person=person)
+
+        # for i in range(len(self.people)):
+        #     if self.contact_nwk != None:
+        #         if self.people[i].suceptible == 1:
+        #             self.event_infected(i=i)
+        #         elif self.people[i].vaccinated == 1:
+        #             self.event_vaccinated(i=i)
+        #     else:
+        #         if self.people[i].suceptible == 1:
+        #             self.event_infected_mixed(i=i)
+        #         elif self.people[i].vaccinated == 1:
+        #             self.event_vaccinated_mixed(i=i)
 
     def __call__(self):
         self.logger.info('-------------------------')
