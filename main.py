@@ -1046,7 +1046,8 @@ while True:
     elif cmd == 'mode':
         modes = set_mode(modes)
     elif cmd == 'export':
-        filename = input('File name: ')
+        print(f'File name: {filename}')
+        filename = input('New file name: ')
     elif cmd == 'thank you':
         root.info('  ==========================================  \n\n')
         root.info('  Agent Based Modelling: COVID-19 SEIP Model  \n\n')

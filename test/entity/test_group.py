@@ -47,7 +47,7 @@ class TestGroup(TestCase):
             self.info_nwk.set_pro(test_propro)
         self.assertEqual(0.5, self.info_nwk.get_prop())
 
-    def test_get_prop_decimal_proportion(self, mock_agpro, mock_propro):
+    def test_get_prop_decimal_proportion(self):
         self.info_nwk.set_ag(0.5)
         self.info_nwk.set_pro(0.5)
 

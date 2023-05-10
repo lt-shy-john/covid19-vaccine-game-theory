@@ -1356,7 +1356,7 @@ class Mode20(Mode):
                     continue
                 p.cI += (self.kI * self.sI) ** d
                 self.logger.debug(f"\tAdded infection costs {(self.kI * self.sI) ** d} (d = {d}) to person {p.id}. ")
-        except:
+        except Exception as e:
             self.logger.error(e)
             self.logger.debug(f"\tNo infection costs added. ")
 
